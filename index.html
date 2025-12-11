@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vocab Canvas Ultimate (Multi-Undo)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; }
+        .tab-active { border-bottom: 3px solid #3b82f6; color: #3b82f6; font-weight: bold; }
+        .output-tab-active { background-color: #3b82f6; color: white; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+        .toast { animation: slideIn 0.3s ease-out forwards; }
+        @keyframes slideIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+                height: 100dvh;
+            }
+            .input-panel {
+                width: 100% !important;
+                height: 25dvh !important;
+                min-height: 25dvh;
+                max-height: 25dvh;
+                border-right: none !important;
+                border-bottom: 1px solid #d1d5db;
+            }
+            .output-panel {
+                width: 100% !important;
+                height: 75dvh !important;
+                flex: 1;
+            }
+            .group:hover .opacity-0 {
+                opacity: 1 !important;
+            }
+            .mobile-always-visible {
+                opacity: 1 !important;
+            }
+        }
+    </style>
+</head>
+<body class="h-screen md:h-screen flex flex-col overflow-hidden relative" style="height: 100dvh;">
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm p-2 md:p-3 flex justify-between items-center z-10 border-b flex-shrink-0">
+        <div class="flex items-center gap-2 md:gap-3">
+            <h1 class="text-base md:text-xl font-bold text-gray-800"><i class="fas fa-layer-group text-blue-500 mr-1 md:mr-2"></i><span class="hidden sm:inline">Vocab Canvas</span><span class="sm:hidden">VC</span></h1>
+            
+            <!-- Sync Controls -->
+            <div class="flex items-center space-x-1 md:space-x-2 bg-gray-50 rounded px-1 md:px-2 py-1 border border-gray-100">
+                <button onclick="triggerAutoSync('pull')" class="text-blue-600 hover:text-blue-800 transition px-1 md:px-2 py-1 rounded hover:bg-blue-50" title="Tải mới nhất từ Cloud">
+                    <i class="fas fa-cloud-download-alt"></i>
+                </button>
+                <div class="h-4 w-px bg-gray-300"></div>
+                <button onclick="openModal('settingsModal')" class="text-gray-500 hover:text-blue-600 transition px-1 md:px-2 py-1" title="Cấu hình">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <span id="syncStatusIndicator" class="text-xs text-gray-400 font-medium pl-1 border-l border-gray-300 ml-1 w-16 md:w-24 truncate">
+                    Local
+                </span>
+            </div>
+
+            <!-- Undo Button -->
+            <button id="undoBtn" onclick="undoLastAction()" class="hidden text-orange-600 hover:text-orange-800 transition px-2 py-1 rounded hover:bg-orange-50 border border-orange-200 bg-orange-50" title="Hoàn tác">
+                <i class="fas fa-undo"></i>
+                <span id="undoCount" class="text-xs font-bold ml-1">0</span>
+            </button>
+        </div>
+
+        <!-- Vocab Counters -->
+        <div class="space-x-1 md:space-x-2 flex">
+            <button onclick="openModal('dictionaryModal')" class="px-1.5 md:px-2 py-1 md:py-1.5 text-xs bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded text-blue-700 font-medium transition" title="Words">
+                W:<span id="wordCount">0</span>
+            </button>
+            <button onclick="openModal('dictionaryModal')" class="px-1.5 md:px-2 py-1 md:py-1.5 text-xs bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded text-indigo-700 font-medium transition" title="Phrases">
+                P:<span id="phraseCount">0</span>
+            </button>
+            <button onclick="openModal('dictionaryModal')" class="px-1.5 md:px-2 py-1 md:py-1.5 text-xs bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded text-teal-700 font-medium transition" title="Word Families">
+                <i class="fas fa-sitemap"></i><span id="familyCount">0</span>
+            </button>
+            <button onclick="openModal('dictionaryModal')" class="hidden sm:block px-1.5 md:px-2 py-1 md:py-1.5 text-xs bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded text-gray-600 font-medium transition" title="Personal / Ignored">
+                <i class="fas fa-user-shield"></i><span id="personalCount">0</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="flex flex-1 overflow-hidden main-container">
+        
+        <!-- Left: Input Area -->
+        <div class="input-panel w-1/2 p-2 md:p-4 flex flex-col border-r border-gray-300 bg-gray-50 relative group">
+            <!-- Tabs -->
+            <div class="flex space-x-4 md:space-x-6 mb-2 md:mb-3 border-b border-gray-300 pb-1 md:pb-2">
+                <button id="tabWordBtn" class="tab-active pb-1 md:pb-2 px-1 md:px-2 transition text-sm md:text-base" onclick="switchTab('word')">Word</button>
+                <button id="tabGeminiBtn" class="text-gray-500 pb-1 md:pb-2 px-1 md:px-2 hover:text-gray-700 transition text-sm md:text-base" onclick="switchTab('gemini')">Gemini</button>
+            </div>
+
+            <div class="relative flex-1 min-h-0">
+                <textarea id="inputText" class="w-full h-full p-2 md:p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none text-sm md:text-lg pr-10 md:pr-12" 
+                placeholder="Dán văn bản tiếng Anh..."></textarea>
+                
+                <!-- Tools -->
+                <div class="absolute top-1 md:top-2 right-1 md:right-2 flex flex-col gap-1 md:gap-2">
+                    <input type="file" id="fileInput" accept=".txt" class="hidden">
+                    <button onclick="document.getElementById('fileInput').click()" class="bg-white p-1.5 md:p-2 rounded shadow hover:bg-blue-50 text-blue-500 border border-gray-200 transition text-xs md:text-base" title="Nhập file .txt">
+                        <i class="fas fa-file-upload"></i>
+                    </button>
+                    <button onclick="pasteFromClipboard()" class="bg-white p-1.5 md:p-2 rounded shadow hover:bg-gray-100 text-gray-600 border border-gray-200 transition text-xs md:text-base" title="Dán từ Clipboard">
+                        <i class="fas fa-paste"></i>
+                    </button>
+                    <button onclick="clearInput()" class="bg-white p-1.5 md:p-2 rounded shadow hover:text-red-500 text-gray-400 border border-gray-200 transition text-xs md:text-base" title="Xóa hết">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div id="geminiControls" class="hidden mt-2 md:mt-3 flex justify-between items-center animate-fade-in">
+                <span id="currentModelDisplay" class="text-xs text-gray-500 bg-yellow-50 px-2 py-1 rounded border border-yellow-200 truncate max-w-[100px] md:max-w-none">Model: ...</span>
+                <button onclick="analyzeWithGemini()" class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-3 md:px-6 py-1.5 md:py-2 rounded-full hover:shadow-lg transition transform hover:scale-105 font-bold text-xs md:text-base">
+                    <i class="fas fa-magic mr-1 md:mr-2"></i> Tìm Phrases
+                </button>
+            </div>
+        </div>
+
+        <!-- Right: Output & Action Area -->
+        <div class="output-panel w-1/2 p-2 md:p-4 flex flex-col bg-white overflow-hidden">
+            
+            <!-- Output Tabs -->
+            <div class="flex mb-2 md:mb-3 border-b border-gray-200">
+                <button id="outputTabResult" onclick="switchOutputTab('result')" class="output-tab-active px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium rounded-t-lg transition">
+                    <i class="fas fa-list mr-1"></i>Kết quả
+                </button>
+                <button id="outputTabPrompt" onclick="switchOutputTab('prompt')" class="px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium text-gray-500 hover:text-gray-700 rounded-t-lg transition">
+                    <i class="fas fa-terminal mr-1"></i>Prompt
+                </button>
+            </div>
+
+            <!-- Result Tab Content -->
+            <div id="outputResultTab" class="flex-1 flex flex-col overflow-hidden">
+                <!-- Result Header -->
+                <div class="flex justify-between items-center mb-2 md:mb-3 flex-shrink-0">
+                    <h2 class="text-sm md:text-lg font-semibold text-gray-700">
+                        <span id="listTitle">Kết quả Word</span> 
+                        <span id="resultCount" class="bg-red-100 text-red-600 px-1.5 md:px-2 py-0.5 rounded text-xs md:text-sm ml-1 md:ml-2">0</span>
+                    </h2>
+                    <button onclick="addAllCurrentToVocab()" class="text-xs text-green-600 hover:text-green-800 font-medium bg-green-50 px-1.5 md:px-2 py-1 rounded border border-green-100 transition">
+                        <i class="fas fa-plus-circle"></i> <span class="hidden sm:inline">Thêm trang này</span><span class="sm:hidden">+All</span>
+                    </button>
+                </div>
+
+                <!-- List of detected items -->
+                <div id="outputList" class="flex-1 overflow-y-auto space-y-1 md:space-y-2 pr-1 md:pr-2">
+                    <div class="text-center text-gray-400 mt-10">...</div>
+                </div>
+
+                <!-- Bottom Action Bar -->
+                <div class="flex-shrink-0 border-t pt-2 md:pt-3 mt-2 md:mt-3 flex gap-2 items-center">
+                    <button onclick="copyWordsOnly()" class="flex-1 text-xs md:text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 md:px-3 py-2 rounded-lg transition font-medium border border-gray-200" title="Copy danh sách từ">
+                        <i class="fas fa-copy mr-1"></i>Copy từ
+                    </button>
+                    <button onclick="copyPrompt()" class="flex-1 text-xs md:text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 md:px-3 py-2 rounded-lg transition font-medium border border-gray-200" title="Copy prompt đầy đủ">
+                        <i class="fas fa-clipboard mr-1"></i>Copy prompt
+                    </button>
+                    <a id="actionLink" href="#" target="_blank" class="px-3 md:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition text-xs md:text-sm" title="Mở Link Custom">
+                        <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Prompt Tab Content -->
+            <div id="outputPromptTab" class="flex-1 flex flex-col overflow-hidden hidden">
+                <div class="flex justify-between items-center mb-2 flex-shrink-0">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase flex items-center">
+                        <i class="fas fa-link mr-1"></i> Unified Prompt Preview
+                    </h3>
+                    <button onclick="copyPrompt()" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-2 py-1 rounded transition">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
+                
+                <div class="bg-gray-800 text-gray-200 p-3 rounded text-xs font-mono flex-1 overflow-y-auto whitespace-pre-wrap" id="promptPreview"></div>
+
+                <div class="flex-shrink-0 mt-3">
+                    <a id="actionLinkPromptTab" href="#" target="_blank" class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 md:py-3 rounded-lg shadow transition text-sm">
+                        <i class="fas fa-external-link-alt mr-2"></i> Mở Link Custom
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+
+    <!-- Dictionary Modal -->
+    <div id="dictionaryModal" class="fixed inset-0 bg-black/50 hidden flex justify-center items-center z-50">
+        <div class="bg-white rounded-lg w-11/12 max-w-7xl h-5/6 flex flex-col p-4 md:p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h2 class="text-lg md:text-xl font-bold">Quản lý Kho từ vựng <span class="text-sm font-normal text-gray-500">(Mới nhất trước)</span></h2>
+                <button onclick="closeModal('dictionaryModal')" class="text-gray-500 hover:text-red-500 text-xl">&times;</button>
+            </div>
+            
+            <input type="text" id="searchVocab" placeholder="Tìm kiếm..." class="w-full p-2 border rounded mb-3" oninput="renderDictionary()">
+            
+            <div class="flex-1 overflow-hidden flex flex-col md:flex-row gap-2 text-sm">
+                <div class="flex-1 flex flex-col bg-blue-50 rounded p-2 min-h-0">
+                    <h3 class="font-bold text-blue-600 mb-2 border-b border-blue-200 pb-1 text-center text-xs md:text-sm">Words (<span id="dictWordCount">0</span>)</h3>
+                    <div id="dictWordList" class="flex-1 overflow-y-auto pr-1 space-y-1"></div>
+                </div>
+                <div class="flex-1 flex flex-col bg-indigo-50 rounded p-2 min-h-0">
+                    <h3 class="font-bold text-indigo-600 mb-2 border-b border-indigo-200 pb-1 text-center text-xs md:text-sm">Phrases (<span id="dictPhraseCount">0</span>)</h3>
+                    <div id="dictPhraseList" class="flex-1 overflow-y-auto pr-1 space-y-1"></div>
+                </div>
+                <div class="flex-1 flex flex-col bg-teal-50 rounded p-2 min-h-0">
+                    <h3 class="font-bold text-teal-600 mb-2 border-b border-teal-200 pb-1 text-center text-xs md:text-sm">Families (<span id="dictFamilyCount">0</span>)</h3>
+                    <div id="dictFamilyList" class="flex-1 overflow-y-auto pr-1 space-y-1"></div>
+                </div>
+                <div class="flex-1 flex flex-col bg-gray-100 rounded p-2 min-h-0">
+                    <h3 class="font-bold text-gray-600 mb-2 border-b border-gray-300 pb-1 text-center text-xs md:text-sm">Ignored (<span id="dictPersonalCount">0</span>)</h3>
+                    <div id="dictPersonalList" class="flex-1 overflow-y-auto pr-1 space-y-1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 bg-black/50 hidden flex justify-center items-center z-50">
+        <div class="bg-white rounded-lg w-full max-w-lg p-4 md:p-6 shadow-2xl max-h-[90vh] overflow-y-auto mx-2">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h2 class="text-lg md:text-xl font-bold">Cài đặt</h2>
+                <button onclick="closeModal('settingsModal')" class="text-gray-500 hover:text-red-500 text-xl">&times;</button>
+            </div>
+
+            <div class="mb-5 bg-blue-50 p-3 rounded border border-blue-100">
+                <h3 class="font-semibold text-blue-800 mb-2">Gemini API</h3>
+                <label class="block text-xs text-gray-600 font-bold">API Key</label>
+                <input type="password" id="geminiKey" class="w-full p-2 border rounded mb-2 text-sm bg-white" placeholder="AIzaSy...">
+                <label class="block text-xs text-gray-600 font-bold">Model</label>
+                <select id="geminiModelSelect" class="w-full p-2 border rounded text-sm bg-white">
+                    <option value="gemini-2.5-flash">gemini-2.5-flash (Default - Smart)</option>
+                    <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite (Faster)</option>
+                </select>
+            </div>
+
+            <div class="mb-5 border-t pt-4">
+                <h3 class="font-semibold text-gray-800 mb-2"><i class="fab fa-github"></i> Github Gist Sync</h3>
+                <p class="text-xs text-gray-500 mb-2 bg-gray-100 p-2 rounded">
+                    <i class="fas fa-info-circle"></i> 
+                    <b>Load App / Pull:</b> Tải & Ghi đè Local.<br>
+                    <b>Thay đổi từ:</b> Đẩy lên & Ghi đè Cloud.
+                </p>
+                <label class="block text-xs text-gray-600">Github Token (quyền gist)</label>
+                <input type="password" id="githubToken" class="w-full p-2 border rounded mb-2 text-sm">
+                <label class="block text-xs text-gray-600">Gist ID</label>
+                <input type="text" id="gistId" class="w-full p-2 border rounded mb-2 text-sm">
+                <label class="block text-xs text-gray-600">Filename</label>
+                <input type="text" id="gistFilename" class="w-full p-2 border rounded mb-2 text-sm" value="vocab_data.json">
+            </div>
+
+            <div class="mb-2 border-t pt-4">
+                <h3 class="font-semibold text-gray-800 mb-2">Link & Prompt</h3>
+                <label class="block text-xs text-gray-600">Base URL</label>
+                <input type="text" id="baseUrl" class="w-full p-2 border rounded mb-3 text-sm" value="https://chatgpt.com/?q=">
+                
+                <label class="block text-xs text-gray-600 font-bold text-gray-700">Unified Prompt Template (CSV Mode)</label>
+                <textarea id="promptTemplate" class="w-full p-2 border rounded text-xs h-32 font-mono whitespace-pre"></textarea>
+            </div>
+
+            <button onclick="saveSettings()" class="w-full bg-gray-800 hover:bg-black text-white py-2 rounded font-bold mt-4 shadow">Lưu Cài Đặt</button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA & STATE ---
+        // Changed from Set to Array to maintain insertion order
+        let vocabWords = [];
+        let vocabPhrases = [];
+        let vocabFamily = [];
+        let personalDict = []; 
+        let sessionIgnored = new Set(); 
+        
+        let detectedWords = [];
+        let detectedPhrases = [];
+        let currentTab = 'word';
+        let currentOutputTab = 'result';
+        let syncTimer = null; 
+        
+        // Multi-Undo Stack
+        let undoStack = [];
+        const MAX_UNDO_STACK = 50;
+
+        const defaultPrompt = 
+`Phân tích các từ/cụm từ này và xuất thành bảng với file csv mã hoá utf-8 theo các mục sau(từ nào đang ở dạng số nhiều thì chuyển về dạng nguyên thể rồi hãng phân tích, còn cụm từ thì giữ nguyên): 
+1. Từ
+2. Phiên âm (UK và US) (ngắn gọn trong 1 dòng)
+3. Từ loại
+4. Nghĩa tiếng việt
+5. Ví dụ (2 ví dụ, mỗi ý một dòng, cấp độ B2)
+6. Nghĩa ví dụ
+Từ cần phân tích: {words}`;
+
+        const config = {
+            geminiKey: '',
+            geminiModel: 'gemini-2.5-flash',
+            githubToken: '',
+            gistId: '',
+            gistFilename: 'vocab_data.json',
+            baseUrl: 'https://chatgpt.com/?q=',
+            promptTemplate: defaultPrompt
+        };
+
+        // --- HELPER: Check if item exists in array ---
+        function hasItem(arr, item) {
+            return arr.includes(item);
+        }
+
+        // --- HELPER: Add item to beginning of array (if not exists) ---
+        function addItem(arr, item) {
+            if (!arr.includes(item)) {
+                arr.unshift(item); // Add to beginning for LIFO order
+            }
+        }
+
+        // --- HELPER: Remove item from array ---
+        function removeItem(arr, item) {
+            const index = arr.indexOf(item);
+            if (index > -1) {
+                arr.splice(index, 1);
+            }
+        }
+
+        // --- INIT ---
+        window.onload = () => {
+            loadSettings();
+            loadVocab();
+            document.getElementById('inputText').addEventListener('input', handleInput);
+            document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+            renderCounts();
+            updateUndoButton();
+            
+            if(config.githubToken && config.gistId) {
+                setTimeout(() => triggerAutoSync('pull'), 1000);
+            }
+        };
+
+        // --- TOOLS ---
+        async function pasteFromClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                const input = document.getElementById('inputText');
+                input.value = text;
+                input.focus();
+                handleInput(); 
+                showToast('Đã dán!');
+            } catch (err) { showToast('Lỗi clipboard: Hãy cấp quyền.'); }
+        }
+
+        function clearInput() {
+            document.getElementById('inputText').value = '';
+            detectedWords = [];
+            detectedPhrases = [];
+            handleInput();
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('inputText').value = e.target.result;
+                handleInput();
+                showToast(`Đã nhập file: ${file.name}`);
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function copyWordsOnly() {
+            const allItems = [...detectedWords, ...detectedPhrases];
+            if(allItems.length === 0) {
+                showToast('Không có từ nào để copy!');
+                return;
+            }
+            const text = allItems.join(', ');
+            navigator.clipboard.writeText(text).then(() => showToast('Đã copy danh sách từ!'));
+        }
+
+        function copyPrompt() {
+            const text = document.getElementById('promptPreview').innerText;
+            if(!text) {
+                showToast('Không có prompt để copy!');
+                return;
+            }
+            navigator.clipboard.writeText(text).then(() => showToast('Đã copy prompt!'));
+        }
+
+        function showToast(msg) {
+            const container = document.getElementById('toastContainer');
+            
+            const div = document.createElement('div');
+            div.className = 'bg-gray-800 text-white px-3 md:px-4 py-2 md:py-3 rounded shadow-lg flex justify-between items-center gap-3 md:gap-4 pointer-events-auto toast text-sm';
+            div.innerHTML = `<span class="text-xs md:text-sm">${msg}</span>`;
+            
+            container.appendChild(div);
+
+            setTimeout(() => {
+                div.style.opacity = '0';
+                div.style.transform = 'translateY(100%)';
+                div.style.transition = 'all 0.3s';
+                setTimeout(() => div.remove(), 300);
+            }, 2500);
+        }
+
+        // --- UNDO STACK LOGIC ---
+        function pushToUndoStack(type, item, sourceTab) {
+            undoStack.push({ type, item, sourceTab });
+            if (undoStack.length > MAX_UNDO_STACK) {
+                undoStack.shift();
+            }
+            updateUndoButton();
+        }
+
+        function updateUndoButton() {
+            const btn = document.getElementById('undoBtn');
+            const countEl = document.getElementById('undoCount');
+            
+            if (undoStack.length > 0) {
+                btn.classList.remove('hidden');
+                countEl.innerText = undoStack.length;
+            } else {
+                btn.classList.add('hidden');
+            }
+        }
+
+        function undoLastAction() {
+            if (undoStack.length === 0) return;
+
+            const action = undoStack.pop();
+            const { type, item, sourceTab } = action;
+
+            // 1. Remove from Array
+            if (type === 'word') removeItem(vocabWords, item);
+            else if (type === 'phrase') removeItem(vocabPhrases, item);
+            else if (type === 'family') removeItem(vocabFamily, item);
+            else if (type === 'personal') removeItem(personalDict, item);
+
+            // 2. Add back to Detected List based on source
+            if (sourceTab === 'gemini') {
+                if (!detectedPhrases.includes(item)) {
+                    detectedPhrases.unshift(item);
+                }
+            }
+
+            // 3. Save & Sync
+            saveVocabLocal();
+            triggerAutoSync('push');
+            
+            // 4. Re-analyze and render
+            analyzeWords();
+            renderView();
+            updateUndoButton();
+            
+            showToast(`Đã hoàn tác: ${item}`);
+        }
+
+        // --- CORE LOGIC ---
+        function handleInput() {
+            analyzeWords();
+            if(!document.getElementById('inputText').value.trim()) detectedPhrases = [];
+            renderView();
+        }
+
+        function analyzeWords() {
+            const text = document.getElementById('inputText').value;
+            if (!text.trim()) {
+                detectedWords = [];
+                return;
+            }
+            const rawWords = text.toLowerCase().match(/[a-z]+/g);
+            if (!rawWords) {
+                detectedWords = [];
+                return;
+            }
+            const uniqueWords = [...new Set(rawWords)];
+            detectedWords = uniqueWords.filter(word => 
+                !hasItem(vocabWords, word) && 
+                !hasItem(vocabFamily, word) && 
+                !sessionIgnored.has(word) && 
+                !hasItem(personalDict, word)
+            );
+        }
+
+        async function analyzeWithGemini() {
+            const text = document.getElementById('inputText').value;
+            const apiKey = config.geminiKey;
+            
+            if (!text.trim()) return showToast("Vui lòng nhập văn bản.");
+            if (!apiKey) return openModal('settingsModal');
+
+            const listEl = document.getElementById('outputList');
+            if(currentTab === 'gemini') {
+                listEl.innerHTML = `<div class="text-center text-blue-500 mt-10"><i class="fas fa-spinner fa-spin fa-2x"></i><br>AI đang phân tích...</div>`;
+            }
+
+            const prompt = `ONLY Extract Phrasal Verbs and Idioms from the text. Return a JSON array of strings in lowercase. Ignore common single words. Text: "${text}"`;
+            
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${config.geminiModel}:generateContent?key=${apiKey}`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+
+                const data = await response.json();
+                if (data.error) throw new Error(data.error.message);
+
+                const rawText = data.candidates[0].content.parts[0].text;
+                const jsonString = rawText.replace(/```json|```/g, '').trim();
+                let phrases = [];
+                try {
+                    phrases = JSON.parse(jsonString);
+                } catch(e) {
+                    const match = jsonString.match(/\[.*\]/s);
+                    if(match) phrases = JSON.parse(match[0]);
+                }
+
+                detectedPhrases = phrases.filter(p => 
+                    !hasItem(vocabPhrases, p) && 
+                    !hasItem(vocabFamily, p) && 
+                    !sessionIgnored.has(p) && 
+                    !hasItem(personalDict, p)
+                );
+                
+                if(currentTab === 'gemini') renderView();
+                updateUnifiedPrompt();
+
+            } catch (error) {
+                console.error(error);
+                if(currentTab === 'gemini') listEl.innerHTML = `<div class="text-center text-red-500 mt-10">Lỗi AI: ${error.message}</div>`;
+            }
+        }
+
+        // --- OUTPUT TAB SWITCH ---
+        function switchOutputTab(tab) {
+            currentOutputTab = tab;
+            const resultTab = document.getElementById('outputResultTab');
+            const promptTab = document.getElementById('outputPromptTab');
+            const resultBtn = document.getElementById('outputTabResult');
+            const promptBtn = document.getElementById('outputTabPrompt');
+
+            if (tab === 'result') {
+                resultTab.classList.remove('hidden');
+                promptTab.classList.add('hidden');
+                resultBtn.classList.add('output-tab-active');
+                resultBtn.classList.remove('text-gray-500');
+                promptBtn.classList.remove('output-tab-active');
+                promptBtn.classList.add('text-gray-500');
+            } else {
+                resultTab.classList.add('hidden');
+                promptTab.classList.remove('hidden');
+                promptBtn.classList.add('output-tab-active');
+                promptBtn.classList.remove('text-gray-500');
+                resultBtn.classList.remove('output-tab-active');
+                resultBtn.classList.add('text-gray-500');
+            }
+        }
+
+        // --- RENDER VIEW ---
+        function renderView() {
+            const listEl = document.getElementById('outputList');
+            const countEl = document.getElementById('resultCount');
+            const titleEl = document.getElementById('listTitle');
+
+            let itemsToRender = currentTab === 'word' ? detectedWords : detectedPhrases;
+            titleEl.innerText = currentTab === 'word' ? 'Kết quả Word' : 'Kết quả Gemini';
+            
+            countEl.innerText = itemsToRender.length;
+            listEl.innerHTML = '';
+
+            if (itemsToRender.length === 0) {
+                listEl.innerHTML = `<div class="text-center text-gray-400 mt-10 text-sm">Trống</div>`;
+            } else {
+                itemsToRender.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'flex justify-between items-center bg-gray-50 p-1.5 md:p-2 rounded hover:bg-white hover:shadow-sm border border-transparent hover:border-blue-200 group transition';
+                    div.innerHTML = `
+                        <span class="font-medium text-gray-800 ml-1 text-sm md:text-base truncate flex-1">${item}</span>
+                        <div class="mobile-always-visible md:opacity-0 group-hover:opacity-100 transition-opacity flex space-x-0.5 md:space-x-1 flex-shrink-0">
+                            <button onclick="ignoreItem('${item}')" class="p-1 md:p-1.5 text-gray-400 hover:text-red-500 text-xs md:text-base" title="Bỏ qua (Tạm thời)"><i class="fas fa-times"></i></button>
+                            <button onclick="addToPersonalDict('${item}')" class="p-1 md:p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded text-xs md:text-base" title="Bỏ qua vĩnh viễn"><i class="fas fa-user-shield"></i></button>
+                            <button onclick="addToWordFamily('${item}')" class="p-1 md:p-1.5 text-teal-500 hover:text-teal-700 hover:bg-teal-50 rounded text-xs md:text-base" title="Word Family"><i class="fas fa-sitemap"></i></button>
+                            <button onclick="addItemToCurrentVocab('${item}')" class="p-1 md:p-1.5 text-blue-400 hover:text-blue-600 text-xs md:text-base" title="Thêm vào kho học"><i class="fas fa-check"></i></button>
+                        </div>
+                    `;
+                    listEl.appendChild(div);
+                });
+            }
+            updateUnifiedPrompt();
+        }
+
+        function updateUnifiedPrompt() {
+            const allItems = [...detectedWords, ...detectedPhrases];
+            const previewEl = document.getElementById('promptPreview');
+            const linkBtn = document.getElementById('actionLink');
+            const linkBtnPromptTab = document.getElementById('actionLinkPromptTab');
+
+            if (allItems.length === 0) {
+                previewEl.innerText = "";
+                linkBtn.classList.add('opacity-50', 'pointer-events-none');
+                linkBtnPromptTab.classList.add('opacity-50', 'pointer-events-none');
+                return;
+            }
+
+            linkBtn.classList.remove('opacity-50', 'pointer-events-none');
+            linkBtnPromptTab.classList.remove('opacity-50', 'pointer-events-none');
+            const joined = allItems.join(', ');
+            const finalPrompt = config.promptTemplate.replace('{words}', joined);
+            
+            previewEl.innerText = finalPrompt;
+            const link = `${config.baseUrl}${encodeURIComponent(finalPrompt)}`;
+            linkBtn.href = link;
+            linkBtnPromptTab.href = link;
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            const wordBtn = document.getElementById('tabWordBtn');
+            const geminiBtn = document.getElementById('tabGeminiBtn');
+            const geminiControls = document.getElementById('geminiControls');
+
+            if (tab === 'word') {
+                wordBtn.classList.replace('text-gray-500', 'tab-active');
+                geminiBtn.classList.replace('tab-active', 'text-gray-500');
+                geminiControls.classList.add('hidden');
+            } else {
+                geminiBtn.classList.replace('text-gray-500', 'tab-active');
+                wordBtn.classList.replace('tab-active', 'text-gray-500');
+                geminiControls.classList.remove('hidden');
+            }
+            renderView();
+        }
+
+        // --- VOCAB & SYNC LOGIC ---
+
+        function updateVocabAndSync() {
+            saveVocabLocal();
+            triggerAutoSync('push'); 
+        }
+
+        function addItemToCurrentVocab(item) {
+            let type = (currentTab === 'word') ? 'word' : 'phrase';
+            if (type === 'word') addItem(vocabWords, item);
+            else addItem(vocabPhrases, item);
+            
+            pushToUndoStack(type, item, currentTab);
+            updateVocabAndSync();
+            removeCurrentItem(item);
+            showToast(`Đã thêm: ${item}`);
+        }
+
+        function addToPersonalDict(item) {
+            addItem(personalDict, item);
+            pushToUndoStack('personal', item, currentTab);
+            updateVocabAndSync();
+            removeCurrentItem(item);
+            showToast(`Đã thêm vào Ignored: ${item}`);
+        }
+
+        function addToWordFamily(item) {
+            addItem(vocabFamily, item);
+            pushToUndoStack('family', item, currentTab);
+            updateVocabAndSync();
+            removeCurrentItem(item);
+            showToast(`Đã thêm vào Word Family: ${item}`);
+        }
+
+        function addAllCurrentToVocab() {
+            const list = currentTab === 'word' ? [...detectedWords] : [...detectedPhrases];
+            if(list.length === 0) return;
+
+            list.forEach(item => {
+                if (currentTab === 'word') {
+                    addItem(vocabWords, item);
+                    pushToUndoStack('word', item, 'word');
+                } else {
+                    addItem(vocabPhrases, item);
+                    pushToUndoStack('phrase', item, 'gemini');
+                }
+            });
+            
+            updateVocabAndSync();
+            
+            if (currentTab === 'word') detectedWords = [];
+            else detectedPhrases = [];
+            
+            renderView();
+            renderCounts();
+            showToast(`Đã thêm ${list.length} từ & Đang đẩy lên Cloud...`);
+        }
+
+        function ignoreItem(item) {
+            sessionIgnored.add(item);
+            removeCurrentItem(item);
+        }
+
+        function removeCurrentItem(item) {
+            if (currentTab === 'word') detectedWords = detectedWords.filter(i => i !== item);
+            else detectedPhrases = detectedPhrases.filter(i => i !== item);
+            renderView();
+            renderCounts();
+        }
+
+        function saveVocabLocal() {
+            localStorage.setItem('myVocabWords', JSON.stringify(vocabWords));
+            localStorage.setItem('myVocabPhrases', JSON.stringify(vocabPhrases));
+            localStorage.setItem('myVocabFamily', JSON.stringify(vocabFamily));
+            localStorage.setItem('myPersonalDict', JSON.stringify(personalDict));
+            renderCounts();
+        }
+
+        function loadVocab() {
+            const w = localStorage.getItem('myVocabWords');
+            const p = localStorage.getItem('myVocabPhrases');
+            const f = localStorage.getItem('myVocabFamily');
+            const d = localStorage.getItem('myPersonalDict');
+            
+            // Handle migration from Set (old format) to Array (new format)
+            if (w) {
+                const parsed = JSON.parse(w);
+                vocabWords = Array.isArray(parsed) ? parsed : [...parsed];
+            }
+            if (p) {
+                const parsed = JSON.parse(p);
+                vocabPhrases = Array.isArray(parsed) ? parsed : [...parsed];
+            }
+            if (f) {
+                const parsed = JSON.parse(f);
+                vocabFamily = Array.isArray(parsed) ? parsed : [...parsed];
+            }
+            if (d) {
+                const parsed = JSON.parse(d);
+                personalDict = Array.isArray(parsed) ? parsed : [...parsed];
+            }
+        }
+
+        function renderCounts() {
+            document.getElementById('wordCount').innerText = vocabWords.length;
+            document.getElementById('phraseCount').innerText = vocabPhrases.length;
+            document.getElementById('familyCount').innerText = vocabFamily.length;
+            document.getElementById('personalCount').innerText = personalDict.length;
+        }
+
+        function renderDictionary() {
+            const wList = document.getElementById('dictWordList');
+            const pList = document.getElementById('dictPhraseList');
+            const fList = document.getElementById('dictFamilyList');
+            const dList = document.getElementById('dictPersonalList');
+            const search = document.getElementById('searchVocab').value.toLowerCase();
+            
+            const renderCol = (arr, container, type) => {
+                container.innerHTML = '';
+                // Array is already in LIFO order (newest first), so just iterate
+                arr.forEach(item => {
+                    if (item.toLowerCase().includes(search)) {
+                        const div = document.createElement('div');
+                        div.className = 'flex justify-between text-xs bg-white p-1.5 md:p-2 rounded border border-gray-100 shadow-sm group';
+                        div.innerHTML = `<span class="truncate pr-2">${item}</span><button onclick="deleteDictItem('${item}', '${type}')" class="text-gray-300 hover:text-red-500">&times;</button>`;
+                        container.appendChild(div);
+                    }
+                });
+            };
+
+            renderCol(vocabWords, wList, 'word');
+            renderCol(vocabPhrases, pList, 'phrase');
+            renderCol(vocabFamily, fList, 'family');
+            renderCol(personalDict, dList, 'personal');
+
+            document.getElementById('dictWordCount').innerText = vocabWords.length;
+            document.getElementById('dictPhraseCount').innerText = vocabPhrases.length;
+            document.getElementById('dictFamilyCount').innerText = vocabFamily.length;
+            document.getElementById('dictPersonalCount').innerText = personalDict.length;
+        }
+
+        function deleteDictItem(item, type) {
+            if(!confirm(`Xóa "${item}" khỏi danh sách này?`)) return;
+            
+            if(type === 'word') removeItem(vocabWords, item);
+            else if(type === 'phrase') removeItem(vocabPhrases, item);
+            else if(type === 'family') removeItem(vocabFamily, item);
+            else if(type === 'personal') removeItem(personalDict, item);
+            
+            updateVocabAndSync();
+            renderDictionary();
+            handleInput(); 
+        }
+
+        // --- GITHUB SYNC ENGINE ---
+        
+        function triggerAutoSync(mode) {
+            if(!config.githubToken || !config.gistId) return;
+
+            const statusEl = document.getElementById('syncStatusIndicator');
+            
+            if(mode === 'pull') {
+                statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin text-blue-500"></i> Pulling...';
+                performSync(mode);
+                return;
+            }
+
+            statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin text-blue-500"></i> Waiting...';
+            if(syncTimer) clearTimeout(syncTimer);
+            syncTimer = setTimeout(() => {
+                performSync(mode);
+            }, 1000);
+        }
+
+        async function performSync(mode) {
+            const statusEl = document.getElementById('syncStatusIndicator');
+            
+            try {
+                if (mode === 'pull') {
+                    const data = await fetchGist();
+                    
+                    // Handle migration: if data is array, use directly; if object with Set-like structure, convert
+                    vocabWords = Array.isArray(data.words) ? data.words : [];
+                    vocabPhrases = Array.isArray(data.phrases) ? data.phrases : [];
+                    vocabFamily = Array.isArray(data.family) ? data.family : [];
+                    personalDict = Array.isArray(data.personal) ? data.personal : [];
+                    
+                    saveVocabLocal(); 
+                    renderCounts();
+                    if(!document.getElementById('dictionaryModal').classList.contains('hidden')) renderDictionary();
+                    handleInput();
+
+                    statusEl.innerHTML = `<i class="fas fa-check text-purple-600"></i> Pulled`;
+                    showToast('Đã đồng bộ dữ liệu mới nhất!');
+
+                } else if (mode === 'push') {
+                    statusEl.innerHTML = '<i class="fas fa-cloud-upload-alt fa-spin text-red-500"></i> Pushing...';
+                    
+                    await pushGist({
+                        words: vocabWords,
+                        phrases: vocabPhrases,
+                        family: vocabFamily,
+                        personal: personalDict
+                    });
+
+                    statusEl.innerHTML = `<i class="fas fa-check-circle text-green-500"></i> Pushed`;
+                }
+                statusEl.title = `Last action: ${mode} at ${new Date().toLocaleTimeString()}`;
+            } catch (err) {
+                console.warn(err);
+                statusEl.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500"></i> Error';
+                statusEl.title = err.message;
+            }
+        }
+
+        async function fetchGist() {
+            const url = `https://api.github.com/gists/${config.gistId}?t=${Date.now()}`;
+            const res = await fetch(url, { headers: { 'Authorization': `token ${config.githubToken}` } });
+            if(!res.ok) throw new Error('Fetch failed');
+            const json = await res.json();
+            const content = json.files[config.gistFilename]?.content;
+            if(!content) return {};
+            try { return JSON.parse(content); } catch { return {}; }
+        }
+
+        async function pushGist(dataObj) {
+            await fetch(`https://api.github.com/gists/${config.gistId}`, {
+                method: 'PATCH',
+                headers: { 
+                    'Authorization': `token ${config.githubToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    files: {
+                        [config.gistFilename]: { content: JSON.stringify(dataObj) }
+                    }
+                })
+            });
+        }
+
+        // --- SETTINGS ---
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+            if(id === 'dictionaryModal') renderDictionary();
+        }
+
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function saveSettings() {
+            config.geminiKey = document.getElementById('geminiKey').value;
+            config.geminiModel = document.getElementById('geminiModelSelect').value;
+            config.githubToken = document.getElementById('githubToken').value;
+            config.gistId = document.getElementById('gistId').value;
+            config.baseUrl = document.getElementById('baseUrl').value;
+            config.promptTemplate = document.getElementById('promptTemplate').value;
+
+            localStorage.setItem('appConfig', JSON.stringify(config));
+            closeModal('settingsModal');
+            showToast('Đã lưu! Đang tải dữ liệu...');
+            
+            document.getElementById('currentModelDisplay').innerText = `Model: ${config.geminiModel}`;
+            updateUnifiedPrompt();
+            triggerAutoSync('pull'); 
+        }
+
+        function loadSettings() {
+            const saved = localStorage.getItem('appConfig');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if(!parsed.promptTemplate || parsed.promptTemplate.includes("Explain these")) {
+                     parsed.promptTemplate = defaultPrompt;
+                }
+                Object.assign(config, parsed);
+                if(!parsed.geminiModel) config.geminiModel = 'gemini-2.5-flash';
+            } else {
+                config.promptTemplate = defaultPrompt;
+            }
+            
+            document.getElementById('geminiKey').value = config.geminiKey;
+            document.getElementById('geminiModelSelect').value = config.geminiModel;
+            document.getElementById('githubToken').value = config.githubToken;
+            document.getElementById('gistId').value = config.gistId;
+            document.getElementById('baseUrl').value = config.baseUrl;
+            document.getElementById('promptTemplate').value = config.promptTemplate;
+            
+            document.getElementById('currentModelDisplay').innerText = `Model: ${config.geminiModel}`;
+        }
+    </script>
+</body>
+</html>
