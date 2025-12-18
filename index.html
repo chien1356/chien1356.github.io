@@ -297,12 +297,12 @@
         const MAX_UNDO_STACK = 50;
 
         const defaultPrompt = 
-`Phân tích các từ/cụm từ này và xuất thành bảng với file csv mã hoá utf-8(từ nào đang ở dạng số nhiều thì chuyển về dạng nguyên thể rồi hãng phân tích, còn cụm từ thì giữ nguyên): 
+`Phân tích các từ/cụm từ này và xuất thành bảng với file csv mã hoá utf-8(từ đơn nào đang ở dạng số nhiều thì chuyển về dạng nguyên thể rồi hãng phân tích, còn Expressions từ thì giữ nguyên): 
 1. Từ
-2. Phiên âm (UK và US) (ngắn gọn trong 1 dòng)
+2. Phiên âm (UK và US) (ngắn gọn trong 1 dòng, nếu là Expressions thì chỉ cần US)
 3. Từ loại
 4. Nghĩa tiếng việt
-5. Ví dụ (2 ví dụ, mỗi ý một dòng, cấp độ B2)
+5. Ví dụ (1 ví dụ cấp độ B2)
 6. Nghĩa ví dụ
 Từ cần phân tích: {words}`;
 
@@ -509,7 +509,7 @@ Từ cần phân tích: {words}`;
                 listEl.innerHTML = `<div class="text-center text-blue-500 mt-10"><i class="fas fa-spinner fa-spin fa-2x"></i><br>AI đang phân tích...</div>`;
             }
 
-            const prompt = `ONLY Extract Phrasal Verbs and Idioms from the text. Return a JSON array of strings in lowercase. Ignore common single words. Text: "${text}"`;
+            const prompt = `Extract Expressions from the text. Return a JSON array of strings in lowercase. Text: "${text}"`;
             
             try {
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/${config.geminiModel}:generateContent?key=${apiKey}`;
