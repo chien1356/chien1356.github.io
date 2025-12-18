@@ -247,6 +247,8 @@
                     <option value="gemini-2.5-flash">gemini-2.5-flash (Default - Smart)</option>
                     <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite (Faster)</option>
                 </select>
+                <label class="block text-xs text-gray-600 font-bold mt-2">Gemini Prompt (Text Analyst)</label>
+                <textarea id="textAnalystPrompt" class="w-full p-2 border rounded text-xs h-24 font-mono whitespace-pre bg-white" placeholder="Extract Expressions from the text..."></textarea>
             </div>
 
             <div class="mb-5 border-t pt-4">
@@ -254,14 +256,17 @@
                 <p class="text-xs text-gray-500 mb-2 bg-gray-100 p-2 rounded">
                     <i class="fas fa-info-circle"></i> 
                     <b>Load App / Pull:</b> Tải & Ghi đè Local.<br>
-                    <b>Thay đổi từ:</b> Đẩy lên & Ghi đè Cloud.
+                    <b>Thay đổi từ:</b> Đẩy lên & Ghi đè Cloud.<br>
+                    <b class="text-purple-600">Settings cũng được sync!</b>
                 </p>
                 <label class="block text-xs text-gray-600">Github Token (quyền gist)</label>
                 <input type="password" id="githubToken" class="w-full p-2 border rounded mb-2 text-sm">
                 <label class="block text-xs text-gray-600">Gist ID</label>
                 <input type="text" id="gistId" class="w-full p-2 border rounded mb-2 text-sm">
-                <label class="block text-xs text-gray-600">Filename</label>
+                <label class="block text-xs text-gray-600">Filename (vocab data)</label>
                 <input type="text" id="gistFilename" class="w-full p-2 border rounded mb-2 text-sm" value="vocab_data.json">
+                <label class="block text-xs text-gray-600">Settings Filename</label>
+                <input type="text" id="gistSettingsFilename" class="w-full p-2 border rounded mb-2 text-sm" value="vocab_settings.json">
             </div>
 
             <div class="mb-2 border-t pt-4">
@@ -279,7 +284,6 @@
 
     <script>
         // --- DATA & STATE ---
-        // Changed from Set to Array to maintain insertion order
         let vocabWords = [];
         let vocabPhrases = [];
         let vocabFamily = [];
@@ -306,12 +310,17 @@
 6. Nghĩa ví dụ
 Từ cần phân tích: {words}`;
 
+        const defaultTextAnalystPrompt = 
+`Extract Expressions from the text. Return a JSON array of strings in lowercase. Text: "{text}"`;
+
         const config = {
             geminiKey: '',
             geminiModel: 'gemini-2.5-flash',
+            textAnalystPrompt: defaultTextAnalystPrompt,
             githubToken: '',
             gistId: '',
             gistFilename: 'vocab_data.json',
+            gistSettingsFilename: 'vocab_settings.json',
             baseUrl: 'https://chatgpt.com/?q=',
             promptTemplate: defaultPrompt
         };
@@ -324,7 +333,7 @@ Từ cần phân tích: {words}`;
         // --- HELPER: Add item to beginning of array (if not exists) ---
         function addItem(arr, item) {
             if (!arr.includes(item)) {
-                arr.unshift(item); // Add to beginning for LIFO order
+                arr.unshift(item);
             }
         }
 
@@ -445,24 +454,20 @@ Từ cần phân tích: {words}`;
             const action = undoStack.pop();
             const { type, item, sourceTab } = action;
 
-            // 1. Remove from Array
             if (type === 'word') removeItem(vocabWords, item);
             else if (type === 'phrase') removeItem(vocabPhrases, item);
             else if (type === 'family') removeItem(vocabFamily, item);
             else if (type === 'personal') removeItem(personalDict, item);
 
-            // 2. Add back to Detected List based on source
             if (sourceTab === 'gemini') {
                 if (!detectedPhrases.includes(item)) {
                     detectedPhrases.unshift(item);
                 }
             }
 
-            // 3. Save & Sync
             saveVocabLocal();
             triggerAutoSync('push');
             
-            // 4. Re-analyze and render
             analyzeWords();
             renderView();
             updateUndoButton();
@@ -509,7 +514,7 @@ Từ cần phân tích: {words}`;
                 listEl.innerHTML = `<div class="text-center text-blue-500 mt-10"><i class="fas fa-spinner fa-spin fa-2x"></i><br>AI đang phân tích...</div>`;
             }
 
-            const prompt = `Extract Expressions from the text. Return a JSON array of strings in lowercase. Text: "${text}"`;
+            const prompt = config.textAnalystPrompt.replace('{text}', text);
             
             try {
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/${config.geminiModel}:generateContent?key=${apiKey}`;
@@ -732,7 +737,6 @@ Từ cần phân tích: {words}`;
             const f = localStorage.getItem('myVocabFamily');
             const d = localStorage.getItem('myPersonalDict');
             
-            // Handle migration from Set (old format) to Array (new format)
             if (w) {
                 const parsed = JSON.parse(w);
                 vocabWords = Array.isArray(parsed) ? parsed : [...parsed];
@@ -767,7 +771,6 @@ Từ cần phân tích: {words}`;
             
             const renderCol = (arr, container, type) => {
                 container.innerHTML = '';
-                // Array is already in LIFO order (newest first), so just iterate
                 arr.forEach(item => {
                     if (item.toLowerCase().includes(search)) {
                         const div = document.createElement('div');
@@ -829,11 +832,33 @@ Từ cần phân tích: {words}`;
                 if (mode === 'pull') {
                     const data = await fetchGist();
                     
-                    // Handle migration: if data is array, use directly; if object with Set-like structure, convert
+                    // Load vocab data
                     vocabWords = Array.isArray(data.words) ? data.words : [];
                     vocabPhrases = Array.isArray(data.phrases) ? data.phrases : [];
                     vocabFamily = Array.isArray(data.family) ? data.family : [];
                     personalDict = Array.isArray(data.personal) ? data.personal : [];
+                    
+                    // Load settings if available
+                    const settings = await fetchGistSettings();
+                    if (settings && Object.keys(settings).length > 0) {
+                        // Merge settings but preserve local token if not in cloud
+                        if (settings.geminiKey) config.geminiKey = settings.geminiKey;
+                        if (settings.geminiModel) config.geminiModel = settings.geminiModel;
+                        if (settings.textAnalystPrompt) config.textAnalystPrompt = settings.textAnalystPrompt;
+                        if (settings.baseUrl) config.baseUrl = settings.baseUrl;
+                        if (settings.promptTemplate) config.promptTemplate = settings.promptTemplate;
+                        
+                        // Save to localStorage
+                        localStorage.setItem('appConfig', JSON.stringify(config));
+                        
+                        // Update UI
+                        document.getElementById('geminiKey').value = config.geminiKey;
+                        document.getElementById('geminiModelSelect').value = config.geminiModel;
+                        document.getElementById('textAnalystPrompt').value = config.textAnalystPrompt;
+                        document.getElementById('baseUrl').value = config.baseUrl;
+                        document.getElementById('promptTemplate').value = config.promptTemplate;
+                        document.getElementById('currentModelDisplay').innerText = `Model: ${config.geminiModel}`;
+                    }
                     
                     saveVocabLocal(); 
                     renderCounts();
@@ -846,11 +871,21 @@ Từ cần phân tích: {words}`;
                 } else if (mode === 'push') {
                     statusEl.innerHTML = '<i class="fas fa-cloud-upload-alt fa-spin text-red-500"></i> Pushing...';
                     
+                    // Push vocab data
                     await pushGist({
                         words: vocabWords,
                         phrases: vocabPhrases,
                         family: vocabFamily,
                         personal: personalDict
+                    });
+                    
+                    // Push settings
+                    await pushGistSettings({
+                        geminiKey: config.geminiKey,
+                        geminiModel: config.geminiModel,
+                        textAnalystPrompt: config.textAnalystPrompt,
+                        baseUrl: config.baseUrl,
+                        promptTemplate: config.promptTemplate
                     });
 
                     statusEl.innerHTML = `<i class="fas fa-check-circle text-green-500"></i> Pushed`;
@@ -873,6 +908,20 @@ Từ cần phân tích: {words}`;
             try { return JSON.parse(content); } catch { return {}; }
         }
 
+        async function fetchGistSettings() {
+            try {
+                const url = `https://api.github.com/gists/${config.gistId}?t=${Date.now()}`;
+                const res = await fetch(url, { headers: { 'Authorization': `token ${config.githubToken}` } });
+                if(!res.ok) return {};
+                const json = await res.json();
+                const content = json.files[config.gistSettingsFilename]?.content;
+                if(!content) return {};
+                return JSON.parse(content);
+            } catch {
+                return {};
+            }
+        }
+
         async function pushGist(dataObj) {
             await fetch(`https://api.github.com/gists/${config.gistId}`, {
                 method: 'PATCH',
@@ -883,6 +932,21 @@ Từ cần phân tích: {words}`;
                 body: JSON.stringify({
                     files: {
                         [config.gistFilename]: { content: JSON.stringify(dataObj) }
+                    }
+                })
+            });
+        }
+
+        async function pushGistSettings(settingsObj) {
+            await fetch(`https://api.github.com/gists/${config.gistId}`, {
+                method: 'PATCH',
+                headers: { 
+                    'Authorization': `token ${config.githubToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    files: {
+                        [config.gistSettingsFilename]: { content: JSON.stringify(settingsObj) }
                     }
                 })
             });
@@ -899,18 +963,23 @@ Từ cần phân tích: {words}`;
         function saveSettings() {
             config.geminiKey = document.getElementById('geminiKey').value;
             config.geminiModel = document.getElementById('geminiModelSelect').value;
+            config.textAnalystPrompt = document.getElementById('textAnalystPrompt').value;
             config.githubToken = document.getElementById('githubToken').value;
             config.gistId = document.getElementById('gistId').value;
+            config.gistFilename = document.getElementById('gistFilename').value;
+            config.gistSettingsFilename = document.getElementById('gistSettingsFilename').value;
             config.baseUrl = document.getElementById('baseUrl').value;
             config.promptTemplate = document.getElementById('promptTemplate').value;
 
             localStorage.setItem('appConfig', JSON.stringify(config));
             closeModal('settingsModal');
-            showToast('Đã lưu! Đang tải dữ liệu...');
+            showToast('Đã lưu! Đang đẩy settings lên Cloud...');
             
             document.getElementById('currentModelDisplay').innerText = `Model: ${config.geminiModel}`;
             updateUnifiedPrompt();
-            triggerAutoSync('pull'); 
+            
+            // Push settings to cloud
+            triggerAutoSync('push');
         }
 
         function loadSettings() {
@@ -920,16 +989,26 @@ Từ cần phân tích: {words}`;
                 if(!parsed.promptTemplate || parsed.promptTemplate.includes("Explain these")) {
                      parsed.promptTemplate = defaultPrompt;
                 }
+                if(!parsed.textAnalystPrompt) {
+                    parsed.textAnalystPrompt = defaultTextAnalystPrompt;
+                }
+                if(!parsed.gistSettingsFilename) {
+                    parsed.gistSettingsFilename = 'vocab_settings.json';
+                }
                 Object.assign(config, parsed);
                 if(!parsed.geminiModel) config.geminiModel = 'gemini-2.5-flash';
             } else {
                 config.promptTemplate = defaultPrompt;
+                config.textAnalystPrompt = defaultTextAnalystPrompt;
             }
             
             document.getElementById('geminiKey').value = config.geminiKey;
             document.getElementById('geminiModelSelect').value = config.geminiModel;
+            document.getElementById('textAnalystPrompt').value = config.textAnalystPrompt;
             document.getElementById('githubToken').value = config.githubToken;
             document.getElementById('gistId').value = config.gistId;
+            document.getElementById('gistFilename').value = config.gistFilename;
+            document.getElementById('gistSettingsFilename').value = config.gistSettingsFilename;
             document.getElementById('baseUrl').value = config.baseUrl;
             document.getElementById('promptTemplate').value = config.promptTemplate;
             
