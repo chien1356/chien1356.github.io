@@ -239,7 +239,7 @@
             </div>
 
             <div class="mb-5 bg-blue-50 p-3 rounded border border-blue-100">
-                <h3 class="font-semibold text-blue-800 mb-2">Gemini API</h3>
+                <h3 class="font-semibold text-blue-800 mb-2">Gemini API <span class="text-xs font-normal text-gray-500">(Chỉ lưu Local)</span></h3>
                 <label class="block text-xs text-gray-600 font-bold">API Key</label>
                 <input type="password" id="geminiKey" class="w-full p-2 border rounded mb-2 text-sm bg-white" placeholder="AIzaSy...">
                 <label class="block text-xs text-gray-600 font-bold">Model</label>
@@ -252,12 +252,12 @@
             </div>
 
             <div class="mb-5 border-t pt-4">
-                <h3 class="font-semibold text-gray-800 mb-2"><i class="fab fa-github"></i> Github Gist Sync</h3>
+                <h3 class="font-semibold text-gray-800 mb-2"><i class="fab fa-github"></i> Github Gist Sync <span class="text-xs font-normal text-gray-500">(Token chỉ lưu Local)</span></h3>
                 <p class="text-xs text-gray-500 mb-2 bg-gray-100 p-2 rounded">
                     <i class="fas fa-info-circle"></i> 
                     <b>Load App / Pull:</b> Tải & Ghi đè Local.<br>
                     <b>Thay đổi từ:</b> Đẩy lên & Ghi đè Cloud.<br>
-                    <b class="text-purple-600">Settings cũng được sync!</b>
+                    <b class="text-purple-600">Settings (trừ API keys) cũng được sync!</b>
                 </p>
                 <label class="block text-xs text-gray-600">Github Token (quyền gist)</label>
                 <input type="password" id="githubToken" class="w-full p-2 border rounded mb-2 text-sm">
@@ -301,12 +301,12 @@
         const MAX_UNDO_STACK = 50;
 
         const defaultPrompt = 
-`Phân tích các từ/cụm từ này và xuất thành bảng với file csv mã hoá utf-8(từ đơn nào đang ở dạng số nhiều thì chuyển về dạng nguyên thể rồi hãng phân tích, còn Expressions từ thì giữ nguyên): 
+`Phân tích các từ/cụm từ này và xuất thành bảng với file csv mã hoá utf-8: 
 1. Từ
-2. Phiên âm (UK và US) (ngắn gọn trong 1 dòng, nếu là Expressions thì chỉ cần US)
+2. Phiên âm
 3. Từ loại
 4. Nghĩa tiếng việt
-5. Ví dụ (2 ví dụ, mỗi ý một dòng, cấp độ B2)
+5. Ví dụ
 6. Nghĩa ví dụ
 Từ cần phân tích: {words}`;
 
@@ -838,11 +838,10 @@ Từ cần phân tích: {words}`;
                     vocabFamily = Array.isArray(data.family) ? data.family : [];
                     personalDict = Array.isArray(data.personal) ? data.personal : [];
                     
-                    // Load settings if available
+                    // Load settings if available (KHÔNG load API keys)
                     const settings = await fetchGistSettings();
                     if (settings && Object.keys(settings).length > 0) {
-                        // Merge settings but preserve local token if not in cloud
-                        if (settings.geminiKey) config.geminiKey = settings.geminiKey;
+                        // Chỉ load các settings không phải API key
                         if (settings.geminiModel) config.geminiModel = settings.geminiModel;
                         if (settings.textAnalystPrompt) config.textAnalystPrompt = settings.textAnalystPrompt;
                         if (settings.baseUrl) config.baseUrl = settings.baseUrl;
@@ -851,8 +850,7 @@ Từ cần phân tích: {words}`;
                         // Save to localStorage
                         localStorage.setItem('appConfig', JSON.stringify(config));
                         
-                        // Update UI
-                        document.getElementById('geminiKey').value = config.geminiKey;
+                        // Update UI (không update API key fields)
                         document.getElementById('geminiModelSelect').value = config.geminiModel;
                         document.getElementById('textAnalystPrompt').value = config.textAnalystPrompt;
                         document.getElementById('baseUrl').value = config.baseUrl;
@@ -879,9 +877,8 @@ Từ cần phân tích: {words}`;
                         personal: personalDict
                     });
                     
-                    // Push settings
+                    // Push settings (KHÔNG push API keys)
                     await pushGistSettings({
-                        geminiKey: config.geminiKey,
                         geminiModel: config.geminiModel,
                         textAnalystPrompt: config.textAnalystPrompt,
                         baseUrl: config.baseUrl,
@@ -978,7 +975,7 @@ Từ cần phân tích: {words}`;
             document.getElementById('currentModelDisplay').innerText = `Model: ${config.geminiModel}`;
             updateUnifiedPrompt();
             
-            // Push settings to cloud
+            // Push settings to cloud (không bao gồm API keys)
             triggerAutoSync('push');
         }
 
