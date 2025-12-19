@@ -330,6 +330,15 @@ Từ cần phân tích: {words}`;
             return arr.includes(item);
         }
 
+        // --- HELPER: Check if item exists in ALL vocab stores ---
+        function isInAnyVocab(item) {
+            return hasItem(vocabWords, item) || 
+                   hasItem(vocabPhrases, item) || 
+                   hasItem(vocabFamily, item) || 
+                   hasItem(personalDict, item) ||
+                   sessionIgnored.has(item);
+        }
+
         // --- HELPER: Add item to beginning of array (if not exists) ---
         function addItem(arr, item) {
             if (!arr.includes(item)) {
@@ -494,12 +503,8 @@ Từ cần phân tích: {words}`;
                 return;
             }
             const uniqueWords = [...new Set(rawWords)];
-            detectedWords = uniqueWords.filter(word => 
-                !hasItem(vocabWords, word) && 
-                !hasItem(vocabFamily, word) && 
-                !sessionIgnored.has(word) && 
-                !hasItem(personalDict, word)
-            );
+            // Words: kiểm tra với tất cả kho từ
+            detectedWords = uniqueWords.filter(word => !isInAnyVocab(word));
         }
 
         async function analyzeWithGemini() {
@@ -537,12 +542,8 @@ Từ cần phân tích: {words}`;
                     if(match) phrases = JSON.parse(match[0]);
                 }
 
-                detectedPhrases = phrases.filter(p => 
-                    !hasItem(vocabPhrases, p) && 
-                    !hasItem(vocabFamily, p) && 
-                    !sessionIgnored.has(p) && 
-                    !hasItem(personalDict, p)
-                );
+                // Phrases: kiểm tra với TẤT CẢ kho từ (words, phrases, family, personal)
+                detectedPhrases = phrases.filter(p => !isInAnyVocab(p));
                 
                 if(currentTab === 'gemini') renderView();
                 updateUnifiedPrompt();
