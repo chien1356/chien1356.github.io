@@ -311,7 +311,7 @@
 Từ cần phân tích: {words}`;
 
         const defaultTextAnalystPrompt = 
-`Extract Expressions from the text. Return a JSON array of strings in lowercase. Text: "{text}"`;
+`ONLY Extract Expressions from the text. Ignore common single words. Return a JSON array of strings in lowercase. Text: "{text}"`;
 
         const config = {
             geminiKey: '',
