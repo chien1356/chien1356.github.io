@@ -113,7 +113,7 @@
                     <button onclick="document.getElementById('fileInput').click()" class="bg-white p-1.5 md:p-2 rounded shadow hover:bg-blue-50 text-blue-500 border border-gray-200 transition text-xs md:text-base" title="Nhập file .txt">
                         <i class="fas fa-file-upload"></i>
                     </button>
-                    <button onclick="pasteFromClipboard()" class="bg-white p-1.5 md:p-2 rounded shadow hover:bg-gray-100 text-gray-600 border border-gray-200 transition text-xs md:text-base" title="Dán từ Clipboard">
+                    <button onclick="pasteFromClipboard()" class="bg-white p-1.5 md:p-2 rounded shadow hover:bg-gray-100 text-gray-600 border border-gray-200 transition text-xs md:text-base" title="Dán nối tiếp từ Clipboard">
                         <i class="fas fa-paste"></i>
                     </button>
                     <button onclick="clearInput()" class="bg-white p-1.5 md:p-2 rounded shadow hover:text-red-500 text-gray-400 border border-gray-200 transition text-xs md:text-base" title="Xóa hết">
@@ -264,15 +264,15 @@
             </div>
 
             <div class="mb-5 bg-blue-50 p-3 rounded border border-blue-100">
-                <h3 class="font-semibold text-blue-800 mb-2">Gemini API <span class="text-xs font-normal text-gray-500">(Chỉ lưu Local)</span></h3>
+                <h3 class="font-semibold text-blue-800 mb-2">Gemini API <span class="text-xs font-normal text-gray-500">(API Key chỉ lưu Local)</span></h3>
                 <label class="block text-xs text-gray-600 font-bold">API Key</label>
                 <input type="password" id="geminiKey" class="w-full p-2 border rounded mb-2 text-sm bg-white" placeholder="AIzaSy...">
-                <label class="block text-xs text-gray-600 font-bold">Model</label>
-                <select id="geminiModelSelect" class="w-full p-2 border rounded text-sm bg-white">
-                    <option value="gemini-2.5-flash">gemini-2.5-flash (Default - Smart)</option>
-                    <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite (Faster)</option>
-                </select>
-                <label class="block text-xs text-gray-600 font-bold mt-2">Gemini Prompt (Text Analyst)</label>
+                <label class="block text-xs text-gray-600 font-bold">Model <span class="text-purple-600">(Sync lên Cloud)</span></label>
+                <input type="text" id="geminiModelInput" class="w-full p-2 border rounded text-sm bg-white" placeholder="gemini-2.5-flash">
+                <p class="text-xs text-gray-500 mt-1">
+                    <i class="fas fa-info-circle"></i> Ví dụ: gemini-2.5-flash, gemini-2.5-flash-lite, gemini-2.0-flash, gemini-1.5-pro...
+                </p>
+                <label class="block text-xs text-gray-600 font-bold mt-2">Gemini Prompt (Text Analyst) <span class="text-purple-600">(Sync)</span></label>
                 <textarea id="textAnalystPrompt" class="w-full p-2 border rounded text-xs h-24 font-mono whitespace-pre bg-white" placeholder="Extract Expressions from the text..."></textarea>
             </div>
 
@@ -295,7 +295,7 @@
             </div>
 
             <div class="mb-2 border-t pt-4">
-                <h3 class="font-semibold text-gray-800 mb-2">Link & Prompt</h3>
+                <h3 class="font-semibold text-gray-800 mb-2">Link & Prompt <span class="text-xs text-purple-600">(Sync)</span></h3>
                 <label class="block text-xs text-gray-600">Base URL</label>
                 <input type="text" id="baseUrl" class="w-full p-2 border rounded mb-3 text-sm" value="https://chatgpt.com/?q=">
                 
@@ -396,13 +396,27 @@ Từ cần phân tích: {words}`;
         // --- TOOLS ---
         async function pasteFromClipboard() {
             try {
-                const text = await navigator.clipboard.readText();
+                const clipboardText = await navigator.clipboard.readText();
                 const input = document.getElementById('inputText');
-                input.value = text;
+                const currentText = input.value;
+                
+                // Nối tiếp với ngăn cách
+                if (currentText.trim()) {
+                    // Có text cũ -> thêm ngăn cách (2 dòng trống) rồi nối
+                    input.value = currentText.trimEnd() + '\n\n---\n\n' + clipboardText;
+                } else {
+                    // Chưa có text -> paste bình thường
+                    input.value = clipboardText;
+                }
+                
                 input.focus();
+                // Scroll xuống cuối
+                input.scrollTop = input.scrollHeight;
                 handleInput(); 
-                showToast('Đã dán!');
-            } catch (err) { showToast('Lỗi clipboard: Hãy cấp quyền.'); }
+                showToast('Đã dán nối tiếp!');
+            } catch (err) { 
+                showToast('Lỗi clipboard: Hãy cấp quyền.'); 
+            }
         }
 
         function clearInput() {
@@ -417,9 +431,18 @@ Từ cần phân tích: {words}`;
             if (!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
-                document.getElementById('inputText').value = e.target.result;
+                const input = document.getElementById('inputText');
+                const currentText = input.value;
+                
+                // Nối tiếp file content
+                if (currentText.trim()) {
+                    input.value = currentText.trimEnd() + '\n\n---\n\n' + e.target.result;
+                } else {
+                    input.value = e.target.result;
+                }
+                
                 handleInput();
-                showToast(`Đã nhập file: ${file.name}`);
+                showToast(`Đã nhập nối tiếp file: ${file.name}`);
                 event.target.value = '';
             };
             reader.readAsText(file);
@@ -964,7 +987,7 @@ Từ cần phân tích: {words}`;
                         localStorage.setItem('appConfig', JSON.stringify(config));
                         
                         // Update UI (không update API key fields)
-                        document.getElementById('geminiModelSelect').value = config.geminiModel;
+                        document.getElementById('geminiModelInput').value = config.geminiModel;
                         document.getElementById('textAnalystPrompt').value = config.textAnalystPrompt;
                         document.getElementById('baseUrl').value = config.baseUrl;
                         document.getElementById('promptTemplate').value = config.promptTemplate;
@@ -1072,7 +1095,7 @@ Từ cần phân tích: {words}`;
 
         function saveSettings() {
             config.geminiKey = document.getElementById('geminiKey').value;
-            config.geminiModel = document.getElementById('geminiModelSelect').value;
+            config.geminiModel = document.getElementById('geminiModelInput').value.trim() || 'gemini-2.5-flash';
             config.textAnalystPrompt = document.getElementById('textAnalystPrompt').value;
             config.githubToken = document.getElementById('githubToken').value;
             config.gistId = document.getElementById('gistId').value;
@@ -1113,7 +1136,7 @@ Từ cần phân tích: {words}`;
             }
             
             document.getElementById('geminiKey').value = config.geminiKey;
-            document.getElementById('geminiModelSelect').value = config.geminiModel;
+            document.getElementById('geminiModelInput').value = config.geminiModel;
             document.getElementById('textAnalystPrompt').value = config.textAnalystPrompt;
             document.getElementById('githubToken').value = config.githubToken;
             document.getElementById('gistId').value = config.gistId;
