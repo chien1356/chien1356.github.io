@@ -139,15 +139,18 @@
         <div class="output-panel w-1/2 p-2 md:p-4 flex flex-col bg-white overflow-hidden">
             
             <!-- Output Tabs -->
-            <div class="flex mb-2 md:mb-3 border-b border-gray-200">
-                <button id="outputTabResult" onclick="switchOutputTab('result')" class="output-tab-active px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium rounded-t-lg transition">
+            <div class="flex mb-2 md:mb-3 border-b border-gray-200 overflow-x-auto">
+                <button id="outputTabResult" onclick="switchOutputTab('result')" class="output-tab-active px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium rounded-t-lg transition whitespace-nowrap">
                     <i class="fas fa-list mr-1"></i>Kết quả
                 </button>
-                <button id="outputTabExtract" onclick="switchOutputTab('extract')" class="px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium text-gray-500 hover:text-gray-700 rounded-t-lg transition">
+                <button id="outputTabExtract" onclick="switchOutputTab('extract')" class="px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium text-gray-500 hover:text-gray-700 rounded-t-lg transition whitespace-nowrap">
                     <i class="fas fa-magic mr-1"></i>Extract
                 </button>
-                <button id="outputTabPrompt" onclick="switchOutputTab('prompt')" class="px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium text-gray-500 hover:text-gray-700 rounded-t-lg transition">
-                    <i class="fas fa-terminal mr-1"></i>Prompt
+                <button id="outputTabPrompt" onclick="switchOutputTab('prompt')" class="px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium text-gray-500 hover:text-gray-700 rounded-t-lg transition whitespace-nowrap">
+                    <i class="fas fa-terminal mr-1"></i>Word
+                </button>
+                <button id="outputTabPhrasePrompt" onclick="switchOutputTab('phrasePrompt')" class="px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium text-gray-500 hover:text-gray-700 rounded-t-lg transition whitespace-nowrap">
+                    <i class="fas fa-comment-dots mr-1"></i>Phrase
                 </button>
             </div>
 
@@ -183,17 +186,30 @@
                 <div class="bg-purple-900 text-purple-100 p-3 rounded text-sm font-mono overflow-y-auto whitespace-pre-wrap flex-1" id="extractPromptPreview"></div>
             </div>
 
-            <!-- Prompt Tab Content -->
+            <!-- Word Prompt Tab Content -->
             <div id="outputPromptTab" class="flex-1 flex flex-col overflow-hidden hidden">
                 <div class="flex justify-between items-center mb-2 flex-shrink-0">
                     <h3 class="text-sm font-bold text-gray-600 flex items-center">
-                        <i class="fas fa-terminal mr-2"></i> Analysis Prompt (ChatGPT)
+                        <i class="fas fa-terminal mr-2"></i> Word Prompt (ChatGPT)
                     </h3>
                     <button onclick="copyPrompt()" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded transition font-medium">
                         <i class="fas fa-copy mr-1"></i> Copy
                     </button>
                 </div>
                 <div class="bg-gray-800 text-gray-200 p-3 rounded text-sm font-mono flex-1 overflow-y-auto whitespace-pre-wrap" id="promptPreview"></div>
+            </div>
+
+            <!-- Phrase Prompt Tab Content -->
+            <div id="outputPhrasePromptTab" class="flex-1 flex flex-col overflow-hidden hidden">
+                <div class="flex justify-between items-center mb-2 flex-shrink-0">
+                    <h3 class="text-sm font-bold text-indigo-600 flex items-center">
+                        <i class="fas fa-comment-dots mr-2"></i> Phrase Prompt (ChatGPT)
+                    </h3>
+                    <button onclick="copyPhrasePrompt()" class="text-xs bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1.5 rounded transition font-medium">
+                        <i class="fas fa-copy mr-1"></i> Copy
+                    </button>
+                </div>
+                <div class="bg-indigo-900 text-indigo-100 p-3 rounded text-sm font-mono flex-1 overflow-y-auto whitespace-pre-wrap" id="phrasePromptPreview"></div>
             </div>
         </div>
     </div>
@@ -270,10 +286,14 @@
                 <input type="text" id="gistSettingsFilename" class="w-full p-2 border rounded mb-2 text-sm" value="vocab_settings.json">
             </div>
 
-            <div class="mb-2 border-t pt-4">
-                <h3 class="font-semibold text-gray-800 mb-2">Prompt Template <span class="text-xs text-purple-600">(Sync)</span></h3>
-                <label class="block text-xs text-gray-600 font-bold text-gray-700">Analysis Prompt Template (CSV Mode)</label>
-                <textarea id="promptTemplate" class="w-full p-2 border rounded text-xs h-32 font-mono whitespace-pre"></textarea>
+            <div class="mb-4 border-t pt-4">
+                <h3 class="font-semibold text-gray-800 mb-2">Prompt Templates <span class="text-xs text-purple-600">(Sync)</span></h3>
+                
+                <label class="block text-xs text-gray-600 font-bold text-gray-700">Word Prompt Template</label>
+                <textarea id="promptTemplate" class="w-full p-2 border rounded text-xs h-28 font-mono whitespace-pre mb-3"></textarea>
+                
+                <label class="block text-xs text-gray-600 font-bold text-indigo-700">Phrase Prompt Template <span class="text-indigo-500">(dùng {phrases})</span></label>
+                <textarea id="phrasePromptTemplate" class="w-full p-2 border rounded text-xs h-28 font-mono whitespace-pre bg-indigo-50"></textarea>
             </div>
 
             <button onclick="saveSettings()" class="w-full bg-gray-800 hover:bg-black text-white py-2 rounded font-bold mt-4 shadow">Lưu Cài Đặt</button>
@@ -299,7 +319,7 @@
         const MAX_UNDO_STACK = 50;
 
         const defaultPrompt = 
-`Phân tích các từ/cụm từ này và xuất thành bảng với file csv mã hoá utf-8: 
+`Phân tích các từ này và xuất thành bảng với file csv mã hoá utf-8: 
 1. Từ
 2. Phiên âm
 3. Từ loại
@@ -307,6 +327,16 @@
 5. Ví dụ
 6. Nghĩa ví dụ
 Từ cần phân tích: {words}`;
+
+        const defaultPhrasePrompt = 
+`Phân tích các cụm từ/thành ngữ này và xuất thành bảng với file csv mã hoá utf-8:
+1. Cụm từ
+2. Phiên âm
+3. Loại (idiom/phrasal verb/collocation/expression)
+4. Nghĩa tiếng Việt
+5. Ví dụ
+6. Nghĩa ví dụ
+Cụm từ cần phân tích: {phrases}`;
 
         const defaultTextAnalystPrompt = 
 `ONLY Extract Expressions from the text. Ignore common single words. Return a JSON array of strings in lowercase. Text: "{text}"`;
@@ -319,7 +349,8 @@ Từ cần phân tích: {words}`;
             gistId: '',
             gistFilename: 'vocab_data.json',
             gistSettingsFilename: 'vocab_settings.json',
-            promptTemplate: defaultPrompt
+            promptTemplate: defaultPrompt,
+            phrasePromptTemplate: defaultPhrasePrompt
         };
 
         // --- HELPER: Check if item exists in array ---
@@ -421,7 +452,16 @@ Từ cần phân tích: {words}`;
                 showToast('Không có prompt để copy!');
                 return;
             }
-            navigator.clipboard.writeText(text).then(() => showToast('Đã copy Analysis Prompt!'));
+            navigator.clipboard.writeText(text).then(() => showToast('Đã copy Word Prompt!'));
+        }
+
+        function copyPhrasePrompt() {
+            const text = document.getElementById('phrasePromptPreview').innerText;
+            if(!text || text.includes('Chưa có')) {
+                showToast('Không có prompt để copy!');
+                return;
+            }
+            navigator.clipboard.writeText(text).then(() => showToast('Đã copy Phrase Prompt!'));
         }
 
         function copyExtractPrompt() {
@@ -630,14 +670,17 @@ Từ cần phân tích: {words}`;
             const resultTab = document.getElementById('outputResultTab');
             const extractTab = document.getElementById('outputExtractTab');
             const promptTab = document.getElementById('outputPromptTab');
+            const phrasePromptTab = document.getElementById('outputPhrasePromptTab');
             const resultBtn = document.getElementById('outputTabResult');
             const extractBtn = document.getElementById('outputTabExtract');
             const promptBtn = document.getElementById('outputTabPrompt');
+            const phrasePromptBtn = document.getElementById('outputTabPhrasePrompt');
 
             // Hide all tabs
             resultTab.classList.add('hidden');
             extractTab.classList.add('hidden');
             promptTab.classList.add('hidden');
+            phrasePromptTab.classList.add('hidden');
             
             // Reset all buttons
             resultBtn.classList.remove('output-tab-active');
@@ -646,6 +689,8 @@ Từ cần phân tích: {words}`;
             extractBtn.classList.add('text-gray-500');
             promptBtn.classList.remove('output-tab-active');
             promptBtn.classList.add('text-gray-500');
+            phrasePromptBtn.classList.remove('output-tab-active');
+            phrasePromptBtn.classList.add('text-gray-500');
 
             // Show selected tab
             if (tab === 'result') {
@@ -656,10 +701,14 @@ Từ cần phân tích: {words}`;
                 extractTab.classList.remove('hidden');
                 extractBtn.classList.add('output-tab-active');
                 extractBtn.classList.remove('text-gray-500');
-            } else {
+            } else if (tab === 'prompt') {
                 promptTab.classList.remove('hidden');
                 promptBtn.classList.add('output-tab-active');
                 promptBtn.classList.remove('text-gray-500');
+            } else if (tab === 'phrasePrompt') {
+                phrasePromptTab.classList.remove('hidden');
+                phrasePromptBtn.classList.add('output-tab-active');
+                phrasePromptBtn.classList.remove('text-gray-500');
             }
         }
 
@@ -697,8 +746,8 @@ Từ cần phân tích: {words}`;
         }
 
         function updatePrompts() {
-            const allItems = [...detectedWords, ...detectedPhrases];
             const previewEl = document.getElementById('promptPreview');
+            const phrasePreviewEl = document.getElementById('phrasePromptPreview');
             const extractPreviewEl = document.getElementById('extractPromptPreview');
 
             // Update Extract Prompt Preview
@@ -710,15 +759,23 @@ Từ cần phân tích: {words}`;
                 extractPreviewEl.innerText = '(Nhập văn bản để xem Extract Prompt)';
             }
 
-            // Update Analysis Prompt Preview
-            if (allItems.length === 0) {
-                previewEl.innerText = "(Chưa có từ/phrases để phân tích)";
-                return;
+            // Update Word Prompt Preview
+            if (detectedWords.length === 0) {
+                previewEl.innerText = "(Chưa có từ để phân tích)";
+            } else {
+                const joinedWords = detectedWords.join(', ');
+                const finalPrompt = config.promptTemplate.replace('{words}', joinedWords);
+                previewEl.innerText = finalPrompt;
             }
 
-            const joined = allItems.join(', ');
-            const finalPrompt = config.promptTemplate.replace('{words}', joined);
-            previewEl.innerText = finalPrompt;
+            // Update Phrase Prompt Preview
+            if (detectedPhrases.length === 0) {
+                phrasePreviewEl.innerText = "(Chưa có phrases để phân tích)";
+            } else {
+                const joinedPhrases = detectedPhrases.join(', ');
+                const finalPhrasePrompt = config.phrasePromptTemplate.replace('{phrases}', joinedPhrases);
+                phrasePreviewEl.innerText = finalPhrasePrompt;
+            }
         }
 
         function switchTab(tab) {
@@ -928,12 +985,14 @@ Từ cần phân tích: {words}`;
                         if (settings.geminiModel) config.geminiModel = settings.geminiModel;
                         if (settings.textAnalystPrompt) config.textAnalystPrompt = settings.textAnalystPrompt;
                         if (settings.promptTemplate) config.promptTemplate = settings.promptTemplate;
+                        if (settings.phrasePromptTemplate) config.phrasePromptTemplate = settings.phrasePromptTemplate;
                         
                         localStorage.setItem('appConfig', JSON.stringify(config));
                         
                         document.getElementById('geminiModelInput').value = config.geminiModel;
                         document.getElementById('textAnalystPrompt').value = config.textAnalystPrompt;
                         document.getElementById('promptTemplate').value = config.promptTemplate;
+                        document.getElementById('phrasePromptTemplate').value = config.phrasePromptTemplate;
                         document.getElementById('currentModelDisplay').innerText = `Model: ${config.geminiModel}`;
                     }
                     
@@ -958,7 +1017,8 @@ Từ cần phân tích: {words}`;
                     await pushGistSettings({
                         geminiModel: config.geminiModel,
                         textAnalystPrompt: config.textAnalystPrompt,
-                        promptTemplate: config.promptTemplate
+                        promptTemplate: config.promptTemplate,
+                        phrasePromptTemplate: config.phrasePromptTemplate
                     });
 
                     statusEl.innerHTML = `<i class="fas fa-check-circle text-green-500"></i> Pushed`;
@@ -1042,6 +1102,7 @@ Từ cần phân tích: {words}`;
             config.gistFilename = document.getElementById('gistFilename').value;
             config.gistSettingsFilename = document.getElementById('gistSettingsFilename').value;
             config.promptTemplate = document.getElementById('promptTemplate').value;
+            config.phrasePromptTemplate = document.getElementById('phrasePromptTemplate').value;
 
             localStorage.setItem('appConfig', JSON.stringify(config));
             closeModal('settingsModal');
@@ -1063,6 +1124,9 @@ Từ cần phân tích: {words}`;
                 if(!parsed.textAnalystPrompt) {
                     parsed.textAnalystPrompt = defaultTextAnalystPrompt;
                 }
+                if(!parsed.phrasePromptTemplate) {
+                    parsed.phrasePromptTemplate = defaultPhrasePrompt;
+                }
                 if(!parsed.gistSettingsFilename) {
                     parsed.gistSettingsFilename = 'vocab_settings.json';
                 }
@@ -1071,6 +1135,7 @@ Từ cần phân tích: {words}`;
             } else {
                 config.promptTemplate = defaultPrompt;
                 config.textAnalystPrompt = defaultTextAnalystPrompt;
+                config.phrasePromptTemplate = defaultPhrasePrompt;
             }
             
             document.getElementById('geminiKey').value = config.geminiKey;
@@ -1081,6 +1146,7 @@ Từ cần phân tích: {words}`;
             document.getElementById('gistFilename').value = config.gistFilename;
             document.getElementById('gistSettingsFilename').value = config.gistSettingsFilename;
             document.getElementById('promptTemplate').value = config.promptTemplate;
+            document.getElementById('phrasePromptTemplate').value = config.phrasePromptTemplate;
             
             document.getElementById('currentModelDisplay').innerText = `Model: ${config.geminiModel}`;
         }
