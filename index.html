@@ -98,12 +98,14 @@
         <!-- Left: Input Area -->
         <div class="input-panel w-1/2 p-2 md:p-4 flex flex-col border-r border-gray-300 bg-gray-50 relative group">
             <!-- Tabs -->
-            <div class="flex space-x-4 md:space-x-6 mb-2 md:mb-3 border-b border-gray-300 pb-1 md:pb-2">
+            <div class="flex space-x-2 md:space-x-4 mb-2 md:mb-3 border-b border-gray-300 pb-1 md:pb-2">
                 <button id="tabWordBtn" class="tab-active pb-1 md:pb-2 px-1 md:px-2 transition text-sm md:text-base" onclick="switchTab('word')">Word</button>
+                <button id="tabManualBtn" class="text-gray-500 pb-1 md:pb-2 px-1 md:px-2 hover:text-gray-700 transition text-sm md:text-base" onclick="switchTab('manual')">Manual</button>
                 <button id="tabGeminiBtn" class="text-gray-500 pb-1 md:pb-2 px-1 md:px-2 hover:text-gray-700 transition text-sm md:text-base" onclick="switchTab('gemini')">Gemini</button>
             </div>
 
-            <div class="relative flex-1 min-h-0">
+            <!-- Word Tab Content -->
+            <div id="wordTabContent" class="relative flex-1 min-h-0 flex flex-col">
                 <textarea id="inputText" class="w-full h-full p-2 md:p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none text-sm md:text-lg pr-10 md:pr-12" 
                 placeholder="Dán văn bản tiếng Anh..."></textarea>
                 
@@ -121,13 +123,44 @@
                     </button>
                 </div>
             </div>
-            
-            <div id="geminiControls" class="hidden mt-2 md:mt-3 flex justify-between items-center animate-fade-in">
-                <span id="currentModelDisplay" class="text-xs text-gray-500 bg-yellow-50 px-2 py-1 rounded border border-yellow-200 truncate max-w-[100px] md:max-w-none">Model: ...</span>
-                <div class="flex gap-2">
-                    <button onclick="importPhrasesFromClipboard()" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 md:px-4 py-1.5 md:py-2 rounded-full hover:shadow-lg transition transform hover:scale-105 font-bold text-xs md:text-sm" title="Dán JSON phrases từ clipboard">
-                        <i class="fas fa-clipboard-list mr-1"></i> <span class="hidden md:inline">Import JSON</span><span class="md:hidden">JSON</span>
+
+            <!-- Manual Tab Content -->
+            <div id="manualTabContent" class="hidden relative flex-1 min-h-0 flex flex-col">
+                <textarea id="manualPhraseInput" class="w-full flex-1 p-2 md:p-4 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none text-sm md:text-base" 
+                placeholder="Nhập phrases thủ công, mỗi phrase một dòng...&#10;&#10;Ví dụ:&#10;break the ice&#10;once in a blue moon&#10;piece of cake"></textarea>
+                
+                <div class="mt-2 md:mt-3 flex justify-between items-center">
+                    <span class="text-xs text-gray-500 bg-purple-50 px-2 py-1 rounded border border-purple-200">
+                        <i class="fas fa-info-circle"></i> Mỗi dòng = 1 phrase
+                    </span>
+                    <div class="flex gap-2">
+                        <button onclick="importPhrasesFromClipboard()" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 md:px-4 py-1.5 md:py-2 rounded-full hover:shadow-lg transition transform hover:scale-105 font-bold text-xs md:text-sm" title="Dán JSON phrases từ clipboard">
+                            <i class="fas fa-clipboard-list mr-1"></i> <span class="hidden md:inline">Import JSON</span><span class="md:hidden">JSON</span>
+                        </button>
+                        <button onclick="clearManualInput()" class="bg-gray-200 hover:bg-gray-300 text-gray-600 px-2 md:px-3 py-1.5 md:py-2 rounded-full transition text-xs md:text-sm" title="Xóa hết">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gemini Tab Content -->
+            <div id="geminiTabContent" class="hidden relative flex-1 min-h-0 flex flex-col">
+                <textarea id="geminiInputText" class="w-full flex-1 p-2 md:p-4 border border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none text-sm md:text-lg pr-10 md:pr-12" 
+                placeholder="Dán văn bản tiếng Anh để AI phân tích..."></textarea>
+                
+                <!-- Tools -->
+                <div class="absolute top-1 md:top-2 right-1 md:right-2 flex flex-col gap-1 md:gap-2">
+                    <button onclick="pasteToGeminiInput()" class="bg-white p-1.5 md:p-2 rounded shadow hover:bg-gray-100 text-gray-600 border border-gray-200 transition text-xs md:text-base" title="Dán từ Clipboard">
+                        <i class="fas fa-paste"></i>
                     </button>
+                    <button onclick="clearGeminiInput()" class="bg-white p-1.5 md:p-2 rounded shadow hover:text-red-500 text-gray-400 border border-gray-200 transition text-xs md:text-base" title="Xóa hết">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+                
+                <div class="mt-2 md:mt-3 flex justify-between items-center">
+                    <span id="currentModelDisplay" class="text-xs text-gray-500 bg-yellow-50 px-2 py-1 rounded border border-yellow-200 truncate max-w-[100px] md:max-w-none">Model: ...</span>
                     <button onclick="analyzeWithGemini()" class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-3 md:px-6 py-1.5 md:py-2 rounded-full hover:shadow-lg transition transform hover:scale-105 font-bold text-xs md:text-base">
                         <i class="fas fa-magic mr-1 md:mr-2"></i> Tìm Phrases
                     </button>
@@ -309,7 +342,10 @@
         let sessionIgnored = new Set(); 
         
         let detectedWords = [];
-        let detectedPhrases = [];
+        let detectedPhrases = []; // Combined from manual + JSON import
+        let manualPhrases = [];   // From manual textarea
+        let jsonPhrases = [];     // From JSON import
+        
         let currentTab = 'word';
         let currentOutputTab = 'result';
         let syncTimer = null; 
@@ -382,11 +418,18 @@ Cụm từ cần phân tích: {phrases}`;
             }
         }
 
+        // --- Combine manual and JSON phrases ---
+        function updateCombinedPhrases() {
+            const allPhrases = [...new Set([...manualPhrases, ...jsonPhrases])];
+            detectedPhrases = allPhrases.filter(p => !isInAnyVocab(p));
+        }
+
         // --- INIT ---
         window.onload = () => {
             loadSettings();
             loadVocab();
             document.getElementById('inputText').addEventListener('input', handleInput);
+            document.getElementById('manualPhraseInput').addEventListener('input', handleManualPhraseInput);
             document.getElementById('fileInput').addEventListener('change', handleFileUpload);
             renderCounts();
             updateUndoButton();
@@ -395,6 +438,55 @@ Cụm từ cần phân tích: {phrases}`;
                 setTimeout(() => triggerAutoSync('pull'), 1000);
             }
         };
+
+        // --- Manual Phrase Input Handler ---
+        function handleManualPhraseInput() {
+            const text = document.getElementById('manualPhraseInput').value;
+            const lines = text.split('\n')
+                .map(line => line.toLowerCase().trim())
+                .filter(line => line.length > 0);
+            
+            manualPhrases = [...new Set(lines)];
+            updateCombinedPhrases();
+            
+            if (currentTab === 'manual') {
+                renderView();
+            }
+            updatePrompts();
+        }
+
+        function clearManualInput() {
+            document.getElementById('manualPhraseInput').value = '';
+            manualPhrases = [];
+            updateCombinedPhrases();
+            renderView();
+            updatePrompts();
+        }
+
+        // --- Gemini Input Handlers ---
+        async function pasteToGeminiInput() {
+            try {
+                const clipboardText = await navigator.clipboard.readText();
+                const input = document.getElementById('geminiInputText');
+                const currentText = input.value;
+                
+                if (currentText.trim()) {
+                    input.value = currentText.trimEnd() + '\n\n---\n\n' + clipboardText;
+                } else {
+                    input.value = clipboardText;
+                }
+                
+                input.focus();
+                input.scrollTop = input.scrollHeight;
+                showToast('Đã dán vào Gemini input!');
+            } catch (err) { 
+                showToast('Lỗi clipboard: Hãy cấp quyền.'); 
+            }
+        }
+
+        function clearGeminiInput() {
+            document.getElementById('geminiInputText').value = '';
+        }
 
         // --- TOOLS ---
         async function pasteFromClipboard() {
@@ -421,7 +513,6 @@ Cụm từ cần phân tích: {phrases}`;
         function clearInput() {
             document.getElementById('inputText').value = '';
             detectedWords = [];
-            detectedPhrases = [];
             handleInput();
         }
 
@@ -517,13 +608,18 @@ Cụm từ cần phân tích: {phrases}`;
                     return;
                 }
 
-                detectedPhrases = validPhrases.filter(p => !isInAnyVocab(p));
+                jsonPhrases = validPhrases;
+                updateCombinedPhrases();
 
-                switchTab('gemini');
-                renderView();
+                // Stay on manual tab or switch to it
+                if (currentTab !== 'manual') {
+                    switchTab('manual');
+                } else {
+                    renderView();
+                }
                 updatePrompts();
 
-                showToast(`Đã import ${detectedPhrases.length}/${validPhrases.length} phrases từ clipboard!`);
+                showToast(`Đã import ${validPhrases.length} phrases từ JSON! (${detectedPhrases.length} mới)`);
 
             } catch (err) {
                 console.error(err);
@@ -580,16 +676,17 @@ Cụm từ cần phân tích: {phrases}`;
             else if (type === 'family') removeItem(vocabFamily, item);
             else if (type === 'personal') removeItem(personalDict, item);
 
-            if (sourceTab === 'gemini') {
-                if (!detectedPhrases.includes(item)) {
-                    detectedPhrases.unshift(item);
-                }
+            // Restore to appropriate source
+            if (sourceTab === 'manual' || sourceTab === 'gemini') {
+                // Re-check combined phrases
+                updateCombinedPhrases();
             }
 
             saveVocabLocal();
             triggerAutoSync('push');
             
             analyzeWords();
+            updateCombinedPhrases();
             renderView();
             updateUndoButton();
             
@@ -599,7 +696,6 @@ Cụm từ cần phân tích: {phrases}`;
         // --- CORE LOGIC ---
         function handleInput() {
             analyzeWords();
-            if(!document.getElementById('inputText').value.trim()) detectedPhrases = [];
             renderView();
         }
 
@@ -619,16 +715,14 @@ Cụm từ cần phân tích: {phrases}`;
         }
 
         async function analyzeWithGemini() {
-            const text = document.getElementById('inputText').value;
+            const text = document.getElementById('geminiInputText').value;
             const apiKey = config.geminiKey;
             
             if (!text.trim()) return showToast("Vui lòng nhập văn bản.");
             if (!apiKey) return openModal('settingsModal');
 
             const listEl = document.getElementById('outputList');
-            if(currentTab === 'gemini') {
-                listEl.innerHTML = `<div class="text-center text-blue-500 mt-10"><i class="fas fa-spinner fa-spin fa-2x"></i><br>AI đang phân tích...</div>`;
-            }
+            listEl.innerHTML = `<div class="text-center text-blue-500 mt-10"><i class="fas fa-spinner fa-spin fa-2x"></i><br>AI đang phân tích...</div>`;
 
             const prompt = config.textAnalystPrompt.replace('{text}', text);
             
@@ -653,14 +747,19 @@ Cụm từ cần phân tích: {phrases}`;
                     if(match) phrases = JSON.parse(match[0]);
                 }
 
-                detectedPhrases = phrases.filter(p => !isInAnyVocab(p));
+                // Add to jsonPhrases and combine
+                const newPhrases = phrases.map(p => p.toLowerCase().trim());
+                jsonPhrases = [...new Set([...jsonPhrases, ...newPhrases])];
+                updateCombinedPhrases();
                 
-                if(currentTab === 'gemini') renderView();
+                renderView();
                 updatePrompts();
+                
+                showToast(`Gemini tìm thấy ${phrases.length} phrases!`);
 
             } catch (error) {
                 console.error(error);
-                if(currentTab === 'gemini') listEl.innerHTML = `<div class="text-center text-red-500 mt-10">Lỗi AI: ${error.message}</div>`;
+                listEl.innerHTML = `<div class="text-center text-red-500 mt-10">Lỗi AI: ${error.message}</div>`;
             }
         }
 
@@ -718,8 +817,18 @@ Cụm từ cần phân tích: {phrases}`;
             const countEl = document.getElementById('resultCount');
             const titleEl = document.getElementById('listTitle');
 
-            let itemsToRender = currentTab === 'word' ? detectedWords : detectedPhrases;
-            titleEl.innerText = currentTab === 'word' ? 'Kết quả Word' : 'Kết quả Gemini';
+            let itemsToRender = [];
+            
+            if (currentTab === 'word') {
+                itemsToRender = detectedWords;
+                titleEl.innerText = 'Kết quả Word';
+            } else if (currentTab === 'manual') {
+                itemsToRender = detectedPhrases;
+                titleEl.innerText = 'Kết quả Phrase (Manual + JSON)';
+            } else if (currentTab === 'gemini') {
+                itemsToRender = detectedPhrases;
+                titleEl.innerText = 'Kết quả Phrase (Manual + JSON + Gemini)';
+            }
             
             countEl.innerText = itemsToRender.length;
             listEl.innerHTML = '';
@@ -728,10 +837,25 @@ Cụm từ cần phân tích: {phrases}`;
                 listEl.innerHTML = `<div class="text-center text-gray-400 mt-10 text-sm">Trống</div>`;
             } else {
                 itemsToRender.forEach(item => {
+                    // Determine source indicator
+                    let sourceIcon = '';
+                    const isFromManual = manualPhrases.includes(item);
+                    const isFromJson = jsonPhrases.includes(item);
+                    
+                    if (currentTab !== 'word') {
+                        if (isFromManual && isFromJson) {
+                            sourceIcon = '<span class="text-xs text-purple-400 mr-1" title="Manual + JSON">●●</span>';
+                        } else if (isFromManual) {
+                            sourceIcon = '<span class="text-xs text-purple-400 mr-1" title="Manual">M</span>';
+                        } else if (isFromJson) {
+                            sourceIcon = '<span class="text-xs text-pink-400 mr-1" title="JSON">J</span>';
+                        }
+                    }
+                    
                     const div = document.createElement('div');
                     div.className = 'flex justify-between items-center bg-gray-50 p-1.5 md:p-2 rounded hover:bg-white hover:shadow-sm border border-transparent hover:border-blue-200 group transition';
                     div.innerHTML = `
-                        <span class="font-medium text-gray-800 ml-1 text-sm md:text-base truncate flex-1">${item}</span>
+                        <span class="font-medium text-gray-800 ml-1 text-sm md:text-base truncate flex-1">${sourceIcon}${item}</span>
                         <div class="mobile-always-visible md:opacity-0 group-hover:opacity-100 transition-opacity flex space-x-0.5 md:space-x-1 flex-shrink-0">
                             <button onclick="ignoreItem('${item}')" class="p-1 md:p-1.5 text-gray-400 hover:text-red-500 text-xs md:text-base" title="Bỏ qua (Tạm thời)"><i class="fas fa-times"></i></button>
                             <button onclick="addToPersonalDict('${item}')" class="p-1 md:p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded text-xs md:text-base" title="Bỏ qua vĩnh viễn"><i class="fas fa-user-shield"></i></button>
@@ -750,13 +874,13 @@ Cụm từ cần phân tích: {phrases}`;
             const phrasePreviewEl = document.getElementById('phrasePromptPreview');
             const extractPreviewEl = document.getElementById('extractPromptPreview');
 
-            // Update Extract Prompt Preview
-            const inputText = document.getElementById('inputText').value;
-            if (inputText.trim()) {
-                const extractPrompt = config.textAnalystPrompt.replace('{text}', inputText);
+            // Update Extract Prompt Preview (use Gemini input)
+            const geminiText = document.getElementById('geminiInputText').value;
+            if (geminiText.trim()) {
+                const extractPrompt = config.textAnalystPrompt.replace('{text}', geminiText);
                 extractPreviewEl.innerText = extractPrompt;
             } else {
-                extractPreviewEl.innerText = '(Nhập văn bản để xem Extract Prompt)';
+                extractPreviewEl.innerText = '(Nhập văn bản vào tab Gemini để xem Extract Prompt)';
             }
 
             // Update Word Prompt Preview
@@ -781,18 +905,39 @@ Cụm từ cần phân tích: {phrases}`;
         function switchTab(tab) {
             currentTab = tab;
             const wordBtn = document.getElementById('tabWordBtn');
+            const manualBtn = document.getElementById('tabManualBtn');
             const geminiBtn = document.getElementById('tabGeminiBtn');
-            const geminiControls = document.getElementById('geminiControls');
+            
+            const wordContent = document.getElementById('wordTabContent');
+            const manualContent = document.getElementById('manualTabContent');
+            const geminiContent = document.getElementById('geminiTabContent');
+
+            // Reset all tabs
+            wordBtn.classList.remove('tab-active');
+            wordBtn.classList.add('text-gray-500');
+            manualBtn.classList.remove('tab-active');
+            manualBtn.classList.add('text-gray-500');
+            geminiBtn.classList.remove('tab-active');
+            geminiBtn.classList.add('text-gray-500');
+            
+            wordContent.classList.add('hidden');
+            manualContent.classList.add('hidden');
+            geminiContent.classList.add('hidden');
 
             if (tab === 'word') {
-                wordBtn.classList.replace('text-gray-500', 'tab-active');
-                geminiBtn.classList.replace('tab-active', 'text-gray-500');
-                geminiControls.classList.add('hidden');
-            } else {
-                geminiBtn.classList.replace('text-gray-500', 'tab-active');
-                wordBtn.classList.replace('tab-active', 'text-gray-500');
-                geminiControls.classList.remove('hidden');
+                wordBtn.classList.add('tab-active');
+                wordBtn.classList.remove('text-gray-500');
+                wordContent.classList.remove('hidden');
+            } else if (tab === 'manual') {
+                manualBtn.classList.add('tab-active');
+                manualBtn.classList.remove('text-gray-500');
+                manualContent.classList.remove('hidden');
+            } else if (tab === 'gemini') {
+                geminiBtn.classList.add('tab-active');
+                geminiBtn.classList.remove('text-gray-500');
+                geminiContent.classList.remove('hidden');
             }
+            
             renderView();
         }
 
@@ -831,27 +976,43 @@ Cụm từ cần phân tích: {phrases}`;
         }
 
         function addAllCurrentToVocab() {
-            const list = currentTab === 'word' ? [...detectedWords] : [...detectedPhrases];
+            let list = [];
+            let type = 'word';
+            
+            if (currentTab === 'word') {
+                list = [...detectedWords];
+                type = 'word';
+            } else {
+                list = [...detectedPhrases];
+                type = 'phrase';
+            }
+            
             if(list.length === 0) return;
 
             list.forEach(item => {
-                if (currentTab === 'word') {
+                if (type === 'word') {
                     addItem(vocabWords, item);
                     pushToUndoStack('word', item, 'word');
                 } else {
                     addItem(vocabPhrases, item);
-                    pushToUndoStack('phrase', item, 'gemini');
+                    pushToUndoStack('phrase', item, currentTab);
                 }
             });
             
             updateVocabAndSync();
             
-            if (currentTab === 'word') detectedWords = [];
-            else detectedPhrases = [];
+            if (currentTab === 'word') {
+                detectedWords = [];
+            } else {
+                // Clear both manual and json phrases that were added
+                manualPhrases = manualPhrases.filter(p => !list.includes(p));
+                jsonPhrases = jsonPhrases.filter(p => !list.includes(p));
+                updateCombinedPhrases();
+            }
             
             renderView();
             renderCounts();
-            showToast(`Đã thêm ${list.length} từ & Đang đẩy lên Cloud...`);
+            showToast(`Đã thêm ${list.length} items & Đang đẩy lên Cloud...`);
         }
 
         function ignoreItem(item) {
@@ -860,8 +1021,14 @@ Cụm từ cần phân tích: {phrases}`;
         }
 
         function removeCurrentItem(item) {
-            if (currentTab === 'word') detectedWords = detectedWords.filter(i => i !== item);
-            else detectedPhrases = detectedPhrases.filter(i => i !== item);
+            if (currentTab === 'word') {
+                detectedWords = detectedWords.filter(i => i !== item);
+            } else {
+                // Remove from source arrays and update combined
+                manualPhrases = manualPhrases.filter(i => i !== item);
+                jsonPhrases = jsonPhrases.filter(i => i !== item);
+                updateCombinedPhrases();
+            }
             renderView();
             renderCounts();
         }
@@ -945,7 +1112,8 @@ Cụm từ cần phân tích: {phrases}`;
             
             updateVocabAndSync();
             renderDictionary();
-            handleInput(); 
+            handleInput();
+            updateCombinedPhrases();
         }
 
         // --- GITHUB SYNC ENGINE ---
@@ -1000,6 +1168,7 @@ Cụm từ cần phân tích: {phrases}`;
                     renderCounts();
                     if(!document.getElementById('dictionaryModal').classList.contains('hidden')) renderDictionary();
                     handleInput();
+                    updateCombinedPhrases();
 
                     statusEl.innerHTML = `<i class="fas fa-check text-purple-600"></i> Pulled`;
                     showToast('Đã đồng bộ dữ liệu mới nhất!');
