@@ -134,8 +134,20 @@
 
             <!-- Manual Tab Content -->
             <div id="manualTabContent" class="hidden relative flex-1 min-h-0 flex flex-col">
-                <textarea id="manualPhraseInput" class="w-full flex-1 p-2 md:p-4 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none text-sm md:text-base" 
-                placeholder="Nhập phrases thủ công, mỗi phrase một dòng...&#10;&#10;Ví dụ:&#10;break the ice&#10;once in a blue moon&#10;piece of cake"></textarea>
+                <div class="relative flex-1">
+                    <textarea id="manualPhraseInput" class="w-full h-full p-2 md:p-4 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none text-sm md:text-base pr-10 md:pr-12" 
+                    placeholder="Nhập phrases thủ công, mỗi phrase một dòng...&#10;&#10;Ví dụ:&#10;break the ice&#10;once in a blue moon&#10;piece of cake"></textarea>
+                    
+                    <!-- Quick Paste Button for Manual -->
+                    <div class="absolute top-1 md:top-2 right-1 md:right-2 flex flex-col gap-1 md:gap-2">
+                        <button onclick="quickPasteManualPhrase()" class="bg-purple-500 hover:bg-purple-600 p-1.5 md:p-2 rounded shadow text-white border border-purple-400 transition text-xs md:text-base" title="Dán nhanh từ Clipboard (thêm 1 dòng)">
+                            <i class="fas fa-paste"></i>
+                        </button>
+                        <button onclick="clearManualInput()" class="bg-white p-1.5 md:p-2 rounded shadow hover:text-red-500 text-gray-400 border border-gray-200 transition text-xs md:text-base" title="Xóa hết">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
                 
                 <div class="mt-2 md:mt-3 flex justify-between items-center">
                     <span class="text-xs text-gray-500 bg-purple-50 px-2 py-1 rounded border border-purple-200">
@@ -144,9 +156,6 @@
                     <div class="flex gap-2">
                         <button onclick="importPhrasesFromClipboard()" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 md:px-4 py-1.5 md:py-2 rounded-full hover:shadow-lg transition transform hover:scale-105 font-bold text-xs md:text-sm" title="Dán JSON phrases từ clipboard">
                             <i class="fas fa-clipboard-list mr-1"></i> <span class="hidden md:inline">Import JSON</span><span class="md:hidden">JSON</span>
-                        </button>
-                        <button onclick="clearManualInput()" class="bg-gray-200 hover:bg-gray-300 text-gray-600 px-2 md:px-3 py-1.5 md:py-2 rounded-full transition text-xs md:text-sm" title="Xóa hết">
-                            <i class="fas fa-trash-alt"></i>
                         </button>
                     </div>
                 </div>
@@ -446,6 +455,55 @@ Cụm từ cần phân tích: {phrases}`;
             updateCombinedPhrases();
             renderView();
             updatePrompts();
+        }
+
+        // --- QUICK PASTE MANUAL PHRASE (NEW FEATURE) ---
+        async function quickPasteManualPhrase() {
+            try {
+                const clipboardText = await navigator.clipboard.readText();
+                
+                if (!clipboardText.trim()) {
+                    showToast('Clipboard trống!');
+                    return;
+                }
+                
+                // Clean the phrase: trim, lowercase, single line
+                const phrase = clipboardText.trim().toLowerCase().replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ');
+                
+                if (!phrase) {
+                    showToast('Không có nội dung hợp lệ!');
+                    return;
+                }
+                
+                const input = document.getElementById('manualPhraseInput');
+                const currentText = input.value;
+                
+                // Check if phrase already exists
+                const existingLines = currentText.split('\n').map(l => l.toLowerCase().trim()).filter(l => l);
+                if (existingLines.includes(phrase)) {
+                    showToast(`"${phrase}" đã có trong danh sách!`);
+                    return;
+                }
+                
+                // Append as new line
+                if (currentText.trim()) {
+                    input.value = currentText.trimEnd() + '\n' + phrase;
+                } else {
+                    input.value = phrase;
+                }
+                
+                // Scroll to bottom
+                input.scrollTop = input.scrollHeight;
+                
+                // Trigger update
+                handleManualPhraseInput();
+                
+                showToast(`Đã thêm: "${phrase}"`);
+                
+            } catch (err) {
+                console.error(err);
+                showToast('Lỗi clipboard: Hãy cấp quyền.');
+            }
         }
 
         // --- TOOLS ---
