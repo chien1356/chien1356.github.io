@@ -450,11 +450,20 @@ Cụm từ cần phân tích: {phrases}`;
         }
 
         function clearManualInput() {
-            document.getElementById('manualPhraseInput').value = '';
+            const input = document.getElementById('manualPhraseInput');
+            if (!input.value.trim()) {
+                showToast('Không có gì để xóa!');
+                return;
+            }
+    
+            if (!confirm('Xóa tất cả phrases đã nhập?')) return;
+    
+            input.value = '';
             manualPhrases = [];
             updateCombinedPhrases();
             renderView();
             updatePrompts();
+            showToast('Đã xóa tất cả!');
         }
 
         // --- QUICK PASTE MANUAL PHRASE (NEW FEATURE) ---
