@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vocab Canvas Ultimate (Multi-Undo)</title>
+    <title>Vocab Canvas Ultimate</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -127,11 +127,8 @@
                 <div class="relative flex-1">
                     <textarea id="manualPhraseInput" class="w-full h-full p-2 md:p-4 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none text-sm md:text-base pr-10 md:pr-12"></textarea>
                     
-                    <!-- Tools for Manual -->
+                    <!-- Quick Paste Button for Manual -->
                     <div class="absolute top-1 md:top-2 right-1 md:right-2 flex flex-col gap-1 md:gap-2">
-                        <button onclick="importJsonFromClipboard()" class="bg-pink-500 hover:bg-pink-600 p-1.5 md:p-2 rounded shadow text-white border border-pink-400 transition text-xs md:text-base" title="Import JSON từ Clipboard">
-                            <i class="fas fa-code"></i>
-                        </button>
                         <button onclick="quickPasteManualPhrase()" class="bg-purple-500 hover:bg-purple-600 p-1.5 md:p-2 rounded shadow text-white border border-purple-400 transition text-xs md:text-base" title="Dán nhanh từ Clipboard">
                             <i class="fas fa-paste"></i>
                         </button>
@@ -357,7 +354,6 @@
         let detectedWords = [];
         let detectedPhrases = [];
         let manualPhrases = [];
-        let jsonPhrases = [];
         
         let currentTab = 'word';
         let currentOutputTab = 'result';
@@ -408,8 +404,7 @@
         }
 
         function updateCombinedPhrases() {
-            const allPhrases = [...new Set([...manualPhrases, ...jsonPhrases])];
-            detectedPhrases = allPhrases.filter(p => !isInAnyVocab(p));
+            detectedPhrases = manualPhrases.filter(p => !isInAnyVocab(p));
         }
 
         // --- INIT ---
@@ -445,7 +440,7 @@
 
         function clearManualInput() {
             const input = document.getElementById('manualPhraseInput');
-            if (!input.value.trim() && jsonPhrases.length === 0) {
+            if (!input.value.trim()) {
                 showToast('Không có gì để xóa!');
                 return;
             }
@@ -454,7 +449,6 @@
     
             input.value = '';
             manualPhrases = [];
-            jsonPhrases = [];
             updateCombinedPhrases();
             renderView();
             updatePrompts();
@@ -500,68 +494,6 @@
             } catch (err) {
                 console.error(err);
                 showToast('Lỗi clipboard: Hãy cấp quyền.');
-            }
-        }
-
-        // --- IMPORT JSON FROM CLIPBOARD ---
-        async function importJsonFromClipboard() {
-            try {
-                const clipText = await navigator.clipboard.readText();
-                
-                if (!clipText.trim()) {
-                    showToast('Clipboard trống!');
-                    return;
-                }
-
-                let phrases = [];
-                
-                try {
-                    let cleanText = clipText.replace(/```json|```/g, '').trim();
-                    phrases = JSON.parse(cleanText);
-                } catch (e) {
-                    const match = clipText.match(/\[[\s\S]*\]/);
-                    if (match) {
-                        try {
-                            phrases = JSON.parse(match[0]);
-                        } catch (e2) {
-                            showToast('Không thể parse JSON!');
-                            return;
-                        }
-                    } else {
-                        showToast('Không tìm thấy JSON array!');
-                        return;
-                    }
-                }
-
-                if (!Array.isArray(phrases)) {
-                    showToast('Dữ liệu không phải là array!');
-                    return;
-                }
-
-                const validPhrases = phrases
-                    .filter(p => typeof p === 'string' && p.trim())
-                    .map(p => p.toLowerCase().trim());
-
-                if (validPhrases.length === 0) {
-                    showToast('Không có phrases hợp lệ trong JSON!');
-                    return;
-                }
-
-                jsonPhrases = [...new Set([...jsonPhrases, ...validPhrases])];
-                updateCombinedPhrases();
-
-                if (currentTab !== 'manual') {
-                    switchTab('manual');
-                } else {
-                    renderView();
-                }
-                updatePrompts();
-
-                showToast(`Đã import ${validPhrases.length} phrases từ JSON!`);
-
-            } catch (err) {
-                console.error(err);
-                showToast('Lỗi clipboard: ' + err.message);
             }
         }
 
@@ -795,23 +727,10 @@
                 listEl.innerHTML = `<div class="text-center text-gray-400 mt-10 text-sm">Trống</div>`;
             } else {
                 itemsToRender.forEach(item => {
-                    let sourceIcon = '';
-                    if (currentTab === 'manual') {
-                        const isFromManual = manualPhrases.includes(item);
-                        const isFromJson = jsonPhrases.includes(item);
-                        if (isFromManual && isFromJson) {
-                            sourceIcon = '<span class="text-xs text-purple-400 mr-1" title="Manual + JSON">●●</span>';
-                        } else if (isFromManual) {
-                            sourceIcon = '<span class="text-xs text-purple-400 mr-1" title="Manual">M</span>';
-                        } else if (isFromJson) {
-                            sourceIcon = '<span class="text-xs text-pink-400 mr-1" title="JSON">J</span>';
-                        }
-                    }
-                    
                     const div = document.createElement('div');
                     div.className = 'flex justify-between items-center bg-gray-50 p-1.5 md:p-2 rounded hover:bg-white hover:shadow-sm border border-transparent hover:border-blue-200 group transition';
                     div.innerHTML = `
-                        <span class="font-medium text-gray-800 ml-1 text-sm md:text-base truncate flex-1">${sourceIcon}${item}</span>
+                        <span class="font-medium text-gray-800 ml-1 text-sm md:text-base truncate flex-1">${item}</span>
                         <div class="mobile-always-visible md:opacity-0 group-hover:opacity-100 transition-opacity flex space-x-0.5 md:space-x-1 flex-shrink-0">
                             <button onclick="ignoreItem('${item}')" class="p-1 md:p-1.5 text-gray-400 hover:text-red-500 text-xs md:text-base" title="Bỏ qua (Tạm thời)"><i class="fas fa-times"></i></button>
                             <button onclick="addToPersonalDict('${item}')" class="p-1 md:p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded text-xs md:text-base" title="Bỏ qua vĩnh viễn"><i class="fas fa-user-shield"></i></button>
@@ -950,7 +869,6 @@
                 detectedWords = [];
             } else {
                 manualPhrases = manualPhrases.filter(p => !list.includes(p));
-                jsonPhrases = jsonPhrases.filter(p => !list.includes(p));
                 updateCombinedPhrases();
             }
             
@@ -969,7 +887,6 @@
                 detectedWords = detectedWords.filter(i => i !== item);
             } else {
                 manualPhrases = manualPhrases.filter(i => i !== item);
-                jsonPhrases = jsonPhrases.filter(i => i !== item);
                 updateCombinedPhrases();
             }
             renderView();
