@@ -456,46 +456,75 @@
         }
 
         // --- QUICK PASTE MANUAL PHRASE ---
-        async function quickPasteManualPhrase() {
-            try {
-                const clipboardText = await navigator.clipboard.readText();
-                
-                if (!clipboardText.trim()) {
-                    showToast('Clipboard trống!');
-                    return;
-                }
-                
-                const phrase = clipboardText.trim().toLowerCase().replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ');
-                
-                if (!phrase) {
-                    showToast('Không có nội dung hợp lệ!');
-                    return;
-                }
-                
-                const input = document.getElementById('manualPhraseInput');
-                const currentText = input.value;
-                
-                const existingLines = currentText.split('\n').map(l => l.toLowerCase().trim()).filter(l => l);
-                if (existingLines.includes(phrase)) {
-                    showToast(`"${phrase}" đã có trong danh sách!`);
-                    return;
-                }
-                
-                if (currentText.trim()) {
-                    input.value = currentText.trimEnd() + '\n' + phrase;
-                } else {
-                    input.value = phrase;
-                }
-                
-                input.scrollTop = input.scrollHeight;
-                handleManualPhraseInput();
-                showToast(`Đã thêm: "${phrase}"`);
-                
-            } catch (err) {
-                console.error(err);
-                showToast('Lỗi clipboard: Hãy cấp quyền.');
-            }
+async function quickPasteManualPhrase() {
+    try {
+        const clipboardText = await navigator.clipboard.readText();
+        
+        if (!clipboardText.trim()) {
+            showToast('Clipboard trống!');
+            return;
         }
+        
+        const input = document.getElementById('manualPhraseInput');
+        const currentText = input.value;
+        const existingLines = currentText.split('\n').map(l => l.toLowerCase().trim()).filter(l => l);
+        
+        // Tách clipboard thành các dòng và xử lý từng phrase
+        const clipboardLines = clipboardText.split('\n')
+            .map(line => line.trim().toLowerCase().replace(/\s+/g, ' '))
+            .filter(line => line.length > 0);
+        
+        if (clipboardLines.length === 0) {
+            showToast('Không có nội dung hợp lệ!');
+            return;
+        }
+        
+        // Lọc ra các phrase chưa có trong danh sách
+        const newPhrases = [];
+        const duplicates = [];
+        
+        clipboardLines.forEach(phrase => {
+            if (existingLines.includes(phrase)) {
+                duplicates.push(phrase);
+            } else if (!newPhrases.includes(phrase)) {
+                newPhrases.push(phrase);
+            }
+        });
+        
+        if (newPhrases.length === 0) {
+            if (duplicates.length === 1) {
+                showToast(`"${duplicates[0]}" đã có trong danh sách!`);
+            } else {
+                showToast(`${duplicates.length} phrases đã có trong danh sách!`);
+            }
+            return;
+        }
+        
+        // Thêm các phrase mới vào input
+        if (currentText.trim()) {
+            input.value = currentText.trimEnd() + '\n' + newPhrases.join('\n');
+        } else {
+            input.value = newPhrases.join('\n');
+        }
+        
+        input.scrollTop = input.scrollHeight;
+        handleManualPhraseInput();
+        
+        // Hiển thị thông báo phù hợp
+        if (newPhrases.length === 1) {
+            showToast(`Đã thêm: "${newPhrases[0]}"`);
+        } else {
+            const msg = duplicates.length > 0 
+                ? `Đã thêm ${newPhrases.length} phrases (${duplicates.length} trùng)`
+                : `Đã thêm ${newPhrases.length} phrases`;
+            showToast(msg);
+        }
+        
+    } catch (err) {
+        console.error(err);
+        showToast('Lỗi clipboard: Hãy cấp quyền.');
+    }
+}
 
         // --- TOOLS ---
         async function pasteFromClipboard() {
