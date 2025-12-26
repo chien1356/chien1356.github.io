@@ -101,10 +101,9 @@
             <div class="flex space-x-2 md:space-x-4 mb-2 md:mb-3 border-b border-gray-300 pb-1 md:pb-2">
                 <button id="tabWordBtn" class="tab-active pb-1 md:pb-2 px-1 md:px-2 transition text-sm md:text-base" onclick="switchTab('word')">Word</button>
                 <button id="tabManualBtn" class="text-gray-500 pb-1 md:pb-2 px-1 md:px-2 hover:text-gray-700 transition text-sm md:text-base" onclick="switchTab('manual')">Manual</button>
-                <button id="tabGeminiBtn" class="text-gray-500 pb-1 md:pb-2 px-1 md:px-2 hover:text-gray-700 transition text-sm md:text-base" onclick="switchTab('gemini')">Gemini</button>
             </div>
 
-            <!-- Word Tab Content (Shared with Gemini) -->
+            <!-- Word Tab Content -->
             <div id="wordTabContent" class="relative flex-1 min-h-0 flex flex-col">
                 <textarea id="inputText" class="w-full h-full p-2 md:p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none text-sm md:text-lg pr-10 md:pr-12" 
                 placeholder="Dán văn bản tiếng Anh..."></textarea>
@@ -120,14 +119,6 @@
                     </button>
                     <button onclick="clearInput()" class="bg-white p-1.5 md:p-2 rounded shadow hover:text-red-500 text-gray-400 border border-gray-200 transition text-xs md:text-base" title="Xóa hết">
                         <i class="fas fa-trash-alt"></i>
-                    </button>
-                </div>
-                
-                <!-- Gemini Action Button (only show when gemini tab is active) -->
-                <div id="geminiActionBar" class="hidden mt-2 md:mt-3 flex justify-between items-center">
-                    <span id="currentModelDisplay" class="text-xs text-gray-500 bg-yellow-50 px-2 py-1 rounded border border-yellow-200 truncate max-w-[100px] md:max-w-none">Model: ...</span>
-                    <button onclick="analyzeWithGemini()" class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-3 md:px-6 py-1.5 md:py-2 rounded-full hover:shadow-lg transition transform hover:scale-105 font-bold text-xs md:text-base">
-                        <i class="fas fa-magic mr-1 md:mr-2"></i> Tìm Phrases
                     </button>
                 </div>
             </div>
@@ -295,26 +286,13 @@
                 <button onclick="closeModal('settingsModal')" class="text-gray-500 hover:text-red-500 text-xl">&times;</button>
             </div>
 
-            <div class="mb-5 bg-blue-50 p-3 rounded border border-blue-100">
-                <h3 class="font-semibold text-blue-800 mb-2">Gemini API <span class="text-xs font-normal text-gray-500">(API Key chỉ lưu Local)</span></h3>
-                <label class="block text-xs text-gray-600 font-bold">API Key</label>
-                <input type="password" id="geminiKey" class="w-full p-2 border rounded mb-2 text-sm bg-white" placeholder="AIzaSy...">
-                <label class="block text-xs text-gray-600 font-bold">Model <span class="text-purple-600">(Sync lên Cloud)</span></label>
-                <input type="text" id="geminiModelInput" class="w-full p-2 border rounded text-sm bg-white" placeholder="gemini-2.5-flash">
-                <p class="text-xs text-gray-500 mt-1">
-                    <i class="fas fa-info-circle"></i> Ví dụ: gemini-2.5-flash, gemini-2.5-flash-lite, gemini-2.0-flash, gemini-1.5-pro...
-                </p>
-                <label class="block text-xs text-gray-600 font-bold mt-2">Gemini Prompt (Text Analyst) <span class="text-purple-600">(Sync)</span></label>
-                <textarea id="textAnalystPrompt" class="w-full p-2 border rounded text-xs h-24 font-mono whitespace-pre bg-white" placeholder="Extract Expressions from the text..."></textarea>
-            </div>
-
-            <div class="mb-5 border-t pt-4">
+            <div class="mb-5 border-b pb-4">
                 <h3 class="font-semibold text-gray-800 mb-2"><i class="fab fa-github"></i> Github Gist Sync <span class="text-xs font-normal text-gray-500">(Token chỉ lưu Local)</span></h3>
                 <p class="text-xs text-gray-500 mb-2 bg-gray-100 p-2 rounded">
                     <i class="fas fa-info-circle"></i> 
                     <b>Load App / Pull:</b> Tải & Ghi đè Local.<br>
                     <b>Thay đổi từ:</b> Đẩy lên & Ghi đè Cloud.<br>
-                    <b class="text-purple-600">Settings (trừ API keys) cũng được sync!</b>
+                    <b class="text-purple-600">Settings (trừ Token) cũng được sync!</b>
                 </p>
                 <label class="block text-xs text-gray-600">Github Token (quyền gist)</label>
                 <input type="password" id="githubToken" class="w-full p-2 border rounded mb-2 text-sm">
@@ -326,14 +304,17 @@
                 <input type="text" id="gistSettingsFilename" class="w-full p-2 border rounded mb-2 text-sm" value="vocab_settings.json">
             </div>
 
-            <div class="mb-4 border-t pt-4">
+            <div class="mb-4">
                 <h3 class="font-semibold text-gray-800 mb-2">Prompt Templates <span class="text-xs text-purple-600">(Sync)</span></h3>
                 
-                <label class="block text-xs text-gray-600 font-bold text-gray-700">Word Prompt Template</label>
-                <textarea id="promptTemplate" class="w-full p-2 border rounded text-xs h-28 font-mono whitespace-pre mb-3"></textarea>
+                <label class="block text-xs text-gray-600 font-bold text-purple-700">Extract Prompt Template <span class="text-purple-500">(dùng {text})</span></label>
+                <textarea id="extractPromptTemplate" class="w-full p-2 border rounded text-xs h-24 font-mono whitespace-pre mb-3 bg-purple-50"></textarea>
+                
+                <label class="block text-xs text-gray-600 font-bold text-gray-700">Word Prompt Template <span class="text-gray-500">(dùng {words})</span></label>
+                <textarea id="promptTemplate" class="w-full p-2 border rounded text-xs h-24 font-mono whitespace-pre mb-3"></textarea>
                 
                 <label class="block text-xs text-gray-600 font-bold text-indigo-700">Phrase Prompt Template <span class="text-indigo-500">(dùng {phrases})</span></label>
-                <textarea id="phrasePromptTemplate" class="w-full p-2 border rounded text-xs h-28 font-mono whitespace-pre bg-indigo-50"></textarea>
+                <textarea id="phrasePromptTemplate" class="w-full p-2 border rounded text-xs h-24 font-mono whitespace-pre bg-indigo-50"></textarea>
             </div>
 
             <button onclick="saveSettings()" class="w-full bg-gray-800 hover:bg-black text-white py-2 rounded font-bold mt-4 shadow">Lưu Cài Đặt</button>
@@ -367,17 +348,15 @@
         const defaultPhrasePrompt = 
 `Phân tích các cụm từ này : {phrases}`;
 
-        const defaultTextAnalystPrompt = 
+        const defaultExtractPrompt = 
 `ONLY Extract Expressions from the text. Ignore common single words. Return a JSON array of strings in lowercase. Text: "{text}"`;
 
         const config = {
-            geminiKey: '',
-            geminiModel: 'gemini-2.5-flash',
-            textAnalystPrompt: defaultTextAnalystPrompt,
             githubToken: '',
             gistId: '',
             gistFilename: 'vocab_data.json',
             gistSettingsFilename: 'vocab_settings.json',
+            extractPromptTemplate: defaultExtractPrompt,
             promptTemplate: defaultPrompt,
             phrasePromptTemplate: defaultPhrasePrompt
         };
@@ -465,7 +444,7 @@
             showToast('Đã xóa tất cả!');
         }
 
-        // --- QUICK PASTE MANUAL PHRASE (NEW FEATURE) ---
+        // --- QUICK PASTE MANUAL PHRASE ---
         async function quickPasteManualPhrase() {
             try {
                 const clipboardText = await navigator.clipboard.readText();
@@ -475,7 +454,6 @@
                     return;
                 }
                 
-                // Clean the phrase: trim, lowercase, single line
                 const phrase = clipboardText.trim().toLowerCase().replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ');
                 
                 if (!phrase) {
@@ -486,26 +464,20 @@
                 const input = document.getElementById('manualPhraseInput');
                 const currentText = input.value;
                 
-                // Check if phrase already exists
                 const existingLines = currentText.split('\n').map(l => l.toLowerCase().trim()).filter(l => l);
                 if (existingLines.includes(phrase)) {
                     showToast(`"${phrase}" đã có trong danh sách!`);
                     return;
                 }
                 
-                // Append as new line
                 if (currentText.trim()) {
                     input.value = currentText.trimEnd() + '\n' + phrase;
                 } else {
                     input.value = phrase;
                 }
                 
-                // Scroll to bottom
                 input.scrollTop = input.scrollHeight;
-                
-                // Trigger update
                 handleManualPhraseInput();
-                
                 showToast(`Đã thêm: "${phrase}"`);
                 
             } catch (err) {
@@ -701,7 +673,7 @@
             else if (type === 'family') removeItem(vocabFamily, item);
             else if (type === 'personal') removeItem(personalDict, item);
 
-            if (sourceTab === 'manual' || sourceTab === 'gemini') {
+            if (sourceTab === 'manual') {
                 updateCombinedPhrases();
             }
 
@@ -736,54 +708,6 @@
             }
             const uniqueWords = [...new Set(rawWords)];
             detectedWords = uniqueWords.filter(word => !isInAnyVocab(word));
-        }
-
-        async function analyzeWithGemini() {
-            const text = document.getElementById('inputText').value;
-            const apiKey = config.geminiKey;
-            
-            if (!text.trim()) return showToast("Vui lòng nhập văn bản.");
-            if (!apiKey) return openModal('settingsModal');
-
-            const listEl = document.getElementById('outputList');
-            listEl.innerHTML = `<div class="text-center text-blue-500 mt-10"><i class="fas fa-spinner fa-spin fa-2x"></i><br>AI đang phân tích...</div>`;
-
-            const prompt = config.textAnalystPrompt.replace('{text}', text);
-            
-            try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/${config.geminiModel}:generateContent?key=${apiKey}`;
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                });
-
-                const data = await response.json();
-                if (data.error) throw new Error(data.error.message);
-
-                const rawText = data.candidates[0].content.parts[0].text;
-                const jsonString = rawText.replace(/```json|```/g, '').trim();
-                let phrases = [];
-                try {
-                    phrases = JSON.parse(jsonString);
-                } catch(e) {
-                    const match = jsonString.match(/\[.*\]/s);
-                    if(match) phrases = JSON.parse(match[0]);
-                }
-
-                const newPhrases = phrases.map(p => p.toLowerCase().trim());
-                jsonPhrases = [...new Set([...jsonPhrases, ...newPhrases])];
-                updateCombinedPhrases();
-                
-                renderView();
-                updatePrompts();
-                
-                showToast(`Gemini tìm thấy ${phrases.length} phrases!`);
-
-            } catch (error) {
-                console.error(error);
-                listEl.innerHTML = `<div class="text-center text-red-500 mt-10">Lỗi AI: ${error.message}</div>`;
-            }
         }
 
         // --- OUTPUT TAB SWITCH ---
@@ -845,9 +769,6 @@
             } else if (currentTab === 'manual') {
                 itemsToRender = detectedPhrases;
                 titleEl.innerText = 'Kết quả Phrase (Manual + JSON)';
-            } else if (currentTab === 'gemini') {
-                itemsToRender = detectedPhrases;
-                titleEl.innerText = 'Kết quả Phrase (Gemini)';
             }
             
             countEl.innerText = itemsToRender.length;
@@ -893,10 +814,10 @@
             const phrasePreviewEl = document.getElementById('phrasePromptPreview');
             const extractPreviewEl = document.getElementById('extractPromptPreview');
 
-            // Update Extract Prompt Preview (use shared inputText)
+            // Update Extract Prompt Preview
             const inputText = document.getElementById('inputText').value;
             if (inputText.trim()) {
-                const extractPrompt = config.textAnalystPrompt.replace('{text}', inputText);
+                const extractPrompt = config.extractPromptTemplate.replace('{text}', inputText);
                 extractPreviewEl.innerText = extractPrompt;
             } else {
                 extractPreviewEl.innerText = '(Nhập văn bản vào ô nhập liệu để xem Extract Prompt)';
@@ -925,23 +846,18 @@
             currentTab = tab;
             const wordBtn = document.getElementById('tabWordBtn');
             const manualBtn = document.getElementById('tabManualBtn');
-            const geminiBtn = document.getElementById('tabGeminiBtn');
             
             const wordContent = document.getElementById('wordTabContent');
             const manualContent = document.getElementById('manualTabContent');
-            const geminiActionBar = document.getElementById('geminiActionBar');
 
             // Reset all tabs
             wordBtn.classList.remove('tab-active');
             wordBtn.classList.add('text-gray-500');
             manualBtn.classList.remove('tab-active');
             manualBtn.classList.add('text-gray-500');
-            geminiBtn.classList.remove('tab-active');
-            geminiBtn.classList.add('text-gray-500');
             
             wordContent.classList.add('hidden');
             manualContent.classList.add('hidden');
-            geminiActionBar.classList.add('hidden');
 
             if (tab === 'word') {
                 wordBtn.classList.add('tab-active');
@@ -951,11 +867,6 @@
                 manualBtn.classList.add('tab-active');
                 manualBtn.classList.remove('text-gray-500');
                 manualContent.classList.remove('hidden');
-            } else if (tab === 'gemini') {
-                geminiBtn.classList.add('tab-active');
-                geminiBtn.classList.remove('text-gray-500');
-                wordContent.classList.remove('hidden');
-                geminiActionBar.classList.remove('hidden');
             }
             
             renderView();
@@ -1168,18 +1079,15 @@
                     
                     const settings = await fetchGistSettings();
                     if (settings && Object.keys(settings).length > 0) {
-                        if (settings.geminiModel) config.geminiModel = settings.geminiModel;
-                        if (settings.textAnalystPrompt) config.textAnalystPrompt = settings.textAnalystPrompt;
+                        if (settings.extractPromptTemplate) config.extractPromptTemplate = settings.extractPromptTemplate;
                         if (settings.promptTemplate) config.promptTemplate = settings.promptTemplate;
                         if (settings.phrasePromptTemplate) config.phrasePromptTemplate = settings.phrasePromptTemplate;
                         
                         localStorage.setItem('appConfig', JSON.stringify(config));
                         
-                        document.getElementById('geminiModelInput').value = config.geminiModel;
-                        document.getElementById('textAnalystPrompt').value = config.textAnalystPrompt;
+                        document.getElementById('extractPromptTemplate').value = config.extractPromptTemplate;
                         document.getElementById('promptTemplate').value = config.promptTemplate;
                         document.getElementById('phrasePromptTemplate').value = config.phrasePromptTemplate;
-                        document.getElementById('currentModelDisplay').innerText = `Model: ${config.geminiModel}`;
                     }
                     
                     saveVocabLocal(); 
@@ -1202,8 +1110,7 @@
                     });
                     
                     await pushGistSettings({
-                        geminiModel: config.geminiModel,
-                        textAnalystPrompt: config.textAnalystPrompt,
+                        extractPromptTemplate: config.extractPromptTemplate,
                         promptTemplate: config.promptTemplate,
                         phrasePromptTemplate: config.phrasePromptTemplate
                     });
@@ -1281,13 +1188,11 @@
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
         function saveSettings() {
-            config.geminiKey = document.getElementById('geminiKey').value;
-            config.geminiModel = document.getElementById('geminiModelInput').value.trim() || 'gemini-2.5-flash';
-            config.textAnalystPrompt = document.getElementById('textAnalystPrompt').value;
             config.githubToken = document.getElementById('githubToken').value;
             config.gistId = document.getElementById('gistId').value;
             config.gistFilename = document.getElementById('gistFilename').value;
             config.gistSettingsFilename = document.getElementById('gistSettingsFilename').value;
+            config.extractPromptTemplate = document.getElementById('extractPromptTemplate').value;
             config.promptTemplate = document.getElementById('promptTemplate').value;
             config.phrasePromptTemplate = document.getElementById('phrasePromptTemplate').value;
 
@@ -1295,7 +1200,6 @@
             closeModal('settingsModal');
             showToast('Đã lưu! Đang đẩy settings lên Cloud...');
             
-            document.getElementById('currentModelDisplay').innerText = `Model: ${config.geminiModel}`;
             updatePrompts();
             
             triggerAutoSync('push');
@@ -1308,8 +1212,8 @@
                 if(!parsed.promptTemplate || parsed.promptTemplate.includes("Explain these")) {
                      parsed.promptTemplate = defaultPrompt;
                 }
-                if(!parsed.textAnalystPrompt) {
-                    parsed.textAnalystPrompt = defaultTextAnalystPrompt;
+                if(!parsed.extractPromptTemplate) {
+                    parsed.extractPromptTemplate = defaultExtractPrompt;
                 }
                 if(!parsed.phrasePromptTemplate) {
                     parsed.phrasePromptTemplate = defaultPhrasePrompt;
@@ -1318,24 +1222,19 @@
                     parsed.gistSettingsFilename = 'vocab_settings.json';
                 }
                 Object.assign(config, parsed);
-                if(!parsed.geminiModel) config.geminiModel = 'gemini-2.5-flash';
             } else {
                 config.promptTemplate = defaultPrompt;
-                config.textAnalystPrompt = defaultTextAnalystPrompt;
+                config.extractPromptTemplate = defaultExtractPrompt;
                 config.phrasePromptTemplate = defaultPhrasePrompt;
             }
             
-            document.getElementById('geminiKey').value = config.geminiKey;
-            document.getElementById('geminiModelInput').value = config.geminiModel;
-            document.getElementById('textAnalystPrompt').value = config.textAnalystPrompt;
             document.getElementById('githubToken').value = config.githubToken;
             document.getElementById('gistId').value = config.gistId;
             document.getElementById('gistFilename').value = config.gistFilename;
             document.getElementById('gistSettingsFilename').value = config.gistSettingsFilename;
+            document.getElementById('extractPromptTemplate').value = config.extractPromptTemplate;
             document.getElementById('promptTemplate').value = config.promptTemplate;
             document.getElementById('phrasePromptTemplate').value = config.phrasePromptTemplate;
-            
-            document.getElementById('currentModelDisplay').innerText = `Model: ${config.geminiModel}`;
         }
     </script>
 </body>
