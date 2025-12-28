@@ -616,7 +616,7 @@
 
         // --- NEW: Search item on Google ---
         function searchOnGoogle(item) {
-            const query = encodeURIComponent(item);
+            const query = encodeURIComponent(item + ' meaning');
             const url = `https://www.google.com/search?q=${query}`;
             window.open(url, '_blank');
         }
