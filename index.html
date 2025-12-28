@@ -59,6 +59,9 @@
                 <button onclick="triggerAutoSync('pull')" class="text-blue-600 hover:text-blue-800 transition px-1 md:px-2 py-1 rounded hover:bg-blue-50" title="Tải mới nhất từ Cloud">
                     <i class="fas fa-cloud-download-alt"></i>
                 </button>
+                <button onclick="manualPushToCloud()" class="text-green-600 hover:text-green-800 transition px-1 md:px-2 py-1 rounded hover:bg-green-50" title="Đẩy lên Cloud thủ công">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </button>
                 <div class="h-4 w-px bg-gray-300"></div>
                 <button onclick="openModal('settingsModal')" class="text-gray-500 hover:text-blue-600 transition px-1 md:px-2 py-1" title="Cấu hình">
                     <i class="fas fa-cog"></i>
@@ -456,75 +459,75 @@
         }
 
         // --- QUICK PASTE MANUAL PHRASE ---
-async function quickPasteManualPhrase() {
-    try {
-        const clipboardText = await navigator.clipboard.readText();
-        
-        if (!clipboardText.trim()) {
-            showToast('Clipboard trống!');
-            return;
-        }
-        
-        const input = document.getElementById('manualPhraseInput');
-        const currentText = input.value;
-        const existingLines = currentText.split('\n').map(l => l.toLowerCase().trim()).filter(l => l);
-        
-        // Tách clipboard thành các dòng và xử lý từng phrase
-        const clipboardLines = clipboardText.split('\n')
-            .map(line => line.trim().toLowerCase().replace(/\s+/g, ' '))
-            .filter(line => line.length > 0);
-        
-        if (clipboardLines.length === 0) {
-            showToast('Không có nội dung hợp lệ!');
-            return;
-        }
-        
-        // Lọc ra các phrase chưa có trong danh sách
-        const newPhrases = [];
-        const duplicates = [];
-        
-        clipboardLines.forEach(phrase => {
-            if (existingLines.includes(phrase)) {
-                duplicates.push(phrase);
-            } else if (!newPhrases.includes(phrase)) {
-                newPhrases.push(phrase);
+        async function quickPasteManualPhrase() {
+            try {
+                const clipboardText = await navigator.clipboard.readText();
+                
+                if (!clipboardText.trim()) {
+                    showToast('Clipboard trống!');
+                    return;
+                }
+                
+                const input = document.getElementById('manualPhraseInput');
+                const currentText = input.value;
+                const existingLines = currentText.split('\n').map(l => l.toLowerCase().trim()).filter(l => l);
+                
+                // Tách clipboard thành các dòng và xử lý từng phrase
+                const clipboardLines = clipboardText.split('\n')
+                    .map(line => line.trim().toLowerCase().replace(/\s+/g, ' '))
+                    .filter(line => line.length > 0);
+                
+                if (clipboardLines.length === 0) {
+                    showToast('Không có nội dung hợp lệ!');
+                    return;
+                }
+                
+                // Lọc ra các phrase chưa có trong danh sách
+                const newPhrases = [];
+                const duplicates = [];
+                
+                clipboardLines.forEach(phrase => {
+                    if (existingLines.includes(phrase)) {
+                        duplicates.push(phrase);
+                    } else if (!newPhrases.includes(phrase)) {
+                        newPhrases.push(phrase);
+                    }
+                });
+                
+                if (newPhrases.length === 0) {
+                    if (duplicates.length === 1) {
+                        showToast(`"${duplicates[0]}" đã có trong danh sách!`);
+                    } else {
+                        showToast(`${duplicates.length} phrases đã có trong danh sách!`);
+                    }
+                    return;
+                }
+                
+                // Thêm các phrase mới vào input
+                if (currentText.trim()) {
+                    input.value = currentText.trimEnd() + '\n' + newPhrases.join('\n');
+                } else {
+                    input.value = newPhrases.join('\n');
+                }
+                
+                input.scrollTop = input.scrollHeight;
+                handleManualPhraseInput();
+                
+                // Hiển thị thông báo phù hợp
+                if (newPhrases.length === 1) {
+                    showToast(`Đã thêm: "${newPhrases[0]}"`);
+                } else {
+                    const msg = duplicates.length > 0 
+                        ? `Đã thêm ${newPhrases.length} phrases (${duplicates.length} trùng)`
+                        : `Đã thêm ${newPhrases.length} phrases`;
+                    showToast(msg);
+                }
+                
+            } catch (err) {
+                console.error(err);
+                showToast('Lỗi clipboard: Hãy cấp quyền.');
             }
-        });
-        
-        if (newPhrases.length === 0) {
-            if (duplicates.length === 1) {
-                showToast(`"${duplicates[0]}" đã có trong danh sách!`);
-            } else {
-                showToast(`${duplicates.length} phrases đã có trong danh sách!`);
-            }
-            return;
         }
-        
-        // Thêm các phrase mới vào input
-        if (currentText.trim()) {
-            input.value = currentText.trimEnd() + '\n' + newPhrases.join('\n');
-        } else {
-            input.value = newPhrases.join('\n');
-        }
-        
-        input.scrollTop = input.scrollHeight;
-        handleManualPhraseInput();
-        
-        // Hiển thị thông báo phù hợp
-        if (newPhrases.length === 1) {
-            showToast(`Đã thêm: "${newPhrases[0]}"`);
-        } else {
-            const msg = duplicates.length > 0 
-                ? `Đã thêm ${newPhrases.length} phrases (${duplicates.length} trùng)`
-                : `Đã thêm ${newPhrases.length} phrases`;
-            showToast(msg);
-        }
-        
-    } catch (err) {
-        console.error(err);
-        showToast('Lỗi clipboard: Hãy cấp quyền.');
-    }
-}
 
         // --- TOOLS ---
         async function pasteFromClipboard() {
@@ -600,6 +603,32 @@ async function quickPasteManualPhrase() {
                 return;
             }
             navigator.clipboard.writeText(text).then(() => showToast('Đã copy Extract Prompt!'));
+        }
+
+        // --- NEW: Copy single item ---
+        function copyItem(item) {
+            navigator.clipboard.writeText(item).then(() => {
+                showToast(`Đã copy: ${item}`);
+            }).catch(() => {
+                showToast('Lỗi copy!');
+            });
+        }
+
+        // --- NEW: Search item on Google ---
+        function searchOnGoogle(item) {
+            const query = encodeURIComponent(item + ' meaning');
+            const url = `https://www.google.com/search?q=${query}`;
+            window.open(url, '_blank');
+        }
+
+        // --- NEW: Manual Push to Cloud ---
+        function manualPushToCloud() {
+            if(!config.githubToken || !config.gistId) {
+                showToast('Chưa cấu hình Github Token và Gist ID!');
+                return;
+            }
+            showToast('Đang đẩy lên Cloud...');
+            performSync('push');
         }
 
         function showToast(msg) {
@@ -756,15 +785,18 @@ async function quickPasteManualPhrase() {
                 listEl.innerHTML = `<div class="text-center text-gray-400 mt-10 text-sm">Trống</div>`;
             } else {
                 itemsToRender.forEach(item => {
+                    const escapedItem = item.replace(/'/g, "\\'").replace(/"/g, '\\"');
                     const div = document.createElement('div');
                     div.className = 'flex justify-between items-center bg-gray-50 p-1.5 md:p-2 rounded hover:bg-white hover:shadow-sm border border-transparent hover:border-blue-200 group transition';
                     div.innerHTML = `
                         <span class="font-medium text-gray-800 ml-1 text-sm md:text-base truncate flex-1">${item}</span>
                         <div class="mobile-always-visible md:opacity-0 group-hover:opacity-100 transition-opacity flex space-x-0.5 md:space-x-1 flex-shrink-0">
-                            <button onclick="ignoreItem('${item}')" class="p-1 md:p-1.5 text-gray-400 hover:text-red-500 text-xs md:text-base" title="Bỏ qua (Tạm thời)"><i class="fas fa-times"></i></button>
-                            <button onclick="addToPersonalDict('${item}')" class="p-1 md:p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded text-xs md:text-base" title="Bỏ qua vĩnh viễn"><i class="fas fa-user-shield"></i></button>
-                            <button onclick="addToWordFamily('${item}')" class="p-1 md:p-1.5 text-teal-500 hover:text-teal-700 hover:bg-teal-50 rounded text-xs md:text-base" title="Word Family"><i class="fas fa-sitemap"></i></button>
-                            <button onclick="addItemToCurrentVocab('${item}')" class="p-1 md:p-1.5 text-blue-400 hover:text-blue-600 text-xs md:text-base" title="Thêm vào kho học"><i class="fas fa-check"></i></button>
+                            <button onclick="copyItem('${escapedItem}')" class="p-1 md:p-1.5 text-yellow-500 hover:text-yellow-600 hover:bg-yellow-50 rounded text-xs md:text-base" title="Copy"><i class="fas fa-copy"></i></button>
+                            <button onclick="searchOnGoogle('${escapedItem}')" class="p-1 md:p-1.5 text-green-500 hover:text-green-600 hover:bg-green-50 rounded text-xs md:text-base" title="Tìm trên Google"><i class="fas fa-search"></i></button>
+                            <button onclick="ignoreItem('${escapedItem}')" class="p-1 md:p-1.5 text-gray-400 hover:text-red-500 text-xs md:text-base" title="Bỏ qua (Tạm thời)"><i class="fas fa-times"></i></button>
+                            <button onclick="addToPersonalDict('${escapedItem}')" class="p-1 md:p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded text-xs md:text-base" title="Bỏ qua vĩnh viễn"><i class="fas fa-user-shield"></i></button>
+                            <button onclick="addToWordFamily('${escapedItem}')" class="p-1 md:p-1.5 text-teal-500 hover:text-teal-700 hover:bg-teal-50 rounded text-xs md:text-base" title="Word Family"><i class="fas fa-sitemap"></i></button>
+                            <button onclick="addItemToCurrentVocab('${escapedItem}')" class="p-1 md:p-1.5 text-blue-400 hover:text-blue-600 text-xs md:text-base" title="Thêm vào kho học"><i class="fas fa-check"></i></button>
                         </div>
                     `;
                     listEl.appendChild(div);
@@ -972,9 +1004,10 @@ async function quickPasteManualPhrase() {
                 container.innerHTML = '';
                 arr.forEach(item => {
                     if (item.toLowerCase().includes(search)) {
+                        const escapedItem = item.replace(/'/g, "\\'").replace(/"/g, '\\"');
                         const div = document.createElement('div');
                         div.className = 'flex justify-between text-xs bg-white p-1.5 md:p-2 rounded border border-gray-100 shadow-sm group';
-                        div.innerHTML = `<span class="truncate pr-2">${item}</span><button onclick="deleteDictItem('${item}', '${type}')" class="text-gray-300 hover:text-red-500">&times;</button>`;
+                        div.innerHTML = `<span class="truncate pr-2">${item}</span><button onclick="deleteDictItem('${escapedItem}', '${type}')" class="text-gray-300 hover:text-red-500">&times;</button>`;
                         container.appendChild(div);
                     }
                 });
@@ -1075,12 +1108,14 @@ async function quickPasteManualPhrase() {
                     });
 
                     statusEl.innerHTML = `<i class="fas fa-check-circle text-green-500"></i> Pushed`;
+                    showToast('Đã đẩy lên Cloud thành công!');
                 }
                 statusEl.title = `Last action: ${mode} at ${new Date().toLocaleTimeString()}`;
             } catch (err) {
                 console.warn(err);
                 statusEl.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500"></i> Error';
                 statusEl.title = err.message;
+                showToast('Lỗi đồng bộ: ' + err.message);
             }
         }
 
