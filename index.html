@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vocab Canvas Ultimate</title>
+    <title>Vocab Canvas</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -616,7 +616,7 @@
 
         // --- NEW: Search item on Google ---
         function searchOnGoogle(item) {
-            const query = encodeURIComponent(item + ' meaning');
+            const query = encodeURIComponent(item);
             const url = `https://www.google.com/search?q=${query}`;
             window.open(url, '_blank');
         }
