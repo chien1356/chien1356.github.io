@@ -396,19 +396,60 @@ function findInPage(item) {
     currentFindIndex = (currentFindIndex + 1) % positions.length;
     const target = positions[currentFindIndex];
     
+    // Tìm câu chứa từ đó
+    const sentence = findSentenceContaining(text, target.start, target.end);
+    
     // Switch to Word tab if needed
     if (currentTab !== 'word') {
         switchTab('word');
     }
     
-    // Focus và select
+    // Focus và select cả câu
     textarea.focus();
-    textarea.setSelectionRange(target.start, target.end);
+    textarea.setSelectionRange(sentence.start, sentence.end);
     
     // Scroll chính xác đến vị trí
-    scrollToSelection(textarea, target.start);
+    scrollToSelection(textarea, sentence.start);
     
     showToast(`"${item}" - ${currentFindIndex + 1}/${positions.length}`);
+}
+
+function findSentenceContaining(text, wordStart, wordEnd) {
+    // Các ký tự kết thúc câu
+    const sentenceEnders = /[.!?;\n]/;
+    
+    // Tìm điểm bắt đầu câu (lùi về trước)
+    let start = wordStart;
+    while (start > 0) {
+        const char = text[start - 1];
+        if (sentenceEnders.test(char)) {
+            break;
+        }
+        start--;
+    }
+    
+    // Bỏ qua khoảng trắng đầu câu
+    while (start < wordStart && /\s/.test(text[start])) {
+        start++;
+    }
+    
+    // Tìm điểm kết thúc câu (tiến về sau)
+    let end = wordEnd;
+    while (end < text.length) {
+        const char = text[end];
+        if (sentenceEnders.test(char)) {
+            end++; // Bao gồm cả dấu kết thúc câu
+            break;
+        }
+        end++;
+    }
+    
+    // Bỏ qua khoảng trắng cuối câu
+    while (end > wordEnd && /\s/.test(text[end - 1])) {
+        end--;
+    }
+    
+    return { start, end };
 }
 
 function escapeRegex(string) {
@@ -420,12 +461,10 @@ function scrollToSelection(textarea, position) {
     const lines = text.split('\n');
     const lineNumber = lines.length - 1;
     
-    // Tính line height từ style
     const style = getComputedStyle(textarea);
     const lineHeight = parseFloat(style.lineHeight) || 20;
     const paddingTop = parseFloat(style.paddingTop) || 0;
     
-    // Scroll đến dòng chứa từ, căn giữa viewport
     const targetY = paddingTop + (lineNumber * lineHeight);
     const viewportHeight = textarea.clientHeight;
     
