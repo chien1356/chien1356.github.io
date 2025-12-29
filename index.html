@@ -7,179 +7,262 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f3f4f6; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; }
         .tab-active { border-bottom: 3px solid #3b82f6; color: #3b82f6; font-weight: bold; }
-        .output-tab-active { background: #3b82f6; color: white; }
-        ::-webkit-scrollbar { width: 6px; }
+        .output-tab-active { background-color: #3b82f6; color: white; }
+        ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
-        .toast { animation: slideIn 0.3s ease-out; }
+        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+        .toast { animation: slideIn 0.3s ease-out forwards; }
         @keyframes slideIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
         @media (max-width: 768px) {
-            .main-container { flex-direction: column; }
-            .input-panel { width: 100% !important; height: 25dvh !important; border-right: none !important; border-bottom: 1px solid #d1d5db; }
-            .output-panel { width: 100% !important; height: 75dvh !important; }
-            .mobile-visible { opacity: 1 !important; }
+            .main-container {
+                flex-direction: column;
+                height: 100dvh;
+            }
+            .input-panel {
+                width: 100% !important;
+                height: 25dvh !important;
+                min-height: 25dvh;
+                max-height: 25dvh;
+                border-right: none !important;
+                border-bottom: 1px solid #d1d5db;
+            }
+            .output-panel {
+                width: 100% !important;
+                height: 75dvh !important;
+                flex: 1;
+            }
+            .group:hover .opacity-0 {
+                opacity: 1 !important;
+            }
+            .mobile-always-visible {
+                opacity: 1 !important;
+            }
         }
     </style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden" style="height: 100dvh;">
+<body class="h-screen md:h-screen flex flex-col overflow-hidden relative" style="height: 100dvh;">
 
-    <!-- Toast -->
-    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
     <!-- Header -->
-    <header class="bg-white shadow-sm p-2 flex justify-between items-center border-b flex-shrink-0">
-        <div class="flex items-center gap-2">
-            <h1 class="text-base md:text-lg font-bold text-gray-800">
-                <i class="fas fa-layer-group text-blue-500 mr-1"></i>
-                <span class="hidden sm:inline">Vocab Canvas</span>
-                <span class="sm:hidden">VC</span>
-            </h1>
+    <header class="bg-white shadow-sm p-2 md:p-3 flex justify-between items-center z-10 border-b flex-shrink-0">
+        <div class="flex items-center gap-2 md:gap-3">
+            <h1 class="text-base md:text-xl font-bold text-gray-800"><i class="fas fa-layer-group text-blue-500 mr-1 md:mr-2"></i><span class="hidden sm:inline">Vocab Canvas</span><span class="sm:hidden">VC</span></h1>
             
-            <!-- Sync -->
-            <div class="flex items-center space-x-1 bg-gray-50 rounded px-1.5 py-1 border text-sm">
-                <button onclick="syncPull()" class="text-blue-600 hover:bg-blue-50 px-2 py-0.5 rounded flex items-center gap-1" title="Pull from Cloud">
+            <!-- Sync Controls -->
+            <div class="flex items-center space-x-1 md:space-x-2 bg-gray-50 rounded px-1 md:px-2 py-1 border border-gray-100">
+                <button onclick="triggerAutoSync('pull')" class="text-blue-600 hover:text-blue-800 transition px-1 md:px-2 py-1 rounded hover:bg-blue-50" title="Tải mới nhất từ Cloud">
                     <i class="fas fa-cloud-download-alt"></i>
-                    <span class="hidden sm:inline text-xs">Pull</span>
                 </button>
-                <button onclick="syncPush()" class="text-green-600 hover:bg-green-50 px-2 py-0.5 rounded flex items-center gap-1" title="Push to Cloud">
+                <button onclick="manualPushToCloud()" class="text-green-600 hover:text-green-800 transition px-1 md:px-2 py-1 rounded hover:bg-green-50" title="Đẩy lên Cloud thủ công">
                     <i class="fas fa-cloud-upload-alt"></i>
-                    <span class="hidden sm:inline text-xs">Push</span>
                 </button>
                 <div class="h-4 w-px bg-gray-300"></div>
-                <button onclick="openModal('settingsModal')" class="text-gray-500 hover:text-blue-600 px-1.5 py-0.5" title="Settings">
+                <button onclick="openModal('settingsModal')" class="text-gray-500 hover:text-blue-600 transition px-1 md:px-2 py-1" title="Cấu hình">
                     <i class="fas fa-cog"></i>
                 </button>
+                <span id="syncStatusIndicator" class="text-xs text-gray-400 font-medium pl-1 border-l border-gray-300 ml-1 w-16 md:w-24 truncate">
+                    Local
+                </span>
             </div>
 
-            <!-- Undo -->
-            <button id="undoBtn" onclick="undoLast()" class="hidden text-orange-600 hover:bg-orange-50 px-2 py-1 rounded border border-orange-200 bg-orange-50 text-sm" title="Undo">
-                <i class="fas fa-undo"></i><span id="undoCount" class="ml-1 font-bold">0</span>
+            <!-- Undo Button -->
+            <button id="undoBtn" onclick="undoLastAction()" class="hidden text-orange-600 hover:text-orange-800 transition px-2 py-1 rounded hover:bg-orange-50 border border-orange-200 bg-orange-50" title="Hoàn tác">
+                <i class="fas fa-undo"></i>
+                <span id="undoCount" class="text-xs font-bold ml-1">0</span>
             </button>
         </div>
 
-        <!-- Counters -->
-        <div class="flex space-x-1 text-xs">
-            <button onclick="openModal('dictionaryModal')" class="px-1.5 py-1 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded text-blue-700 font-medium">
+        <!-- Vocab Counters -->
+        <div class="space-x-1 md:space-x-2 flex">
+            <button onclick="openModal('dictionaryModal')" class="px-1.5 md:px-2 py-1 md:py-1.5 text-xs bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded text-blue-700 font-medium transition" title="Words">
                 W:<span id="wordCount">0</span>
             </button>
-            <button onclick="openModal('dictionaryModal')" class="px-1.5 py-1 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded text-indigo-700 font-medium">
+            <button onclick="openModal('dictionaryModal')" class="px-1.5 md:px-2 py-1 md:py-1.5 text-xs bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded text-indigo-700 font-medium transition" title="Phrases">
                 P:<span id="phraseCount">0</span>
             </button>
-            <button onclick="openModal('dictionaryModal')" class="px-1.5 py-1 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded text-teal-700 font-medium">
+            <button onclick="openModal('dictionaryModal')" class="px-1.5 md:px-2 py-1 md:py-1.5 text-xs bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded text-teal-700 font-medium transition" title="Word Families">
                 <i class="fas fa-sitemap"></i><span id="familyCount">0</span>
             </button>
-            <button onclick="openModal('dictionaryModal')" class="hidden sm:block px-1.5 py-1 bg-gray-100 hover:bg-gray-200 border rounded text-gray-600 font-medium">
-                <i class="fas fa-ban"></i><span id="ignoredCount">0</span>
+            <button onclick="openModal('dictionaryModal')" class="hidden sm:block px-1.5 md:px-2 py-1 md:py-1.5 text-xs bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded text-gray-600 font-medium transition" title="Personal / Ignored">
+                <i class="fas fa-user-shield"></i><span id="personalCount">0</span>
             </button>
         </div>
     </header>
 
-    <!-- Main -->
+    <!-- Main Content -->
     <div class="flex flex-1 overflow-hidden main-container">
-        <!-- Input -->
-        <div class="input-panel w-1/2 p-2 md:p-3 flex flex-col border-r bg-gray-50">
-            <div class="flex space-x-3 mb-2 border-b pb-1">
-                <button id="tabWord" class="tab-active pb-1 px-1 text-sm" onclick="switchTab('word')">Word</button>
-                <button id="tabManual" class="text-gray-500 pb-1 px-1 text-sm" onclick="switchTab('manual')">Manual</button>
+        
+        <!-- Left: Input Area -->
+        <div class="input-panel w-1/2 p-2 md:p-4 flex flex-col border-r border-gray-300 bg-gray-50 relative group">
+            <!-- Tabs -->
+            <div class="flex space-x-2 md:space-x-4 mb-2 md:mb-3 border-b border-gray-300 pb-1 md:pb-2">
+                <button id="tabWordBtn" class="tab-active pb-1 md:pb-2 px-1 md:px-2 transition text-sm md:text-base" onclick="switchTab('word')">Word</button>
+                <button id="tabManualBtn" class="text-gray-500 pb-1 md:pb-2 px-1 md:px-2 hover:text-gray-700 transition text-sm md:text-base" onclick="switchTab('manual')">Manual</button>
             </div>
 
-            <div id="wordTab" class="relative flex-1 flex flex-col">
-                <textarea id="inputText" class="w-full h-full p-2 border rounded-lg resize-none text-sm pr-9" placeholder="Nhập văn bản tiếng Anh..."></textarea>
-                <div class="absolute top-1 right-1 flex flex-col gap-1">
+            <!-- Word Tab Content -->
+            <div id="wordTabContent" class="relative flex-1 min-h-0 flex flex-col">
+                <textarea id="inputText" class="w-full h-full p-2 md:p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none text-sm md:text-lg pr-10 md:pr-12"></textarea>
+                
+                <!-- Tools -->
+                <div class="absolute top-1 md:top-2 right-1 md:right-2 flex flex-col gap-1 md:gap-2">
                     <input type="file" id="fileInput" accept=".txt" class="hidden">
-                    <button onclick="document.getElementById('fileInput').click()" class="bg-white p-1 rounded shadow hover:bg-blue-50 text-blue-500 border text-xs"><i class="fas fa-file-upload"></i></button>
-                    <button onclick="pasteClipboard()" class="bg-white p-1 rounded shadow hover:bg-gray-100 text-gray-600 border text-xs"><i class="fas fa-paste"></i></button>
-                    <button onclick="clearInput()" class="bg-white p-1 rounded shadow hover:text-red-500 text-gray-400 border text-xs"><i class="fas fa-trash-alt"></i></button>
+                    <button onclick="document.getElementById('fileInput').click()" class="bg-white p-1.5 md:p-2 rounded shadow hover:bg-blue-50 text-blue-500 border border-gray-200 transition text-xs md:text-base" title="Nhập file .txt">
+                        <i class="fas fa-file-upload"></i>
+                    </button>
+                    <button onclick="pasteFromClipboard()" class="bg-white p-1.5 md:p-2 rounded shadow hover:bg-gray-100 text-gray-600 border border-gray-200 transition text-xs md:text-base" title="Dán nối tiếp từ Clipboard">
+                        <i class="fas fa-paste"></i>
+                    </button>
+                    <button onclick="clearInput()" class="bg-white p-1.5 md:p-2 rounded shadow hover:text-red-500 text-gray-400 border border-gray-200 transition text-xs md:text-base" title="Xóa hết">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
                 </div>
             </div>
 
-            <div id="manualTab" class="hidden relative flex-1 flex flex-col">
-                <textarea id="manualInput" class="w-full h-full p-2 border border-purple-300 rounded-lg resize-none text-sm pr-9" placeholder="Mỗi phrase một dòng..."></textarea>
-                <div class="absolute top-1 right-1 flex flex-col gap-1">
-                    <button onclick="pasteManual()" class="bg-purple-500 p-1 rounded shadow text-white text-xs"><i class="fas fa-paste"></i></button>
-                    <button onclick="clearManual()" class="bg-white p-1 rounded shadow hover:text-red-500 text-gray-400 border text-xs"><i class="fas fa-trash-alt"></i></button>
+            <!-- Manual Tab Content -->
+            <div id="manualTabContent" class="hidden relative flex-1 min-h-0 flex flex-col">
+                <div class="relative flex-1">
+                    <textarea id="manualPhraseInput" class="w-full h-full p-2 md:p-4 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none text-sm md:text-base pr-10 md:pr-12"></textarea>
+                    
+                    <!-- Quick Paste Button for Manual -->
+                    <div class="absolute top-1 md:top-2 right-1 md:right-2 flex flex-col gap-1 md:gap-2">
+                        <button onclick="quickPasteManualPhrase()" class="bg-purple-500 hover:bg-purple-600 p-1.5 md:p-2 rounded shadow text-white border border-purple-400 transition text-xs md:text-base" title="Dán nhanh từ Clipboard">
+                            <i class="fas fa-paste"></i>
+                        </button>
+                        <button onclick="clearManualInput()" class="bg-white p-1.5 md:p-2 rounded shadow hover:text-red-500 text-gray-400 border border-gray-200 transition text-xs md:text-base" title="Xóa hết">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Output -->
-        <div class="output-panel w-1/2 p-2 md:p-3 flex flex-col bg-white overflow-hidden">
-            <div class="flex mb-2 border-b overflow-x-auto text-xs">
-                <button id="outTabResult" onclick="switchOutTab('result')" class="output-tab-active px-2 py-1 font-medium rounded-t whitespace-nowrap">
+        <!-- Right: Output & Action Area -->
+        <div class="output-panel w-1/2 p-2 md:p-4 flex flex-col bg-white overflow-hidden">
+            
+            <!-- Output Tabs -->
+            <div class="flex mb-2 md:mb-3 border-b border-gray-200 overflow-x-auto">
+                <button id="outputTabResult" onclick="switchOutputTab('result')" class="output-tab-active px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium rounded-t-lg transition whitespace-nowrap">
                     <i class="fas fa-list mr-1"></i>Kết quả
                 </button>
-                <button id="outTabWord" onclick="switchOutTab('word')" class="px-2 py-1 font-medium text-gray-500 rounded-t whitespace-nowrap">
+                <button id="outputTabExtract" onclick="switchOutputTab('extract')" class="px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium text-gray-500 hover:text-gray-700 rounded-t-lg transition whitespace-nowrap">
+                    <i class="fas fa-magic mr-1"></i>Extract
+                </button>
+                <button id="outputTabPrompt" onclick="switchOutputTab('prompt')" class="px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium text-gray-500 hover:text-gray-700 rounded-t-lg transition whitespace-nowrap">
                     <i class="fas fa-terminal mr-1"></i>Word
                 </button>
-                <button id="outTabPhrase" onclick="switchOutTab('phrase')" class="px-2 py-1 font-medium text-gray-500 rounded-t whitespace-nowrap">
+                <button id="outputTabPhrasePrompt" onclick="switchOutputTab('phrasePrompt')" class="px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium text-gray-500 hover:text-gray-700 rounded-t-lg transition whitespace-nowrap">
                     <i class="fas fa-comment-dots mr-1"></i>Phrase
                 </button>
             </div>
 
-            <!-- Result -->
-            <div id="panelResult" class="flex-1 flex flex-col overflow-hidden">
-                <div class="flex justify-between items-center mb-2">
-                    <h2 class="text-sm font-semibold text-gray-700">
-                        <span id="listTitle">Words</span>
-                        <span id="resultCount" class="bg-red-100 text-red-600 px-1.5 py-0.5 rounded text-xs ml-1">0</span>
+            <!-- Result Tab Content -->
+            <div id="outputResultTab" class="flex-1 flex flex-col overflow-hidden">
+                <!-- Result Header -->
+                <div class="flex justify-between items-center mb-2 md:mb-3 flex-shrink-0">
+                    <h2 class="text-sm md:text-lg font-semibold text-gray-700">
+                        <span id="listTitle">Kết quả Word</span> 
+                        <span id="resultCount" class="bg-red-100 text-red-600 px-1.5 md:px-2 py-0.5 rounded text-xs md:text-sm ml-1 md:ml-2">0</span>
                     </h2>
-                    <button onclick="addAllToVocab()" class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded border border-green-100">
-                        <i class="fas fa-plus-circle"></i> Thêm tất cả
+                    <button onclick="addAllCurrentToVocab()" class="text-xs text-green-600 hover:text-green-800 font-medium bg-green-50 px-1.5 md:px-2 py-1 rounded border border-green-100 transition">
+                        <i class="fas fa-plus-circle"></i> <span class="hidden sm:inline">Thêm trang này</span><span class="sm:hidden">+All</span>
                     </button>
                 </div>
-                <div id="outputList" class="flex-1 overflow-y-auto space-y-1 pr-1 text-sm"></div>
-                <div class="flex gap-2 mt-2 pt-2 border-t text-xs">
-                    <button onclick="copyWord()" class="flex-1 py-1.5 font-medium bg-gray-200 hover:bg-gray-300 text-gray-700 rounded"><i class="fas fa-terminal mr-1"></i>Word</button>
-                    <button onclick="copyPhrase()" class="flex-1 py-1.5 font-medium bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded"><i class="fas fa-comment-dots mr-1"></i>Phrase</button>
+
+                <!-- List of detected items -->
+                <div id="outputList" class="flex-1 overflow-y-auto space-y-1 md:space-y-2 pr-1 md:pr-2">
+                    <div class="text-center text-gray-400 mt-10">...</div>
+                </div>
+
+                <!-- Quick Copy Buttons -->
+                <div class="flex gap-2 mt-2 pt-2 border-t border-gray-200 flex-shrink-0">
+                    <button onclick="copyExtractPrompt()" class="flex-1 py-1.5 text-xs font-medium bg-purple-100 hover:bg-purple-200 text-purple-700 rounded transition" title="Copy Extract Prompt">
+                        <i class="fas fa-magic mr-1"></i>Extract
+                    </button>
+                    <button onclick="copyPrompt()" class="flex-1 py-1.5 text-xs font-medium bg-gray-200 hover:bg-gray-300 text-gray-700 rounded transition" title="Copy Word Prompt">
+                        <i class="fas fa-terminal mr-1"></i>Word
+                    </button>
+                    <button onclick="copyPhrasePrompt()" class="flex-1 py-1.5 text-xs font-medium bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded transition" title="Copy Phrase Prompt">
+                        <i class="fas fa-comment-dots mr-1"></i>Phrase
+                    </button>
                 </div>
             </div>
 
-            <!-- Word -->
-            <div id="panelWord" class="hidden flex-1 flex flex-col overflow-hidden">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-sm font-bold text-gray-600"><i class="fas fa-terminal mr-1"></i>Word Prompt</h3>
-                    <button onclick="copyWord()" class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded"><i class="fas fa-copy mr-1"></i>Copy</button>
+            <!-- Extract Prompt Tab Content -->
+            <div id="outputExtractTab" class="flex-1 flex flex-col overflow-hidden hidden">
+                <div class="flex justify-between items-center mb-2 flex-shrink-0">
+                    <h3 class="text-sm font-bold text-purple-600 flex items-center">
+                        <i class="fas fa-magic mr-2"></i> Extract Prompt
+                    </h3>
+                    <button onclick="copyExtractPrompt()" class="text-xs bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-1.5 rounded transition font-medium">
+                        <i class="fas fa-copy mr-1"></i> Copy
+                    </button>
                 </div>
-                <div class="bg-gray-800 text-gray-200 p-2 rounded text-xs font-mono flex-1 overflow-y-auto whitespace-pre-wrap" id="wordPreview"></div>
+                <div class="bg-purple-900 text-purple-100 p-3 rounded text-sm font-mono overflow-y-auto whitespace-pre-wrap flex-1" id="extractPromptPreview"></div>
             </div>
 
-            <!-- Phrase -->
-            <div id="panelPhrase" class="hidden flex-1 flex flex-col overflow-hidden">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-sm font-bold text-indigo-600"><i class="fas fa-comment-dots mr-1"></i>Phrase Prompt</h3>
-                    <button onclick="copyPhrase()" class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded"><i class="fas fa-copy mr-1"></i>Copy</button>
+            <!-- Word Prompt Tab Content -->
+            <div id="outputPromptTab" class="flex-1 flex flex-col overflow-hidden hidden">
+                <div class="flex justify-between items-center mb-2 flex-shrink-0">
+                    <h3 class="text-sm font-bold text-gray-600 flex items-center">
+                        <i class="fas fa-terminal mr-2"></i> Word Prompt
+                    </h3>
+                    <button onclick="copyPrompt()" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded transition font-medium">
+                        <i class="fas fa-copy mr-1"></i> Copy
+                    </button>
                 </div>
-                <div class="bg-indigo-900 text-indigo-100 p-2 rounded text-xs font-mono flex-1 overflow-y-auto whitespace-pre-wrap" id="phrasePreview"></div>
+                <div class="bg-gray-800 text-gray-200 p-3 rounded text-sm font-mono flex-1 overflow-y-auto whitespace-pre-wrap" id="promptPreview"></div>
+            </div>
+
+            <!-- Phrase Prompt Tab Content -->
+            <div id="outputPhrasePromptTab" class="flex-1 flex flex-col overflow-hidden hidden">
+                <div class="flex justify-between items-center mb-2 flex-shrink-0">
+                    <h3 class="text-sm font-bold text-indigo-600 flex items-center">
+                        <i class="fas fa-comment-dots mr-2"></i> Phrase Prompt
+                    </h3>
+                    <button onclick="copyPhrasePrompt()" class="text-xs bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1.5 rounded transition font-medium">
+                        <i class="fas fa-copy mr-1"></i> Copy
+                    </button>
+                </div>
+                <div class="bg-indigo-900 text-indigo-100 p-3 rounded text-sm font-mono flex-1 overflow-y-auto whitespace-pre-wrap" id="phrasePromptPreview"></div>
             </div>
         </div>
     </div>
 
+    <!-- MODALS -->
+
     <!-- Dictionary Modal -->
-    <div id="dictionaryModal" class="fixed inset-0 bg-black/50 hidden flex justify-center items-center z-50 p-2">
-        <div class="bg-white rounded-lg w-full max-w-6xl h-[85vh] flex flex-col p-3 shadow-2xl">
-            <div class="flex justify-between items-center mb-2 border-b pb-2">
-                <h2 class="text-base font-bold">Kho từ vựng</h2>
-                <button onclick="closeModal('dictionaryModal')" class="text-gray-500 hover:text-red-500 text-lg">&times;</button>
+    <div id="dictionaryModal" class="fixed inset-0 bg-black/50 hidden flex justify-center items-center z-50">
+        <div class="bg-white rounded-lg w-11/12 max-w-7xl h-5/6 flex flex-col p-4 md:p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h2 class="text-lg md:text-xl font-bold">Quản lý Kho từ vựng <span class="text-sm font-normal text-gray-500">(Mới nhất trước)</span></h2>
+                <button onclick="closeModal('dictionaryModal')" class="text-gray-500 hover:text-red-500 text-xl">&times;</button>
             </div>
-            <input type="text" id="searchVocab" class="w-full p-2 border rounded mb-2 text-sm" placeholder="Tìm kiếm..." oninput="renderDict()">
-            <div class="flex-1 overflow-y-auto flex flex-col md:flex-row gap-2 text-xs">
-                <div class="flex-1 flex flex-col bg-blue-50 rounded p-2 min-h-[150px]">
-                    <h3 class="font-bold text-blue-600 mb-1 border-b border-blue-200 pb-1 text-center">Words (<span id="dictWord">0</span>)</h3>
-                    <div id="dictWordList" class="flex-1 overflow-y-auto space-y-1"></div>
+            
+            <input type="text" id="searchVocab" class="w-full p-2 border rounded mb-3" oninput="renderDictionary()">
+            
+            <div class="flex-1 overflow-y-auto flex flex-col md:flex-row gap-2 text-sm">
+                <div class="min-h-[300px] flex-1 flex flex-col bg-blue-50 rounded p-2 min-h-0">
+                    <h3 class="font-bold text-blue-600 mb-2 border-b border-blue-200 pb-1 text-center text-xs md:text-sm">Words (<span id="dictWordCount">0</span>)</h3>
+                    <div id="dictWordList" class="flex-1 overflow-y-auto pr-1 space-y-1"></div>
                 </div>
-                <div class="flex-1 flex flex-col bg-indigo-50 rounded p-2 min-h-[150px]">
-                    <h3 class="font-bold text-indigo-600 mb-1 border-b border-indigo-200 pb-1 text-center">Phrases (<span id="dictPhrase">0</span>)</h3>
-                    <div id="dictPhraseList" class="flex-1 overflow-y-auto space-y-1"></div>
+                <div class="min-h-[300px] flex-1 flex flex-col bg-indigo-50 rounded p-2 min-h-0">
+                    <h3 class="font-bold text-indigo-600 mb-2 border-b border-indigo-200 pb-1 text-center text-xs md:text-sm">Phrases (<span id="dictPhraseCount">0</span>)</h3>
+                    <div id="dictPhraseList" class="flex-1 overflow-y-auto pr-1 space-y-1"></div>
                 </div>
-                <div class="flex-1 flex flex-col bg-teal-50 rounded p-2 min-h-[150px]">
-                    <h3 class="font-bold text-teal-600 mb-1 border-b border-teal-200 pb-1 text-center">Families (<span id="dictFamily">0</span>)</h3>
-                    <div id="dictFamilyList" class="flex-1 overflow-y-auto space-y-1"></div>
+                <div class="min-h-[300px] flex-1 flex flex-col bg-teal-50 rounded p-2 min-h-0">
+                    <h3 class="font-bold text-teal-600 mb-2 border-b border-teal-200 pb-1 text-center text-xs md:text-sm">Families (<span id="dictFamilyCount">0</span>)</h3>
+                    <div id="dictFamilyList" class="flex-1 overflow-y-auto pr-1 space-y-1"></div>
                 </div>
-                <div class="flex-1 flex flex-col bg-gray-100 rounded p-2 min-h-[150px]">
-                    <h3 class="font-bold text-gray-600 mb-1 border-b border-gray-300 pb-1 text-center">Ignored (<span id="dictIgnored">0</span>)</h3>
-                    <div id="dictIgnoredList" class="flex-1 overflow-y-auto space-y-1"></div>
+                <div class="min-h-[300px] flex-1 flex flex-col bg-gray-100 rounded p-2 min-h-0">
+                    <h3 class="font-bold text-gray-600 mb-2 border-b border-gray-300 pb-1 text-center text-xs md:text-sm">Ignored (<span id="dictPersonalCount">0</span>)</h3>
+                    <div id="dictPersonalList" class="flex-1 overflow-y-auto pr-1 space-y-1"></div>
                 </div>
             </div>
         </div>
@@ -187,481 +270,966 @@
 
     <!-- Settings Modal -->
     <div id="settingsModal" class="fixed inset-0 bg-black/50 hidden flex justify-center items-center z-50 p-4">
-        <div class="bg-white rounded-xl w-full max-w-md p-5 shadow-2xl">
-            <div class="flex justify-between items-center mb-5 border-b pb-3">
-                <h2 class="text-lg font-bold text-gray-800"><i class="fas fa-cog text-blue-500 mr-2"></i>Cài đặt</h2>
-                <button onclick="closeModal('settingsModal')" class="text-gray-400 hover:text-red-500 text-xl">&times;</button>
+        <div class="bg-white rounded-xl w-full max-w-3xl p-6 md:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6 border-b pb-4">
+                <h2 class="text-xl md:text-2xl font-bold text-gray-800">
+                    <i class="fas fa-cog text-blue-500 mr-2"></i>Cài đặt
+                </h2>
+                <button onclick="closeModal('settingsModal')" class="text-gray-400 hover:text-red-500 text-2xl transition">&times;</button>
             </div>
 
-            <!-- Github -->
-            <div class="mb-5 bg-gray-50 p-4 rounded-xl border">
-                <h3 class="font-bold text-gray-800 mb-3 text-sm"><i class="fab fa-github mr-2"></i>Github Gist Sync</h3>
-                <div class="space-y-3 text-sm">
+            <!-- Github Sync Section -->
+            <div class="mb-8 bg-gradient-to-r from-gray-50 to-gray-100 p-5 rounded-xl border border-gray-200">
+                <h3 class="font-bold text-gray-800 mb-4 text-lg flex items-center">
+                    <i class="fab fa-github mr-2 text-xl"></i> Github Gist Sync
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs text-gray-600 mb-1">Token</label>
-                        <input type="password" id="cfgToken" class="w-full p-2 border rounded">
+                        <label class="block text-sm text-gray-600 font-medium mb-1">Github Token</label>
+                        <input type="password" id="githubToken" class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-600 mb-1">Gist ID</label>
-                        <input type="text" id="cfgGistId" class="w-full p-2 border rounded">
+                        <label class="block text-sm text-gray-600 font-medium mb-1">Gist ID</label>
+                        <input type="text" id="gistId" class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-600 mb-1">Filename</label>
-                        <input type="text" id="cfgFilename" class="w-full p-2 border rounded" value="vocab_data.json">
+                        <label class="block text-sm text-gray-600 font-medium mb-1">Vocab Filename</label>
+                        <input type="text" id="gistFilename" class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none" value="vocab_data.json">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-600 font-medium mb-1">Settings Filename</label>
+                        <input type="text" id="gistSettingsFilename" class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none" value="vocab_settings.json">
                     </div>
                 </div>
             </div>
 
-            <!-- Prompts -->
-            <div class="mb-5">
-                <h3 class="font-bold text-gray-800 mb-3 text-sm"><i class="fas fa-edit text-purple-500 mr-2"></i>Prompt Templates</h3>
-                <div class="space-y-3 text-sm">
-                    <div class="bg-gray-50 p-3 rounded-lg border">
-                        <label class="block text-xs font-bold text-gray-700 mb-1">Word <span class="font-normal text-gray-500">(dùng {words})</span></label>
-                        <textarea id="cfgWord" class="w-full p-2 border rounded text-xs font-mono h-16 bg-white"></textarea>
+            <!-- Prompt Templates Section -->
+            <div class="mb-6">
+                <h3 class="font-bold text-gray-800 mb-4 text-lg flex items-center">
+                    <i class="fas fa-edit text-purple-500 mr-2"></i> Prompt Templates
+                </h3>
+                
+                <div class="space-y-5">
+                    <!-- Extract Prompt -->
+                    <div class="bg-purple-50 p-4 rounded-xl border border-purple-200">
+                        <label class="block text-sm font-bold text-purple-700 mb-2">
+                            <i class="fas fa-magic mr-1"></i> Extract Prompt
+                            <span class="font-normal text-purple-500 ml-2">(dùng {text})</span>
+                        </label>
+                        <textarea id="extractPromptTemplate" class="w-full p-3 border border-purple-300 rounded-lg text-sm font-mono h-32 focus:ring-2 focus:ring-purple-400 focus:outline-none bg-white"></textarea>
                     </div>
-                    <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-200">
-                        <label class="block text-xs font-bold text-indigo-700 mb-1">Phrase <span class="font-normal text-indigo-500">(dùng {phrases})</span></label>
-                        <textarea id="cfgPhrase" class="w-full p-2 border border-indigo-300 rounded text-xs font-mono h-16 bg-white"></textarea>
+                    
+                    <!-- Word Prompt -->
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                            <i class="fas fa-terminal mr-1"></i> Word Prompt
+                            <span class="font-normal text-gray-500 ml-2">(dùng {words})</span>
+                        </label>
+                        <textarea id="promptTemplate" class="w-full p-3 border border-gray-300 rounded-lg text-sm font-mono h-32 focus:ring-2 focus:ring-gray-400 focus:outline-none bg-white"></textarea>
+                    </div>
+                    
+                    <!-- Phrase Prompt -->
+                    <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-200">
+                        <label class="block text-sm font-bold text-indigo-700 mb-2">
+                            <i class="fas fa-comment-dots mr-1"></i> Phrase Prompt
+                            <span class="font-normal text-indigo-500 ml-2">(dùng {phrases})</span>
+                        </label>
+                        <textarea id="phrasePromptTemplate" class="w-full p-3 border border-indigo-300 rounded-lg text-sm font-mono h-32 focus:ring-2 focus:ring-indigo-400 focus:outline-none bg-white"></textarea>
                     </div>
                 </div>
             </div>
 
-            <button onclick="saveConfig()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl font-bold">
-                <i class="fas fa-save mr-2"></i>Lưu cài đặt
+            <button onclick="saveSettings()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 rounded-xl font-bold text-lg shadow-lg transition transform hover:scale-[1.02]">
+                <i class="fas fa-save mr-2"></i> Lưu Cài Đặt
             </button>
         </div>
     </div>
 
-<script>
-// ═══════════════════════════════════════════════════════════════
-// CONFIG & DATA
-// ═══════════════════════════════════════════════════════════════
-const cfg = { token: '', gistId: '', filename: 'vocab_data.json', wordPrompt: '', phrasePrompt: '' };
-let words = [], phrases = [], family = [], ignored = [];
-let detected = [], detectedPhrases = [], manualPhrases = [];
-let sessionIgnored = new Set();
-let curTab = 'word', curOut = 'result';
-let undoStack = [];
-
-// ═══════════════════════════════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════════════════════════════
-const $ = id => document.getElementById(id);
-
-function toast(msg, type = 'info') {
-    const colors = { info: 'bg-gray-800', success: 'bg-green-600', warning: 'bg-yellow-600', error: 'bg-red-600' };
-    const icons = { info: 'fa-info-circle', success: 'fa-check-circle', warning: 'fa-exclamation-triangle', error: 'fa-times-circle' };
-    const div = document.createElement('div');
-    div.className = `${colors[type]} text-white px-3 py-2 rounded shadow-lg flex items-center gap-2 pointer-events-auto toast text-sm`;
-    div.innerHTML = `<i class="fas ${icons[type]}"></i><span>${msg}</span>`;
-    $('toastContainer').appendChild(div);
-    setTimeout(() => { div.style.opacity = '0'; div.style.transition = 'opacity 0.3s'; setTimeout(() => div.remove(), 300); }, 3000);
-}
-
-function openModal(id) { $(id).classList.remove('hidden'); if (id === 'dictionaryModal') renderDict(); }
-function closeModal(id) { $(id).classList.add('hidden'); }
-
-function isInVocab(item) {
-    return words.includes(item) || phrases.includes(item) || family.includes(item) || ignored.includes(item) || sessionIgnored.has(item);
-}
-
-// ═══════════════════════════════════════════════════════════════
-// SYNC - MANUAL OVERWRITE ONLY
-// ═══════════════════════════════════════════════════════════════
-async function syncPull() {
-    if (!cfg.token || !cfg.gistId) { toast('Chưa cấu hình Gist!', 'error'); return; }
-    
-    if (!confirm('Pull sẽ GHI ĐÈ toàn bộ dữ liệu local. Tiếp tục?')) return;
-    
-    try {
-        toast('Đang pull...', 'info');
-        const res = await fetch(`https://api.github.com/gists/${cfg.gistId}`, {
-            headers: { 'Authorization': `token ${cfg.token}` }
-        });
+    <script>
+        // --- DATA & STATE ---
+        let vocabWords = [];
+        let vocabPhrases = [];
+        let vocabFamily = [];
+        let personalDict = []; 
+        let sessionIgnored = new Set(); 
         
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        let detectedWords = [];
+        let detectedPhrases = [];
+        let manualPhrases = [];
         
-        const json = await res.json();
-        const content = json.files[cfg.filename]?.content;
+        let currentTab = 'word';
+        let currentOutputTab = 'result';
+        let syncTimer = null; 
         
-        if (!content) { toast('File không tồn tại trên Gist', 'warning'); return; }
-        
-        const data = JSON.parse(content);
-        words = data.words || [];
-        phrases = data.phrases || [];
-        family = data.family || [];
-        ignored = data.ignored || [];
-        
-        saveLocal();
-        renderCounts();
-        handleInput();
-        updatePhrases();
-        renderList();
-        
-        toast(`Pull thành công! W:${words.length} P:${phrases.length}`, 'success');
-    } catch (e) {
-        console.error('Pull error:', e);
-        toast(`Pull lỗi: ${e.message}`, 'error');
-    }
-}
+        // Multi-Undo Stack
+        let undoStack = [];
+        const MAX_UNDO_STACK = 50;
 
-async function syncPush() {
-    if (!cfg.token || !cfg.gistId) { toast('Chưa cấu hình Gist!', 'error'); return; }
+        const defaultPrompt = `Phân tích các từ này : {words}`;
+        const defaultPhrasePrompt = `Phân tích các cụm từ này : {phrases}`;
+        const defaultExtractPrompt = `ONLY Extract Expressions from the text. Ignore common single words. Return a JSON array of strings in lowercase. Text: "{text}"`;
+
+        const config = {
+            githubToken: '',
+            gistId: '',
+            gistFilename: 'vocab_data.json',
+            gistSettingsFilename: 'vocab_settings.json',
+            extractPromptTemplate: defaultExtractPrompt,
+            promptTemplate: defaultPrompt,
+            phrasePromptTemplate: defaultPhrasePrompt
+        };
+
+        // --- HELPER FUNCTIONS ---
+        function hasItem(arr, item) {
+            return arr.includes(item);
+        }
+
+        function isInAnyVocab(item) {
+            return hasItem(vocabWords, item) || 
+                   hasItem(vocabPhrases, item) || 
+                   hasItem(vocabFamily, item) || 
+                   hasItem(personalDict, item) ||
+                   sessionIgnored.has(item);
+        }
+
+        function addItem(arr, item) {
+            if (!arr.includes(item)) {
+                arr.unshift(item);
+            }
+        }
+
+        function removeItem(arr, item) {
+            const index = arr.indexOf(item);
+            if (index > -1) {
+                arr.splice(index, 1);
+            }
+        }
+
+        function updateCombinedPhrases() {
+            detectedPhrases = manualPhrases.filter(p => !isInAnyVocab(p));
+        }
+
+        // --- INIT ---
+        window.onload = () => {
+            loadSettings();
+            loadVocab();
+            document.getElementById('inputText').addEventListener('input', handleInput);
+            document.getElementById('manualPhraseInput').addEventListener('input', handleManualPhraseInput);
+            document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+            renderCounts();
+            updateUndoButton();
+            
+            if(config.githubToken && config.gistId) {
+                setTimeout(() => triggerAutoSync('pull'), 1000);
+            }
+        };
+
+        // --- Manual Phrase Input Handler ---
+        function handleManualPhraseInput() {
+            const text = document.getElementById('manualPhraseInput').value;
+            const lines = text.split('\n')
+                .map(line => line.toLowerCase().trim())
+                .filter(line => line.length > 0);
+            
+            manualPhrases = [...new Set(lines)];
+            updateCombinedPhrases();
+            
+            if (currentTab === 'manual') {
+                renderView();
+            }
+            updatePrompts();
+        }
+
+        function clearManualInput() {
+            const input = document.getElementById('manualPhraseInput');
+            if (!input.value.trim()) {
+                showToast('Không có gì để xóa!');
+                return;
+            }
     
-    if (!confirm('Push sẽ GHI ĐÈ toàn bộ dữ liệu trên cloud. Tiếp tục?')) return;
+            if (!confirm('Xóa tất cả phrases đã nhập?')) return;
     
-    try {
-        toast('Đang push...', 'info');
-        const data = { words, phrases, family, ignored };
-        
-        const res = await fetch(`https://api.github.com/gists/${cfg.gistId}`, {
-            method: 'PATCH',
-            headers: { 
-                'Authorization': `token ${cfg.token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                files: { [cfg.filename]: { content: JSON.stringify(data, null, 2) } }
-            })
-        });
-        
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        
-        toast(`Push thành công! W:${words.length} P:${phrases.length}`, 'success');
-    } catch (e) {
-        console.error('Push error:', e);
-        toast(`Push lỗi: ${e.message}`, 'error');
-    }
-}
+            input.value = '';
+            manualPhrases = [];
+            updateCombinedPhrases();
+            renderView();
+            updatePrompts();
+            showToast('Đã xóa tất cả!');
+        }
 
-// ═══════════════════════════════════════════════════════════════
-// UI
-// ═══════════════════════════════════════════════════════════════
-function switchTab(tab) {
-    curTab = tab;
-    $('tabWord').classList.toggle('tab-active', tab === 'word');
-    $('tabWord').classList.toggle('text-gray-500', tab !== 'word');
-    $('tabManual').classList.toggle('tab-active', tab === 'manual');
-    $('tabManual').classList.toggle('text-gray-500', tab !== 'manual');
-    $('wordTab').classList.toggle('hidden', tab !== 'word');
-    $('manualTab').classList.toggle('hidden', tab !== 'manual');
-    renderList();
-}
+        // --- QUICK PASTE MANUAL PHRASE ---
+        async function quickPasteManualPhrase() {
+            try {
+                const clipboardText = await navigator.clipboard.readText();
+                
+                if (!clipboardText.trim()) {
+                    showToast('Clipboard trống!');
+                    return;
+                }
+                
+                const input = document.getElementById('manualPhraseInput');
+                const currentText = input.value;
+                const existingLines = currentText.split('\n').map(l => l.toLowerCase().trim()).filter(l => l);
+                
+                // Tách clipboard thành các dòng và xử lý từng phrase
+                const clipboardLines = clipboardText.split('\n')
+                    .map(line => line.trim().toLowerCase().replace(/\s+/g, ' '))
+                    .filter(line => line.length > 0);
+                
+                if (clipboardLines.length === 0) {
+                    showToast('Không có nội dung hợp lệ!');
+                    return;
+                }
+                
+                // Lọc ra các phrase chưa có trong danh sách
+                const newPhrases = [];
+                const duplicates = [];
+                
+                clipboardLines.forEach(phrase => {
+                    if (existingLines.includes(phrase)) {
+                        duplicates.push(phrase);
+                    } else if (!newPhrases.includes(phrase)) {
+                        newPhrases.push(phrase);
+                    }
+                });
+                
+                if (newPhrases.length === 0) {
+                    if (duplicates.length === 1) {
+                        showToast(`"${duplicates[0]}" đã có trong danh sách!`);
+                    } else {
+                        showToast(`${duplicates.length} phrases đã có trong danh sách!`);
+                    }
+                    return;
+                }
+                
+                // Thêm các phrase mới vào input
+                if (currentText.trim()) {
+                    input.value = currentText.trimEnd() + '\n' + newPhrases.join('\n');
+                } else {
+                    input.value = newPhrases.join('\n');
+                }
+                
+                input.scrollTop = input.scrollHeight;
+                handleManualPhraseInput();
+                
+                // Hiển thị thông báo phù hợp
+                if (newPhrases.length === 1) {
+                    showToast(`Đã thêm: "${newPhrases[0]}"`);
+                } else {
+                    const msg = duplicates.length > 0 
+                        ? `Đã thêm ${newPhrases.length} phrases (${duplicates.length} trùng)`
+                        : `Đã thêm ${newPhrases.length} phrases`;
+                    showToast(msg);
+                }
+                
+            } catch (err) {
+                console.error(err);
+                showToast('Lỗi clipboard: Hãy cấp quyền.');
+            }
+        }
 
-function switchOutTab(tab) {
-    curOut = tab;
-    ['Result', 'Word', 'Phrase'].forEach(t => {
-        const l = t.toLowerCase();
-        $(`panel${t}`)?.classList.toggle('hidden', l !== tab);
-        const btn = $(`outTab${t}`);
-        if (btn) { btn.classList.toggle('output-tab-active', l === tab); btn.classList.toggle('text-gray-500', l !== tab); }
-    });
-}
+        // --- TOOLS ---
+        async function pasteFromClipboard() {
+            try {
+                const clipboardText = await navigator.clipboard.readText();
+                const input = document.getElementById('inputText');
+                const currentText = input.value;
+                
+                if (currentText.trim()) {
+                    input.value = currentText.trimEnd() + '\n\n---\n\n' + clipboardText;
+                } else {
+                    input.value = clipboardText;
+                }
+                
+                input.focus();
+                input.scrollTop = input.scrollHeight;
+                handleInput(); 
+                showToast('Đã dán nối tiếp!');
+            } catch (err) { 
+                showToast('Lỗi clipboard: Hãy cấp quyền.'); 
+            }
+        }
 
-function renderList() {
-    const list = $('outputList');
-    const items = curTab === 'word' ? detected : detectedPhrases;
-    $('listTitle').textContent = curTab === 'word' ? 'Words' : 'Phrases';
-    $('resultCount').textContent = items.length;
-    
-    list.innerHTML = items.length ? items.map(i => {
-        const e = i.replace(/'/g, "\\'").replace(/"/g, '\\"');
-        return `<div class="flex justify-between items-center bg-gray-50 p-1.5 rounded hover:bg-white hover:shadow-sm border border-transparent hover:border-blue-200 group">
-            <span class="font-medium text-gray-800 truncate flex-1">${i}</span>
-            <div class="mobile-visible md:opacity-0 group-hover:opacity-100 flex space-x-0.5 flex-shrink-0">
-                <button onclick="copyItem('${e}')" class="p-1 text-yellow-500 hover:bg-yellow-50 rounded"><i class="fas fa-copy"></i></button>
-                <button onclick="searchG('${e}')" class="p-1 text-green-500 hover:bg-green-50 rounded"><i class="fas fa-search"></i></button>
-                <button onclick="skip('${e}')" class="p-1 text-gray-400 hover:text-red-500"><i class="fas fa-times"></i></button>
-                <button onclick="addIgnored('${e}')" class="p-1 text-gray-400 hover:text-gray-700 rounded"><i class="fas fa-ban"></i></button>
-                <button onclick="addFamily('${e}')" class="p-1 text-teal-500 hover:bg-teal-50 rounded"><i class="fas fa-sitemap"></i></button>
-                <button onclick="addVocab('${e}')" class="p-1 text-blue-400 hover:text-blue-600"><i class="fas fa-check"></i></button>
-            </div>
-        </div>`;
-    }).join('') : '<div class="text-center text-gray-400 mt-8">Trống</div>';
-    updatePrompts();
-}
+        function clearInput() {
+            document.getElementById('inputText').value = '';
+            detectedWords = [];
+            handleInput();
+        }
 
-function renderCounts() {
-    $('wordCount').textContent = words.length;
-    $('phraseCount').textContent = phrases.length;
-    $('familyCount').textContent = family.length;
-    $('ignoredCount').textContent = ignored.length;
-}
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const input = document.getElementById('inputText');
+                const currentText = input.value;
+                
+                if (currentText.trim()) {
+                    input.value = currentText.trimEnd() + '\n\n---\n\n' + e.target.result;
+                } else {
+                    input.value = e.target.result;
+                }
+                
+                handleInput();
+                showToast(`Đã nhập nối tiếp file: ${file.name}`);
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
 
-function renderDict() {
-    const q = $('searchVocab').value.toLowerCase();
-    const render = (arr, el, type) => {
-        el.innerHTML = arr.filter(i => i.includes(q)).map(i => {
-            const e = i.replace(/'/g, "\\'").replace(/"/g, '\\"');
-            return `<div class="flex justify-between text-xs bg-white p-1.5 rounded border shadow-sm">
-                <span class="truncate pr-2">${i}</span>
-                <button onclick="delDict('${e}','${type}')" class="text-gray-300 hover:text-red-500 flex-shrink-0">&times;</button>
-            </div>`;
-        }).join('');
-    };
-    render(words, $('dictWordList'), 'word');
-    render(phrases, $('dictPhraseList'), 'phrase');
-    render(family, $('dictFamilyList'), 'family');
-    render(ignored, $('dictIgnoredList'), 'ignored');
-    $('dictWord').textContent = words.length;
-    $('dictPhrase').textContent = phrases.length;
-    $('dictFamily').textContent = family.length;
-    $('dictIgnored').textContent = ignored.length;
-}
+        function copyPrompt() {
+            const text = document.getElementById('promptPreview').innerText;
+            if(!text || text.includes('Chưa có từ')) {
+                showToast('Không có Word Prompt để copy!');
+                return;
+            }
+            navigator.clipboard.writeText(text).then(() => showToast('Đã copy Word Prompt!'));
+        }
 
-function updatePrompts() {
-    $('wordPreview').textContent = detected.length 
-        ? (cfg.wordPrompt || '{words}').replace('{words}', detected.join(', ')) 
-        : '(Chưa có từ)';
-    $('phrasePreview').textContent = detectedPhrases.length 
-        ? (cfg.phrasePrompt || '{phrases}').replace('{phrases}', detectedPhrases.join(', ')) 
-        : '(Chưa có phrase)';
-}
+        function copyPhrasePrompt() {
+            const text = document.getElementById('phrasePromptPreview').innerText;
+            if(!text || text.includes('Chưa có')) {
+                showToast('Không có Phrase Prompt để copy!');
+                return;
+            }
+            navigator.clipboard.writeText(text).then(() => showToast('Đã copy Phrase Prompt!'));
+        }
 
-// ═══════════════════════════════════════════════════════════════
-// CORE
-// ═══════════════════════════════════════════════════════════════
-function handleInput() { analyze(); renderList(); }
+        function copyExtractPrompt() {
+            const text = document.getElementById('extractPromptPreview').innerText;
+            if(!text || text.includes('Nhập văn bản')) {
+                showToast('Không có Extract Prompt để copy!');
+                return;
+            }
+            navigator.clipboard.writeText(text).then(() => showToast('Đã copy Extract Prompt!'));
+        }
 
-function analyze() {
-    const txt = $('inputText').value;
-    if (!txt.trim()) { detected = []; return; }
-    const ws = txt.toLowerCase().match(/[a-z]+/g);
-    detected = ws ? [...new Set(ws)].filter(w => !isInVocab(w)) : [];
-}
+        // --- NEW: Copy single item ---
+        function copyItem(item) {
+            navigator.clipboard.writeText(item).then(() => {
+                showToast(`Đã copy: ${item}`);
+            }).catch(() => {
+                showToast('Lỗi copy!');
+            });
+        }
 
-function handleManual() {
-    const txt = $('manualInput').value;
-    manualPhrases = [...new Set(txt.split('\n').map(l => l.toLowerCase().trim()).filter(l => l))];
-    updatePhrases();
-    if (curTab === 'manual') renderList();
-    updatePrompts();
-}
+        // --- NEW: Search item on Google ---
+        function searchOnGoogle(item) {
+            const query = encodeURIComponent(item + ' meaning');
+            const url = `https://www.google.com/search?q=${query}`;
+            window.open(url, '_blank');
+        }
 
-function updatePhrases() { detectedPhrases = manualPhrases.filter(p => !isInVocab(p)); }
+        // --- NEW: Manual Push to Cloud ---
+        function manualPushToCloud() {
+            if(!config.githubToken || !config.gistId) {
+                showToast('Chưa cấu hình Github Token và Gist ID!');
+                return;
+            }
+            showToast('Đang đẩy lên Cloud...');
+            performSync('push');
+        }
 
-// ═══════════════════════════════════════════════════════════════
-// VOCAB ACTIONS
-// ═══════════════════════════════════════════════════════════════
-function addVocab(item) {
-    const arr = curTab === 'word' ? words : phrases;
-    if (!arr.includes(item)) {
-        arr.unshift(item);
-        pushUndo(curTab === 'word' ? 'word' : 'phrase', item);
-        saveLocal();
-        removeItem(item);
-        renderCounts();
-        toast(`+${item}`, 'success');
-    }
-}
+        function showToast(msg) {
+            const container = document.getElementById('toastContainer');
+            
+            const div = document.createElement('div');
+            div.className = 'bg-gray-800 text-white px-3 md:px-4 py-2 md:py-3 rounded shadow-lg flex justify-between items-center gap-3 md:gap-4 pointer-events-auto toast text-sm';
+            div.innerHTML = `<span class="text-xs md:text-sm">${msg}</span>`;
+            
+            container.appendChild(div);
 
-function addIgnored(item) {
-    if (!ignored.includes(item)) {
-        ignored.unshift(item);
-        pushUndo('ignored', item);
-        saveLocal();
-        removeItem(item);
-        renderCounts();
-        toast(`Ignored: ${item}`, 'success');
-    }
-}
+            setTimeout(() => {
+                div.style.opacity = '0';
+                div.style.transform = 'translateY(100%)';
+                div.style.transition = 'all 0.3s';
+                setTimeout(() => div.remove(), 300);
+            }, 2500);
+        }
 
-function addFamily(item) {
-    if (!family.includes(item)) {
-        family.unshift(item);
-        pushUndo('family', item);
-        saveLocal();
-        removeItem(item);
-        renderCounts();
-        toast(`Family: ${item}`, 'success');
-    }
-}
+        // --- UNDO STACK LOGIC ---
+        function pushToUndoStack(type, item, sourceTab) {
+            undoStack.push({ type, item, sourceTab });
+            if (undoStack.length > MAX_UNDO_STACK) {
+                undoStack.shift();
+            }
+            updateUndoButton();
+        }
 
-function addAllToVocab() {
-    const items = curTab === 'word' ? [...detected] : [...detectedPhrases];
-    if (!items.length) return;
-    const arr = curTab === 'word' ? words : phrases;
-    items.forEach(i => { if (!arr.includes(i)) { arr.unshift(i); pushUndo(curTab === 'word' ? 'word' : 'phrase', i); } });
-    saveLocal();
-    if (curTab === 'word') detected = [];
-    else { manualPhrases = manualPhrases.filter(p => !items.includes(p)); updatePhrases(); }
-    renderList();
-    renderCounts();
-    toast(`+${items.length}`, 'success');
-}
+        function updateUndoButton() {
+            const btn = document.getElementById('undoBtn');
+            const countEl = document.getElementById('undoCount');
+            
+            if (undoStack.length > 0) {
+                btn.classList.remove('hidden');
+                countEl.innerText = undoStack.length;
+            } else {
+                btn.classList.add('hidden');
+            }
+        }
 
-function skip(item) { sessionIgnored.add(item); removeItem(item); }
+        function undoLastAction() {
+            if (undoStack.length === 0) return;
 
-function removeItem(item) {
-    if (curTab === 'word') detected = detected.filter(i => i !== item);
-    else { manualPhrases = manualPhrases.filter(i => i !== item); updatePhrases(); }
-    renderList();
-}
+            const action = undoStack.pop();
+            const { type, item, sourceTab } = action;
 
-function delDict(item, type) {
-    if (!confirm(`Xóa "${item}"?`)) return;
-    const arr = { word: words, phrase: phrases, family: family, ignored: ignored }[type];
-    const idx = arr.indexOf(item);
-    if (idx > -1) {
-        arr.splice(idx, 1);
-        saveLocal();
-        renderDict();
-        renderCounts();
-        handleInput();
-        updatePhrases();
-        toast(`Đã xóa: ${item}`, 'success');
-    }
-}
+            if (type === 'word') removeItem(vocabWords, item);
+            else if (type === 'phrase') removeItem(vocabPhrases, item);
+            else if (type === 'family') removeItem(vocabFamily, item);
+            else if (type === 'personal') removeItem(personalDict, item);
 
-// ═══════════════════════════════════════════════════════════════
-// UNDO
-// ═══════════════════════════════════════════════════════════════
-function pushUndo(type, item) {
-    undoStack.push({ type, item });
-    if (undoStack.length > 50) undoStack.shift();
-    updateUndo();
-}
+            if (sourceTab === 'manual') {
+                updateCombinedPhrases();
+            }
 
-function updateUndo() {
-    $('undoCount').textContent = undoStack.length;
-    $('undoBtn').classList.toggle('hidden', !undoStack.length);
-}
+            saveVocabLocal();
+            triggerAutoSync('push');
+            
+            analyzeWords();
+            updateCombinedPhrases();
+            renderView();
+            updateUndoButton();
+            
+            showToast(`Đã hoàn tác: ${item}`);
+        }
 
-function undoLast() {
-    if (!undoStack.length) return;
-    const { type, item } = undoStack.pop();
-    const arr = { word: words, phrase: phrases, family: family, ignored: ignored }[type];
-    const idx = arr.indexOf(item);
-    if (idx > -1) {
-        arr.splice(idx, 1);
-        saveLocal();
-        analyze();
-        updatePhrases();
-        renderList();
-        renderCounts();
-        updateUndo();
-        toast(`Undo: ${item}`, 'success');
-    }
-}
+        // --- CORE LOGIC ---
+        function handleInput() {
+            analyzeWords();
+            renderView();
+            updatePrompts();
+        }
 
-// ═══════════════════════════════════════════════════════════════
-// TOOLS
-// ═══════════════════════════════════════════════════════════════
-async function pasteClipboard() {
-    try {
-        const txt = await navigator.clipboard.readText();
-        const inp = $('inputText');
-        inp.value = inp.value.trim() ? inp.value.trimEnd() + '\n\n---\n\n' + txt : txt;
-        handleInput();
-        toast('Đã dán!', 'success');
-    } catch { toast('Lỗi clipboard', 'error'); }
-}
+        function analyzeWords() {
+            const text = document.getElementById('inputText').value;
+            if (!text.trim()) {
+                detectedWords = [];
+                return;
+            }
+            const rawWords = text.toLowerCase().match(/[a-z]+/g);
+            if (!rawWords) {
+                detectedWords = [];
+                return;
+            }
+            const uniqueWords = [...new Set(rawWords)];
+            detectedWords = uniqueWords.filter(word => !isInAnyVocab(word));
+        }
 
-async function pasteManual() {
-    try {
-        const txt = await navigator.clipboard.readText();
-        if (!txt.trim()) { toast('Clipboard trống', 'warning'); return; }
-        const inp = $('manualInput');
-        const existing = inp.value.split('\n').map(l => l.toLowerCase().trim()).filter(l => l);
-        const newLines = txt.split('\n').map(l => l.toLowerCase().trim()).filter(l => l && !existing.includes(l));
-        if (!newLines.length) { toast('Tất cả đã có', 'warning'); return; }
-        inp.value = inp.value.trim() ? inp.value.trimEnd() + '\n' + newLines.join('\n') : newLines.join('\n');
-        handleManual();
-        toast(`+${newLines.length} phrases`, 'success');
-    } catch { toast('Lỗi clipboard', 'error'); }
-}
+        // --- OUTPUT TAB SWITCH ---
+        function switchOutputTab(tab) {
+            currentOutputTab = tab;
+            const resultTab = document.getElementById('outputResultTab');
+            const extractTab = document.getElementById('outputExtractTab');
+            const promptTab = document.getElementById('outputPromptTab');
+            const phrasePromptTab = document.getElementById('outputPhrasePromptTab');
+            const resultBtn = document.getElementById('outputTabResult');
+            const extractBtn = document.getElementById('outputTabExtract');
+            const promptBtn = document.getElementById('outputTabPrompt');
+            const phrasePromptBtn = document.getElementById('outputTabPhrasePrompt');
 
-function clearInput() { $('inputText').value = ''; detected = []; handleInput(); }
-function clearManual() {
-    if (!$('manualInput').value.trim()) { toast('Đã trống', 'warning'); return; }
-    if (!confirm('Xóa tất cả?')) return;
-    $('manualInput').value = '';
-    manualPhrases = [];
-    updatePhrases();
-    renderList();
-    toast('Đã xóa', 'success');
-}
+            resultTab.classList.add('hidden');
+            extractTab.classList.add('hidden');
+            promptTab.classList.add('hidden');
+            phrasePromptTab.classList.add('hidden');
+            
+            resultBtn.classList.remove('output-tab-active');
+            resultBtn.classList.add('text-gray-500');
+            extractBtn.classList.remove('output-tab-active');
+            extractBtn.classList.add('text-gray-500');
+            promptBtn.classList.remove('output-tab-active');
+            promptBtn.classList.add('text-gray-500');
+            phrasePromptBtn.classList.remove('output-tab-active');
+            phrasePromptBtn.classList.add('text-gray-500');
 
-function copyItem(i) { navigator.clipboard.writeText(i).then(() => toast(`Copied: ${i}`, 'success')); }
-function searchG(i) { window.open(`https://www.google.com/search?q=${encodeURIComponent(i + ' meaning')}`, '_blank'); }
-function copyWord() { const t = $('wordPreview').textContent; if (!t.includes('Chưa có')) navigator.clipboard.writeText(t).then(() => toast('Copied!', 'success')); }
-function copyPhrase() { const t = $('phrasePreview').textContent; if (!t.includes('Chưa có')) navigator.clipboard.writeText(t).then(() => toast('Copied!', 'success')); }
+            if (tab === 'result') {
+                resultTab.classList.remove('hidden');
+                resultBtn.classList.add('output-tab-active');
+                resultBtn.classList.remove('text-gray-500');
+            } else if (tab === 'extract') {
+                extractTab.classList.remove('hidden');
+                extractBtn.classList.add('output-tab-active');
+                extractBtn.classList.remove('text-gray-500');
+            } else if (tab === 'prompt') {
+                promptTab.classList.remove('hidden');
+                promptBtn.classList.add('output-tab-active');
+                promptBtn.classList.remove('text-gray-500');
+            } else if (tab === 'phrasePrompt') {
+                phrasePromptTab.classList.remove('hidden');
+                phrasePromptBtn.classList.add('output-tab-active');
+                phrasePromptBtn.classList.remove('text-gray-500');
+            }
+        }
 
-// ═══════════════════════════════════════════════════════════════
-// STORAGE
-// ═══════════════════════════════════════════════════════════════
-function saveLocal() {
-    localStorage.setItem('words', JSON.stringify(words));
-    localStorage.setItem('phrases', JSON.stringify(phrases));
-    localStorage.setItem('family', JSON.stringify(family));
-    localStorage.setItem('ignored', JSON.stringify(ignored));
-}
+        // --- RENDER VIEW ---
+        function renderView() {
+            const listEl = document.getElementById('outputList');
+            const countEl = document.getElementById('resultCount');
+            const titleEl = document.getElementById('listTitle');
 
-function loadVocab() {
-    words = JSON.parse(localStorage.getItem('words') || '[]');
-    phrases = JSON.parse(localStorage.getItem('phrases') || '[]');
-    family = JSON.parse(localStorage.getItem('family') || '[]');
-    ignored = JSON.parse(localStorage.getItem('ignored') || '[]');
-}
+            let itemsToRender = [];
+            
+            if (currentTab === 'word') {
+                itemsToRender = detectedWords;
+                titleEl.innerText = 'Kết quả Word';
+            } else if (currentTab === 'manual') {
+                itemsToRender = detectedPhrases;
+                titleEl.innerText = 'Kết quả Phrase';
+            }
+            
+            countEl.innerText = itemsToRender.length;
+            listEl.innerHTML = '';
 
-function loadConfig() {
-    const s = JSON.parse(localStorage.getItem('config') || '{}');
-    cfg.token = s.token || '';
-    cfg.gistId = s.gistId || '';
-    cfg.filename = s.filename || 'vocab_data.json';
-    cfg.wordPrompt = s.wordPrompt || '';
-    cfg.phrasePrompt = s.phrasePrompt || '';
-    
-    $('cfgToken').value = cfg.token;
-    $('cfgGistId').value = cfg.gistId;
-    $('cfgFilename').value = cfg.filename;
-    $('cfgWord').value = cfg.wordPrompt;
-    $('cfgPhrase').value = cfg.phrasePrompt;
-}
+            if (itemsToRender.length === 0) {
+                listEl.innerHTML = `<div class="text-center text-gray-400 mt-10 text-sm">Trống</div>`;
+            } else {
+                itemsToRender.forEach(item => {
+                    const escapedItem = item.replace(/'/g, "\\'").replace(/"/g, '\\"');
+                    const div = document.createElement('div');
+                    div.className = 'flex justify-between items-center bg-gray-50 p-1.5 md:p-2 rounded hover:bg-white hover:shadow-sm border border-transparent hover:border-blue-200 group transition';
+                    div.innerHTML = `
+                        <span class="font-medium text-gray-800 ml-1 text-sm md:text-base truncate flex-1">${item}</span>
+                        <div class="mobile-always-visible md:opacity-0 group-hover:opacity-100 transition-opacity flex space-x-0.5 md:space-x-1 flex-shrink-0">
+                            <button onclick="copyItem('${escapedItem}')" class="p-1 md:p-1.5 text-yellow-500 hover:text-yellow-600 hover:bg-yellow-50 rounded text-xs md:text-base" title="Copy"><i class="fas fa-copy"></i></button>
+                            <button onclick="searchOnGoogle('${escapedItem}')" class="p-1 md:p-1.5 text-green-500 hover:text-green-600 hover:bg-green-50 rounded text-xs md:text-base" title="Tìm trên Google"><i class="fas fa-search"></i></button>
+                            <button onclick="ignoreItem('${escapedItem}')" class="p-1 md:p-1.5 text-gray-400 hover:text-red-500 text-xs md:text-base" title="Bỏ qua (Tạm thời)"><i class="fas fa-times"></i></button>
+                            <button onclick="addToPersonalDict('${escapedItem}')" class="p-1 md:p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded text-xs md:text-base" title="Bỏ qua vĩnh viễn"><i class="fas fa-user-shield"></i></button>
+                            <button onclick="addToWordFamily('${escapedItem}')" class="p-1 md:p-1.5 text-teal-500 hover:text-teal-700 hover:bg-teal-50 rounded text-xs md:text-base" title="Word Family"><i class="fas fa-sitemap"></i></button>
+                            <button onclick="addItemToCurrentVocab('${escapedItem}')" class="p-1 md:p-1.5 text-blue-400 hover:text-blue-600 text-xs md:text-base" title="Thêm vào kho học"><i class="fas fa-check"></i></button>
+                        </div>
+                    `;
+                    listEl.appendChild(div);
+                });
+            }
+            updatePrompts();
+        }
 
-function saveConfig() {
-    cfg.token = $('cfgToken').value;
-    cfg.gistId = $('cfgGistId').value;
-    cfg.filename = $('cfgFilename').value;
-    cfg.wordPrompt = $('cfgWord').value;
-    cfg.phrasePrompt = $('cfgPhrase').value;
-    
-    localStorage.setItem('config', JSON.stringify(cfg));
-    closeModal('settingsModal');
-    updatePrompts();
-    toast('Đã lưu!', 'success');
-}
+        function updatePrompts() {
+            const previewEl = document.getElementById('promptPreview');
+            const phrasePreviewEl = document.getElementById('phrasePromptPreview');
+            const extractPreviewEl = document.getElementById('extractPromptPreview');
 
-// File upload
-$('fileInput')?.addEventListener('change', e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = evt => {
-        const inp = $('inputText');
-        inp.value = inp.value.trim() ? inp.value.trimEnd() + '\n\n---\n\n' + evt.target.result : evt.target.result;
-        handleInput();
-        toast(`Đã nhập: ${file.name}`, 'success');
-        e.target.value = '';
-    };
-    reader.readAsText(file);
-});
+            // Update Extract Prompt Preview
+            const inputText = document.getElementById('inputText').value;
+            if (inputText.trim()) {
+                const extractPrompt = config.extractPromptTemplate.replace('{text}', inputText);
+                extractPreviewEl.innerText = extractPrompt;
+            } else {
+                extractPreviewEl.innerText = '(Nhập văn bản vào ô nhập liệu để xem Extract Prompt)';
+            }
 
-// ═══════════════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════════════
-window.onload = () => {
-    loadConfig();
-    loadVocab();
-    
-    $('inputText').addEventListener('input', handleInput);
-    $('manualInput').addEventListener('input', handleManual);
-    
-    renderCounts();
-    updateUndo();
-    updatePrompts();
-};
-</script>
+            // Update Word Prompt Preview
+            if (detectedWords.length === 0) {
+                previewEl.innerText = "(Chưa có từ để phân tích)";
+            } else {
+                const joinedWords = detectedWords.join(', ');
+                const finalPrompt = config.promptTemplate.replace('{words}', joinedWords);
+                previewEl.innerText = finalPrompt;
+            }
+
+            // Update Phrase Prompt Preview
+            if (detectedPhrases.length === 0) {
+                phrasePreviewEl.innerText = "(Chưa có phrases để phân tích)";
+            } else {
+                const joinedPhrases = detectedPhrases.join(', ');
+                const finalPhrasePrompt = config.phrasePromptTemplate.replace('{phrases}', joinedPhrases);
+                phrasePreviewEl.innerText = finalPhrasePrompt;
+            }
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            const wordBtn = document.getElementById('tabWordBtn');
+            const manualBtn = document.getElementById('tabManualBtn');
+            
+            const wordContent = document.getElementById('wordTabContent');
+            const manualContent = document.getElementById('manualTabContent');
+
+            wordBtn.classList.remove('tab-active');
+            wordBtn.classList.add('text-gray-500');
+            manualBtn.classList.remove('tab-active');
+            manualBtn.classList.add('text-gray-500');
+            
+            wordContent.classList.add('hidden');
+            manualContent.classList.add('hidden');
+
+            if (tab === 'word') {
+                wordBtn.classList.add('tab-active');
+                wordBtn.classList.remove('text-gray-500');
+                wordContent.classList.remove('hidden');
+            } else if (tab === 'manual') {
+                manualBtn.classList.add('tab-active');
+                manualBtn.classList.remove('text-gray-500');
+                manualContent.classList.remove('hidden');
+            }
+            
+            renderView();
+        }
+
+        // --- VOCAB & SYNC LOGIC ---
+        function updateVocabAndSync() {
+            saveVocabLocal();
+            triggerAutoSync('push'); 
+        }
+
+        function addItemToCurrentVocab(item) {
+            let type = (currentTab === 'word') ? 'word' : 'phrase';
+            if (type === 'word') addItem(vocabWords, item);
+            else addItem(vocabPhrases, item);
+            
+            pushToUndoStack(type, item, currentTab);
+            updateVocabAndSync();
+            removeCurrentItem(item);
+            showToast(`Đã thêm: ${item}`);
+        }
+
+        function addToPersonalDict(item) {
+            addItem(personalDict, item);
+            pushToUndoStack('personal', item, currentTab);
+            updateVocabAndSync();
+            removeCurrentItem(item);
+            showToast(`Đã thêm vào Ignored: ${item}`);
+        }
+
+        function addToWordFamily(item) {
+            addItem(vocabFamily, item);
+            pushToUndoStack('family', item, currentTab);
+            updateVocabAndSync();
+            removeCurrentItem(item);
+            showToast(`Đã thêm vào Word Family: ${item}`);
+        }
+
+        function addAllCurrentToVocab() {
+            let list = [];
+            let type = 'word';
+            
+            if (currentTab === 'word') {
+                list = [...detectedWords];
+                type = 'word';
+            } else {
+                list = [...detectedPhrases];
+                type = 'phrase';
+            }
+            
+            if(list.length === 0) return;
+
+            list.forEach(item => {
+                if (type === 'word') {
+                    addItem(vocabWords, item);
+                    pushToUndoStack('word', item, 'word');
+                } else {
+                    addItem(vocabPhrases, item);
+                    pushToUndoStack('phrase', item, currentTab);
+                }
+            });
+            
+            updateVocabAndSync();
+            
+            if (currentTab === 'word') {
+                detectedWords = [];
+            } else {
+                manualPhrases = manualPhrases.filter(p => !list.includes(p));
+                updateCombinedPhrases();
+            }
+            
+            renderView();
+            renderCounts();
+            showToast(`Đã thêm ${list.length} items & Đang đẩy lên Cloud...`);
+        }
+
+        function ignoreItem(item) {
+            sessionIgnored.add(item);
+            removeCurrentItem(item);
+        }
+
+        function removeCurrentItem(item) {
+            if (currentTab === 'word') {
+                detectedWords = detectedWords.filter(i => i !== item);
+            } else {
+                manualPhrases = manualPhrases.filter(i => i !== item);
+                updateCombinedPhrases();
+            }
+            renderView();
+            renderCounts();
+        }
+
+        function saveVocabLocal() {
+            localStorage.setItem('myVocabWords', JSON.stringify(vocabWords));
+            localStorage.setItem('myVocabPhrases', JSON.stringify(vocabPhrases));
+            localStorage.setItem('myVocabFamily', JSON.stringify(vocabFamily));
+            localStorage.setItem('myPersonalDict', JSON.stringify(personalDict));
+            renderCounts();
+        }
+
+        function loadVocab() {
+            const w = localStorage.getItem('myVocabWords');
+            const p = localStorage.getItem('myVocabPhrases');
+            const f = localStorage.getItem('myVocabFamily');
+            const d = localStorage.getItem('myPersonalDict');
+            
+            if (w) {
+                const parsed = JSON.parse(w);
+                vocabWords = Array.isArray(parsed) ? parsed : [...parsed];
+            }
+            if (p) {
+                const parsed = JSON.parse(p);
+                vocabPhrases = Array.isArray(parsed) ? parsed : [...parsed];
+            }
+            if (f) {
+                const parsed = JSON.parse(f);
+                vocabFamily = Array.isArray(parsed) ? parsed : [...parsed];
+            }
+            if (d) {
+                const parsed = JSON.parse(d);
+                personalDict = Array.isArray(parsed) ? parsed : [...parsed];
+            }
+        }
+
+        function renderCounts() {
+            document.getElementById('wordCount').innerText = vocabWords.length;
+            document.getElementById('phraseCount').innerText = vocabPhrases.length;
+            document.getElementById('familyCount').innerText = vocabFamily.length;
+            document.getElementById('personalCount').innerText = personalDict.length;
+        }
+
+        function renderDictionary() {
+            const wList = document.getElementById('dictWordList');
+            const pList = document.getElementById('dictPhraseList');
+            const fList = document.getElementById('dictFamilyList');
+            const dList = document.getElementById('dictPersonalList');
+            const search = document.getElementById('searchVocab').value.toLowerCase();
+            
+            const renderCol = (arr, container, type) => {
+                container.innerHTML = '';
+                arr.forEach(item => {
+                    if (item.toLowerCase().includes(search)) {
+                        const escapedItem = item.replace(/'/g, "\\'").replace(/"/g, '\\"');
+                        const div = document.createElement('div');
+                        div.className = 'flex justify-between text-xs bg-white p-1.5 md:p-2 rounded border border-gray-100 shadow-sm group';
+                        div.innerHTML = `<span class="truncate pr-2">${item}</span><button onclick="deleteDictItem('${escapedItem}', '${type}')" class="text-gray-300 hover:text-red-500">&times;</button>`;
+                        container.appendChild(div);
+                    }
+                });
+            };
+
+            renderCol(vocabWords, wList, 'word');
+            renderCol(vocabPhrases, pList, 'phrase');
+            renderCol(vocabFamily, fList, 'family');
+            renderCol(personalDict, dList, 'personal');
+
+            document.getElementById('dictWordCount').innerText = vocabWords.length;
+            document.getElementById('dictPhraseCount').innerText = vocabPhrases.length;
+            document.getElementById('dictFamilyCount').innerText = vocabFamily.length;
+            document.getElementById('dictPersonalCount').innerText = personalDict.length;
+        }
+
+        function deleteDictItem(item, type) {
+            if(!confirm(`Xóa "${item}" khỏi danh sách này?`)) return;
+            
+            if(type === 'word') removeItem(vocabWords, item);
+            else if(type === 'phrase') removeItem(vocabPhrases, item);
+            else if(type === 'family') removeItem(vocabFamily, item);
+            else if(type === 'personal') removeItem(personalDict, item);
+            
+            updateVocabAndSync();
+            renderDictionary();
+            handleInput();
+            updateCombinedPhrases();
+        }
+
+        // --- GITHUB SYNC ENGINE ---
+        function triggerAutoSync(mode) {
+            if(!config.githubToken || !config.gistId) return;
+
+            const statusEl = document.getElementById('syncStatusIndicator');
+            
+            if(mode === 'pull') {
+                statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin text-blue-500"></i> Pulling...';
+                performSync(mode);
+                return;
+            }
+
+            statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin text-blue-500"></i> Waiting...';
+            if(syncTimer) clearTimeout(syncTimer);
+            syncTimer = setTimeout(() => {
+                performSync(mode);
+            }, 1000);
+        }
+
+        async function performSync(mode) {
+            const statusEl = document.getElementById('syncStatusIndicator');
+            
+            try {
+                if (mode === 'pull') {
+                    const data = await fetchGist();
+                    
+                    vocabWords = Array.isArray(data.words) ? data.words : [];
+                    vocabPhrases = Array.isArray(data.phrases) ? data.phrases : [];
+                    vocabFamily = Array.isArray(data.family) ? data.family : [];
+                    personalDict = Array.isArray(data.personal) ? data.personal : [];
+                    
+                    const settings = await fetchGistSettings();
+                    if (settings && Object.keys(settings).length > 0) {
+                        if (settings.extractPromptTemplate) config.extractPromptTemplate = settings.extractPromptTemplate;
+                        if (settings.promptTemplate) config.promptTemplate = settings.promptTemplate;
+                        if (settings.phrasePromptTemplate) config.phrasePromptTemplate = settings.phrasePromptTemplate;
+                        
+                        localStorage.setItem('appConfig', JSON.stringify(config));
+                        
+                        document.getElementById('extractPromptTemplate').value = config.extractPromptTemplate;
+                        document.getElementById('promptTemplate').value = config.promptTemplate;
+                        document.getElementById('phrasePromptTemplate').value = config.phrasePromptTemplate;
+                    }
+                    
+                    saveVocabLocal(); 
+                    renderCounts();
+                    if(!document.getElementById('dictionaryModal').classList.contains('hidden')) renderDictionary();
+                    handleInput();
+                    updateCombinedPhrases();
+
+                    statusEl.innerHTML = `<i class="fas fa-check text-purple-600"></i> Pulled`;
+                    showToast('Đã đồng bộ dữ liệu mới nhất!');
+
+                } else if (mode === 'push') {
+                    statusEl.innerHTML = '<i class="fas fa-cloud-upload-alt fa-spin text-red-500"></i> Pushing...';
+                    
+                    await pushGist({
+                        words: vocabWords,
+                        phrases: vocabPhrases,
+                        family: vocabFamily,
+                        personal: personalDict
+                    });
+                    
+                    await pushGistSettings({
+                        extractPromptTemplate: config.extractPromptTemplate,
+                        promptTemplate: config.promptTemplate,
+                        phrasePromptTemplate: config.phrasePromptTemplate
+                    });
+
+                    statusEl.innerHTML = `<i class="fas fa-check-circle text-green-500"></i> Pushed`;
+                    showToast('Đã đẩy lên Cloud thành công!');
+                }
+                statusEl.title = `Last action: ${mode} at ${new Date().toLocaleTimeString()}`;
+            } catch (err) {
+                console.warn(err);
+                statusEl.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500"></i> Error';
+                statusEl.title = err.message;
+                showToast('Lỗi đồng bộ: ' + err.message);
+            }
+        }
+
+        async function fetchGist() {
+            const url = `https://api.github.com/gists/${config.gistId}?t=${Date.now()}`;
+            const res = await fetch(url, { headers: { 'Authorization': `token ${config.githubToken}` } });
+            if(!res.ok) throw new Error('Fetch failed');
+            const json = await res.json();
+            const content = json.files[config.gistFilename]?.content;
+            if(!content) return {};
+            try { return JSON.parse(content); } catch { return {}; }
+        }
+
+        async function fetchGistSettings() {
+            try {
+                const url = `https://api.github.com/gists/${config.gistId}?t=${Date.now()}`;
+                const res = await fetch(url, { headers: { 'Authorization': `token ${config.githubToken}` } });
+                if(!res.ok) return {};
+                const json = await res.json();
+                const content = json.files[config.gistSettingsFilename]?.content;
+                if(!content) return {};
+                return JSON.parse(content);
+            } catch {
+                return {};
+            }
+        }
+
+        async function pushGist(dataObj) {
+            await fetch(`https://api.github.com/gists/${config.gistId}`, {
+                method: 'PATCH',
+                headers: { 
+                    'Authorization': `token ${config.githubToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    files: {
+                        [config.gistFilename]: { content: JSON.stringify(dataObj) }
+                    }
+                })
+            });
+        }
+
+        async function pushGistSettings(settingsObj) {
+            await fetch(`https://api.github.com/gists/${config.gistId}`, {
+                method: 'PATCH',
+                headers: { 
+                    'Authorization': `token ${config.githubToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    files: {
+                        [config.gistSettingsFilename]: { content: JSON.stringify(settingsObj) }
+                    }
+                })
+            });
+        }
+
+        // --- SETTINGS ---
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+            if(id === 'dictionaryModal') renderDictionary();
+        }
+
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function saveSettings() {
+            config.githubToken = document.getElementById('githubToken').value;
+            config.gistId = document.getElementById('gistId').value;
+            config.gistFilename = document.getElementById('gistFilename').value;
+            config.gistSettingsFilename = document.getElementById('gistSettingsFilename').value;
+            config.extractPromptTemplate = document.getElementById('extractPromptTemplate').value;
+            config.promptTemplate = document.getElementById('promptTemplate').value;
+            config.phrasePromptTemplate = document.getElementById('phrasePromptTemplate').value;
+
+            localStorage.setItem('appConfig', JSON.stringify(config));
+            closeModal('settingsModal');
+            showToast('Đã lưu! Đang đẩy settings lên Cloud...');
+            
+            updatePrompts();
+            
+            triggerAutoSync('push');
+        }
+
+        function loadSettings() {
+            const saved = localStorage.getItem('appConfig');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if(!parsed.promptTemplate || parsed.promptTemplate.includes("Explain these")) {
+                     parsed.promptTemplate = defaultPrompt;
+                }
+                if(!parsed.extractPromptTemplate) {
+                    parsed.extractPromptTemplate = defaultExtractPrompt;
+                }
+                if(!parsed.phrasePromptTemplate) {
+                    parsed.phrasePromptTemplate = defaultPhrasePrompt;
+                }
+                if(!parsed.gistSettingsFilename) {
+                    parsed.gistSettingsFilename = 'vocab_settings.json';
+                }
+                Object.assign(config, parsed);
+            } else {
+                config.promptTemplate = defaultPrompt;
+                config.extractPromptTemplate = defaultExtractPrompt;
+                config.phrasePromptTemplate = defaultPhrasePrompt;
+            }
+            
+            document.getElementById('githubToken').value = config.githubToken;
+            document.getElementById('gistId').value = config.gistId;
+            document.getElementById('gistFilename').value = config.gistFilename;
+            document.getElementById('gistSettingsFilename').value = config.gistSettingsFilename;
+            document.getElementById('extractPromptTemplate').value = config.extractPromptTemplate;
+            document.getElementById('promptTemplate').value = config.promptTemplate;
+            document.getElementById('phrasePromptTemplate').value = config.phrasePromptTemplate;
+        }
+    </script>
 </body>
 </html>
