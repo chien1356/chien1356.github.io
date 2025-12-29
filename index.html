@@ -42,6 +42,10 @@
                 opacity: 1 !important;
             }
         }
+        
+        .diff-positive { color: #16a34a; }
+        .diff-negative { color: #dc2626; }
+        .diff-neutral { color: #6b7280; }
     </style>
 </head>
 <body class="h-screen md:h-screen flex flex-col overflow-hidden relative" style="height: 100dvh;">
@@ -61,6 +65,10 @@
                 </button>
                 <button onclick="manualPushToCloud()" class="text-green-600 hover:text-green-800 transition px-1 md:px-2 py-1 rounded hover:bg-green-50" title="Đẩy lên Cloud thủ công">
                     <i class="fas fa-cloud-upload-alt"></i>
+                </button>
+                <!-- NEW: Compare Button -->
+                <button onclick="openCompareModal()" class="text-purple-600 hover:text-purple-800 transition px-1 md:px-2 py-1 rounded hover:bg-purple-50" title="So sánh Cloud vs Local">
+                    <i class="fas fa-balance-scale"></i>
                 </button>
                 <div class="h-4 w-px bg-gray-300"></div>
                 <button onclick="openModal('settingsModal')" class="text-gray-500 hover:text-blue-600 transition px-1 md:px-2 py-1" title="Cấu hình">
@@ -236,6 +244,84 @@
     </div>
 
     <!-- MODALS -->
+
+    <!-- Compare Modal -->
+    <div id="compareModal" class="fixed inset-0 bg-black/50 hidden flex justify-center items-center z-50 p-4">
+        <div class="bg-white rounded-xl w-full max-w-2xl p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-6 border-b pb-4">
+                <h2 class="text-xl font-bold text-gray-800">
+                    <i class="fas fa-balance-scale text-purple-500 mr-2"></i>So sánh Cloud vs Local
+                </h2>
+                <button onclick="closeModal('compareModal')" class="text-gray-400 hover:text-red-500 text-2xl transition">&times;</button>
+            </div>
+
+            <!-- Loading State -->
+            <div id="compareLoading" class="text-center py-10">
+                <i class="fas fa-circle-notch fa-spin text-4xl text-blue-500 mb-4"></i>
+                <p class="text-gray-500">Đang tải dữ liệu từ Cloud...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="compareError" class="hidden text-center py-10">
+                <i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-4"></i>
+                <p class="text-red-600 font-medium" id="compareErrorMsg">Lỗi kết nối</p>
+                <button onclick="openCompareModal()" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                    <i class="fas fa-redo mr-2"></i>Thử lại
+                </button>
+            </div>
+
+            <!-- Compare Table -->
+            <div id="compareContent" class="hidden">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="p-3 text-left font-semibold text-gray-700 border-b">Danh mục</th>
+                            <th class="p-3 text-center font-semibold text-blue-600 border-b">
+                                <i class="fas fa-cloud mr-1"></i>Cloud
+                            </th>
+                            <th class="p-3 text-center font-semibold text-green-600 border-b">
+                                <i class="fas fa-laptop mr-1"></i>Local
+                            </th>
+                            <th class="p-3 text-center font-semibold text-gray-600 border-b">Chênh lệch</th>
+                        </tr>
+                    </thead>
+                    <tbody id="compareTableBody">
+                        <!-- Dynamic content -->
+                    </tbody>
+                    <tfoot>
+                        <tr class="bg-gray-50 font-bold">
+                            <td class="p-3 border-t">Tổng cộng</td>
+                            <td class="p-3 text-center border-t text-blue-600" id="totalCloud">0</td>
+                            <td class="p-3 text-center border-t text-green-600" id="totalLocal">0</td>
+                            <td class="p-3 text-center border-t" id="totalDiff">0</td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <!-- Last Updated -->
+                <div class="mt-4 text-center text-sm text-gray-500" id="compareTimestamp"></div>
+
+                <!-- Action Buttons -->
+                <div class="mt-6 flex gap-3">
+                    <button onclick="triggerAutoSync('pull'); closeModal('compareModal');" class="flex-1 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition">
+                        <i class="fas fa-cloud-download-alt mr-2"></i>Đồng bộ từ Cloud
+                    </button>
+                    <button onclick="manualPushToCloud(); closeModal('compareModal');" class="flex-1 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition">
+                        <i class="fas fa-cloud-upload-alt mr-2"></i>Đẩy lên Cloud
+                    </button>
+                </div>
+            </div>
+
+            <!-- No Config State -->
+            <div id="compareNoConfig" class="hidden text-center py-10">
+                <i class="fas fa-cog text-4xl text-gray-400 mb-4"></i>
+                <p class="text-gray-600 mb-4">Chưa cấu hình Github Gist</p>
+                <button onclick="closeModal('compareModal'); openModal('settingsModal');" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                    <i class="fas fa-cog mr-2"></i>Mở Cài đặt
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Dictionary Modal -->
     <div id="dictionaryModal" class="fixed inset-0 bg-black/50 hidden flex justify-center items-center z-50">
@@ -1036,6 +1122,122 @@
             renderDictionary();
             handleInput();
             updateCombinedPhrases();
+        }
+
+        // --- COMPARE CLOUD VS LOCAL ---
+        async function openCompareModal() {
+            openModal('compareModal');
+            
+            const loadingEl = document.getElementById('compareLoading');
+            const errorEl = document.getElementById('compareError');
+            const contentEl = document.getElementById('compareContent');
+            const noConfigEl = document.getElementById('compareNoConfig');
+            
+            // Reset states
+            loadingEl.classList.remove('hidden');
+            errorEl.classList.add('hidden');
+            contentEl.classList.add('hidden');
+            noConfigEl.classList.add('hidden');
+            
+            // Check if configured
+            if (!config.githubToken || !config.gistId) {
+                loadingEl.classList.add('hidden');
+                noConfigEl.classList.remove('hidden');
+                return;
+            }
+            
+            try {
+                // Fetch cloud data
+                const cloudData = await fetchGist();
+                
+                const cloudWords = Array.isArray(cloudData.words) ? cloudData.words.length : 0;
+                const cloudPhrases = Array.isArray(cloudData.phrases) ? cloudData.phrases.length : 0;
+                const cloudFamily = Array.isArray(cloudData.family) ? cloudData.family.length : 0;
+                const cloudPersonal = Array.isArray(cloudData.personal) ? cloudData.personal.length : 0;
+                
+                // Local counts
+                const localWords = vocabWords.length;
+                const localPhrases = vocabPhrases.length;
+                const localFamily = vocabFamily.length;
+                const localPersonal = personalDict.length;
+                
+                // Render comparison table
+                const tableBody = document.getElementById('compareTableBody');
+                tableBody.innerHTML = '';
+                
+                const categories = [
+                    { name: 'Words', icon: 'fas fa-font', color: 'blue', cloud: cloudWords, local: localWords },
+                    { name: 'Phrases', icon: 'fas fa-comment', color: 'indigo', cloud: cloudPhrases, local: localPhrases },
+                    { name: 'Word Families', icon: 'fas fa-sitemap', color: 'teal', cloud: cloudFamily, local: localFamily },
+                    { name: 'Ignored', icon: 'fas fa-user-shield', color: 'gray', cloud: cloudPersonal, local: localPersonal }
+                ];
+                
+                categories.forEach(cat => {
+                    const diff = cat.local - cat.cloud;
+                    let diffText = '';
+                    let diffClass = 'diff-neutral';
+                    
+                    if (diff > 0) {
+                        diffText = `+${diff}`;
+                        diffClass = 'diff-positive';
+                    } else if (diff < 0) {
+                        diffText = `${diff}`;
+                        diffClass = 'diff-negative';
+                    } else {
+                        diffText = '0';
+                    }
+                    
+                    const row = document.createElement('tr');
+                    row.className = 'border-b hover:bg-gray-50';
+                    row.innerHTML = `
+                        <td class="p-3">
+                            <i class="${cat.icon} text-${cat.color}-500 mr-2"></i>
+                            ${cat.name}
+                        </td>
+                        <td class="p-3 text-center font-semibold text-blue-600">${cat.cloud}</td>
+                        <td class="p-3 text-center font-semibold text-green-600">${cat.local}</td>
+                        <td class="p-3 text-center font-semibold ${diffClass}">${diffText}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+                
+                // Totals
+                const totalCloud = cloudWords + cloudPhrases + cloudFamily + cloudPersonal;
+                const totalLocal = localWords + localPhrases + localFamily + localPersonal;
+                const totalDiff = totalLocal - totalCloud;
+                
+                document.getElementById('totalCloud').innerText = totalCloud;
+                document.getElementById('totalLocal').innerText = totalLocal;
+                
+                let totalDiffText = '';
+                let totalDiffClass = 'diff-neutral';
+                if (totalDiff > 0) {
+                    totalDiffText = `+${totalDiff}`;
+                    totalDiffClass = 'diff-positive';
+                } else if (totalDiff < 0) {
+                    totalDiffText = `${totalDiff}`;
+                    totalDiffClass = 'diff-negative';
+                } else {
+                    totalDiffText = '0';
+                }
+                
+                const totalDiffEl = document.getElementById('totalDiff');
+                totalDiffEl.innerText = totalDiffText;
+                totalDiffEl.className = `p-3 text-center border-t ${totalDiffClass}`;
+                
+                // Timestamp
+                document.getElementById('compareTimestamp').innerText = `Cập nhật: ${new Date().toLocaleString('vi-VN')}`;
+                
+                // Show content
+                loadingEl.classList.add('hidden');
+                contentEl.classList.remove('hidden');
+                
+            } catch (err) {
+                console.error('Compare error:', err);
+                loadingEl.classList.add('hidden');
+                errorEl.classList.remove('hidden');
+                document.getElementById('compareErrorMsg').innerText = err.message || 'Không thể kết nối đến Cloud';
+            }
         }
 
         // --- GITHUB SYNC ENGINE ---
