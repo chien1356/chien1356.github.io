@@ -15,12 +15,6 @@
         ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
         .toast { animation: slideIn 0.3s ease-out; }
         @keyframes slideIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .offline-banner { background: linear-gradient(90deg, #f59e0b, #d97706); }
-        .sync-cached { color: #8b5cf6; }
-        .sync-success { color: #10b981; }
-        .sync-pending { color: #f59e0b; }
-        .sync-error { color: #ef4444; }
-        .sync-offline { color: #6b7280; }
         @media (max-width: 768px) {
             .main-container { flex-direction: column; }
             .input-panel { width: 100% !important; height: 25dvh !important; border-right: none !important; border-bottom: 1px solid #d1d5db; }
@@ -30,11 +24,6 @@
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden" style="height: 100dvh;">
-
-    <!-- Offline Banner -->
-    <div id="offlineBanner" class="hidden offline-banner text-white text-center py-1 text-sm font-medium">
-        <i class="fas fa-wifi-slash mr-2"></i>Offline - <span id="pendingCount">0</span> thay đổi đang chờ
-    </div>
 
     <!-- Toast -->
     <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
@@ -50,23 +39,18 @@
             
             <!-- Sync -->
             <div class="flex items-center space-x-1 bg-gray-50 rounded px-1.5 py-1 border text-sm">
-                <button onclick="syncManager.forcePull()" class="text-blue-600 hover:bg-blue-50 px-1.5 py-0.5 rounded" title="Force Pull">
+                <button onclick="syncPull()" class="text-blue-600 hover:bg-blue-50 px-2 py-0.5 rounded flex items-center gap-1" title="Pull from Cloud">
                     <i class="fas fa-cloud-download-alt"></i>
+                    <span class="hidden sm:inline text-xs">Pull</span>
                 </button>
-                <button onclick="syncManager.smartSync()" class="text-purple-600 hover:bg-purple-50 px-1.5 py-0.5 rounded" title="Smart Sync">
-                    <i class="fas fa-sync"></i>
-                </button>
-                <button onclick="syncManager.forcePush()" class="text-green-600 hover:bg-green-50 px-1.5 py-0.5 rounded" title="Force Push">
+                <button onclick="syncPush()" class="text-green-600 hover:bg-green-50 px-2 py-0.5 rounded flex items-center gap-1" title="Push to Cloud">
                     <i class="fas fa-cloud-upload-alt"></i>
+                    <span class="hidden sm:inline text-xs">Push</span>
                 </button>
                 <div class="h-4 w-px bg-gray-300"></div>
                 <button onclick="openModal('settingsModal')" class="text-gray-500 hover:text-blue-600 px-1.5 py-0.5" title="Settings">
                     <i class="fas fa-cog"></i>
                 </button>
-                <div id="syncStatus" class="flex items-center text-xs pl-1.5 border-l ml-1 min-w-[90px]">
-                    <span id="syncIcon" class="text-gray-400"><i class="fas fa-database"></i></span>
-                    <span id="syncText" class="ml-1 truncate text-gray-400">Local</span>
-                </div>
             </div>
 
             <!-- Undo -->
@@ -87,7 +71,7 @@
                 <i class="fas fa-sitemap"></i><span id="familyCount">0</span>
             </button>
             <button onclick="openModal('dictionaryModal')" class="hidden sm:block px-1.5 py-1 bg-gray-100 hover:bg-gray-200 border rounded text-gray-600 font-medium">
-                <i class="fas fa-ban"></i><span id="personalCount">0</span>
+                <i class="fas fa-ban"></i><span id="ignoredCount">0</span>
             </button>
         </div>
     </header>
@@ -126,9 +110,6 @@
                 <button id="outTabResult" onclick="switchOutTab('result')" class="output-tab-active px-2 py-1 font-medium rounded-t whitespace-nowrap">
                     <i class="fas fa-list mr-1"></i>Kết quả
                 </button>
-                <button id="outTabExtract" onclick="switchOutTab('extract')" class="px-2 py-1 font-medium text-gray-500 rounded-t whitespace-nowrap">
-                    <i class="fas fa-magic mr-1"></i>Extract
-                </button>
                 <button id="outTabWord" onclick="switchOutTab('word')" class="px-2 py-1 font-medium text-gray-500 rounded-t whitespace-nowrap">
                     <i class="fas fa-terminal mr-1"></i>Word
                 </button>
@@ -150,19 +131,9 @@
                 </div>
                 <div id="outputList" class="flex-1 overflow-y-auto space-y-1 pr-1 text-sm"></div>
                 <div class="flex gap-2 mt-2 pt-2 border-t text-xs">
-                    <button onclick="copyExtract()" class="flex-1 py-1.5 font-medium bg-purple-100 hover:bg-purple-200 text-purple-700 rounded"><i class="fas fa-magic mr-1"></i>Extract</button>
                     <button onclick="copyWord()" class="flex-1 py-1.5 font-medium bg-gray-200 hover:bg-gray-300 text-gray-700 rounded"><i class="fas fa-terminal mr-1"></i>Word</button>
                     <button onclick="copyPhrase()" class="flex-1 py-1.5 font-medium bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded"><i class="fas fa-comment-dots mr-1"></i>Phrase</button>
                 </div>
-            </div>
-
-            <!-- Extract -->
-            <div id="panelExtract" class="hidden flex-1 flex flex-col overflow-hidden">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-sm font-bold text-purple-600"><i class="fas fa-magic mr-1"></i>Extract Prompt</h3>
-                    <button onclick="copyExtract()" class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded"><i class="fas fa-copy mr-1"></i>Copy</button>
-                </div>
-                <div class="bg-purple-900 text-purple-100 p-2 rounded text-xs font-mono flex-1 overflow-y-auto whitespace-pre-wrap" id="extractPreview"></div>
             </div>
 
             <!-- Word -->
@@ -181,45 +152,6 @@
                     <button onclick="copyPhrase()" class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded"><i class="fas fa-copy mr-1"></i>Copy</button>
                 </div>
                 <div class="bg-indigo-900 text-indigo-100 p-2 rounded text-xs font-mono flex-1 overflow-y-auto whitespace-pre-wrap" id="phrasePreview"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Conflict Modal -->
-    <div id="conflictModal" class="fixed inset-0 bg-black/50 hidden flex justify-center items-center z-50 p-4">
-        <div class="bg-white rounded-xl w-full max-w-2xl p-5 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4 border-b pb-3">
-                <h2 class="text-lg font-bold text-orange-600"><i class="fas fa-exclamation-triangle mr-2"></i>Xung đột dữ liệu</h2>
-                <button onclick="closeModal('conflictModal')" class="text-gray-400 hover:text-red-500 text-xl">&times;</button>
-            </div>
-            
-            <div id="conflictDetails" class="mb-4 p-3 bg-orange-50 rounded-lg text-sm border border-orange-200"></div>
-            
-            <div class="grid grid-cols-3 gap-2 mb-4 text-center text-xs">
-                <div class="bg-blue-50 p-3 rounded-lg border-2 border-blue-200">
-                    <h3 class="font-bold text-blue-700 mb-1"><i class="fas fa-cloud"></i> Cloud</h3>
-                    <div id="conflictCloud" class="text-blue-600"></div>
-                </div>
-                <div class="bg-green-50 p-3 rounded-lg border-2 border-green-200">
-                    <h3 class="font-bold text-green-700 mb-1"><i class="fas fa-laptop"></i> Local</h3>
-                    <div id="conflictLocal" class="text-green-600"></div>
-                </div>
-                <div class="bg-purple-50 p-3 rounded-lg border-2 border-purple-200">
-                    <h3 class="font-bold text-purple-700 mb-1"><i class="fas fa-code-merge"></i> Merge</h3>
-                    <div id="conflictMerge" class="text-purple-600"></div>
-                </div>
-            </div>
-            
-            <div class="flex gap-2 text-sm">
-                <button onclick="syncManager.resolve('cloud')" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2.5 rounded-lg font-medium">
-                    <i class="fas fa-cloud-download-alt mr-1"></i>Dùng Cloud
-                </button>
-                <button onclick="syncManager.resolve('local')" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-lg font-medium">
-                    <i class="fas fa-laptop mr-1"></i>Giữ Local
-                </button>
-                <button onclick="syncManager.resolve('merge')" class="flex-1 bg-purple-500 hover:bg-purple-600 text-white py-2.5 rounded-lg font-medium">
-                    <i class="fas fa-code-merge mr-1"></i>Merge
-                </button>
             </div>
         </div>
     </div>
@@ -255,7 +187,7 @@
 
     <!-- Settings Modal -->
     <div id="settingsModal" class="fixed inset-0 bg-black/50 hidden flex justify-center items-center z-50 p-4">
-        <div class="bg-white rounded-xl w-full max-w-3xl p-5 shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div class="bg-white rounded-xl w-full max-w-md p-5 shadow-2xl">
             <div class="flex justify-between items-center mb-5 border-b pb-3">
                 <h2 class="text-lg font-bold text-gray-800"><i class="fas fa-cog text-blue-500 mr-2"></i>Cài đặt</h2>
                 <button onclick="closeModal('settingsModal')" class="text-gray-400 hover:text-red-500 text-xl">&times;</button>
@@ -264,7 +196,7 @@
             <!-- Github -->
             <div class="mb-5 bg-gray-50 p-4 rounded-xl border">
                 <h3 class="font-bold text-gray-800 mb-3 text-sm"><i class="fab fa-github mr-2"></i>Github Gist Sync</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                <div class="space-y-3 text-sm">
                     <div>
                         <label class="block text-xs text-gray-600 mb-1">Token</label>
                         <input type="password" id="cfgToken" class="w-full p-2 border rounded">
@@ -274,53 +206,8 @@
                         <input type="text" id="cfgGistId" class="w-full p-2 border rounded">
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-600 mb-1">Vocab File</label>
-                        <input type="text" id="cfgVocabFile" class="w-full p-2 border rounded" value="vocab_data.json">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-gray-600 mb-1">Settings File</label>
-                        <input type="text" id="cfgSettingsFile" class="w-full p-2 border rounded" value="vocab_settings.json">
-                    </div>
-                </div>
-                
-                <!-- Auto Merge -->
-                <div class="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <label class="flex items-center gap-3 cursor-pointer">
-                        <input type="checkbox" id="cfgAutoMerge" class="w-5 h-5 rounded text-blue-600 cursor-pointer">
-                        <div>
-                            <span class="font-medium text-blue-800 text-sm">Tự động Merge khi có Conflict</span>
-                            <p class="text-xs text-blue-600">Không hiện popup, luôn gộp Local + Cloud</p>
-                        </div>
-                    </label>
-                </div>
-                
-                <!-- Stats -->
-                <div class="mt-3 p-2 bg-white rounded border text-xs">
-                    <div class="grid grid-cols-3 md:grid-cols-6 gap-1 text-center">
-                        <div class="p-1.5 bg-gray-50 rounded">
-                            <div class="text-gray-500">Last Sync</div>
-                            <div id="statSync" class="font-medium truncate">-</div>
-                        </div>
-                        <div class="p-1.5 bg-gray-50 rounded">
-                            <div class="text-gray-500">ETag</div>
-                            <div id="statEtag" class="font-medium truncate">-</div>
-                        </div>
-                        <div class="p-1.5 bg-gray-50 rounded">
-                            <div class="text-gray-500">Pending</div>
-                            <div id="statPending" class="font-medium">0</div>
-                        </div>
-                        <div class="p-1.5 bg-gray-50 rounded">
-                            <div class="text-gray-500">API Saved</div>
-                            <div id="statApi" class="font-medium text-green-600">0</div>
-                        </div>
-                        <div class="p-1.5 bg-green-50 rounded border border-green-200">
-                            <div class="text-green-600">Size</div>
-                            <div id="statSize" class="font-medium text-green-700">-</div>
-                        </div>
-                        <div class="p-1.5 bg-blue-50 rounded border border-blue-200">
-                            <div class="text-blue-600">Savings</div>
-                            <div id="statSave" class="font-medium text-blue-700">-</div>
-                        </div>
+                        <label class="block text-xs text-gray-600 mb-1">Filename</label>
+                        <input type="text" id="cfgFilename" class="w-full p-2 border rounded" value="vocab_data.json">
                     </div>
                 </div>
             </div>
@@ -329,16 +216,12 @@
             <div class="mb-5">
                 <h3 class="font-bold text-gray-800 mb-3 text-sm"><i class="fas fa-edit text-purple-500 mr-2"></i>Prompt Templates</h3>
                 <div class="space-y-3 text-sm">
-                    <div class="bg-purple-50 p-3 rounded-lg border border-purple-200">
-                        <label class="block text-xs font-bold text-purple-700 mb-1">Extract <span class="font-normal">(dùng {text})</span></label>
-                        <textarea id="cfgExtract" class="w-full p-2 border border-purple-300 rounded text-xs font-mono h-16 bg-white"></textarea>
-                    </div>
                     <div class="bg-gray-50 p-3 rounded-lg border">
-                        <label class="block text-xs font-bold text-gray-700 mb-1">Word <span class="font-normal">(dùng {words})</span></label>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Word <span class="font-normal text-gray-500">(dùng {words})</span></label>
                         <textarea id="cfgWord" class="w-full p-2 border rounded text-xs font-mono h-16 bg-white"></textarea>
                     </div>
                     <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-200">
-                        <label class="block text-xs font-bold text-indigo-700 mb-1">Phrase <span class="font-normal">(dùng {phrases})</span></label>
+                        <label class="block text-xs font-bold text-indigo-700 mb-1">Phrase <span class="font-normal text-indigo-500">(dùng {phrases})</span></label>
                         <textarea id="cfgPhrase" class="w-full p-2 border border-indigo-300 rounded text-xs font-mono h-16 bg-white"></textarea>
                     </div>
                 </div>
@@ -352,35 +235,9 @@
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-// CONSTANTS
+// CONFIG & DATA
 // ═══════════════════════════════════════════════════════════════
-const DEVICE_ID = localStorage.getItem('deviceId') || (() => {
-    const id = 'dev_' + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem('deviceId', id);
-    return id;
-})();
-
-const TOMBSTONE_TTL = 14 * 24 * 60 * 60 * 1000;
-const BASE_TS = 1700000000000;
-
-const defaultExtract = 'Extract vocabulary from text. Return JSON array. Text: "{text}"';
-const defaultWord = 'Explain these words: {words}';
-const defaultPhrase = 'Explain these phrases: {phrases}';
-
-const cfg = {
-    token: '', gistId: '',
-    vocabFile: 'vocab_data.json',
-    settingsFile: 'vocab_settings.json',
-    extractPrompt: defaultExtract,
-    wordPrompt: defaultWord,
-    phrasePrompt: defaultPhrase,
-    autoMerge: false
-};
-
-// ═══════════════════════════════════════════════════════════════
-// DATA
-// ═══════════════════════════════════════════════════════════════
-let wordsMeta = [], phrasesMeta = [], familyMeta = [], ignoredMeta = [];
+const cfg = { token: '', gistId: '', filename: 'vocab_data.json', wordPrompt: '', phrasePrompt: '' };
 let words = [], phrases = [], family = [], ignored = [];
 let detected = [], detectedPhrases = [], manualPhrases = [];
 let sessionIgnored = new Set();
@@ -388,518 +245,7 @@ let curTab = 'word', curOut = 'result';
 let undoStack = [];
 
 // ═══════════════════════════════════════════════════════════════
-// STORAGE OPTIMIZER
-// ═══════════════════════════════════════════════════════════════
-const Compressor = {
-    encTs: ts => ts ? Math.floor((ts - BASE_TS) / 1000) : 0,
-    decTs: e => e ? BASE_TS + e * 1000 : null,
-
-    compress(data) {
-        const now = Date.now();
-        const recent = now - 86400000;
-        const cutoff = now - TOMBSTONE_TTL;
-
-        const proc = arr => {
-            const active = [], del = [], rec = [];
-            (arr || []).forEach(i => {
-                if (typeof i === 'string') { active.push(i); return; }
-                if (i.deleted) {
-                    if (i.deletedAt > cutoff) del.push(`${i.value}:${this.encTs(i.addedAt)}:${this.encTs(i.deletedAt)}`);
-                } else {
-                    active.push(i.value);
-                    if (i.addedAt > recent) rec.push(`${i.value}:${this.encTs(i.addedAt)}:0`);
-                }
-            });
-            return { active, del, rec };
-        };
-
-        const w = proc(data.words), p = proc(data.phrases), f = proc(data.family), i = proc(data.ignored);
-        const r = { v: 2, w: w.active, p: p.active, f: f.active, i: i.active };
-        
-        if (w.del.length || p.del.length || f.del.length || i.del.length)
-            r._d = { w: w.del, p: p.del, f: f.del, i: i.del };
-        if (w.rec.length || p.rec.length || f.rec.length || i.rec.length)
-            r._m = { w: w.rec, p: p.rec, f: f.rec, i: i.rec };
-        
-        r._t = this.encTs(now);
-        r._id = DEVICE_ID.slice(0, 8);
-        return r;
-    },
-
-    decompress(c) {
-        if (!c?.v || c.v < 2) return this.decompressV1(c);
-
-        const parse = s => {
-            const [v, a, d] = s.split(':');
-            return { value: v, addedAt: this.decTs(+a) || Date.now(), deleted: +d > 0, deletedAt: +d > 0 ? this.decTs(+d) : null };
-        };
-
-        const proc = (active, del = [], rec = []) => {
-            const m = new Map();
-            (active || []).forEach(v => m.set(v, { value: v, addedAt: BASE_TS, deleted: false, deletedAt: null }));
-            (rec || []).forEach(s => { const p = parse(s); if (m.has(p.value)) m.get(p.value).addedAt = p.addedAt; });
-            (del || []).forEach(s => { const p = parse(s); m.set(p.value, p); });
-            return Array.from(m.values());
-        };
-
-        return {
-            words: proc(c.w, c._d?.w, c._m?.w),
-            phrases: proc(c.p, c._d?.p, c._m?.p),
-            family: proc(c.f, c._d?.f, c._m?.f),
-            ignored: proc(c.i, c._d?.i, c._m?.i)
-        };
-    },
-
-    decompressV1(d) {
-        const mig = a => (a || []).map(i => typeof i === 'string' ? { value: i, addedAt: Date.now(), deleted: false, deletedAt: null } : i);
-        return { words: mig(d?.words), phrases: mig(d?.phrases), family: mig(d?.family), ignored: mig(d?.ignored || d?.personal) };
-    },
-
-    diff(old, neu) {
-        const d = (o, n) => {
-            const os = new Set(getActive(o)), ns = new Set(getActive(n));
-            return { added: [...ns].filter(x => !os.has(x)), removed: [...os].filter(x => !ns.has(x)) };
-        };
-        return { words: d(old.words, neu.words), phrases: d(old.phrases, neu.phrases), family: d(old.family, neu.family), ignored: d(old.ignored, neu.ignored) };
-    },
-
-    stats(d) {
-        const full = JSON.stringify({ words: d.words, phrases: d.phrases, family: d.family, ignored: d.ignored });
-        const comp = JSON.stringify(this.compress(d));
-        const fs = new Blob([full]).size, cs = new Blob([comp]).size;
-        return { full: fs, comp: cs, savings: ((fs - cs) / fs * 100).toFixed(1) + '%' };
-    }
-};
-
-// ═══════════════════════════════════════════════════════════════
 // HELPERS
-// ═══════════════════════════════════════════════════════════════
-const getActive = arr => (arr || []).filter(i => !i.deleted).map(i => typeof i === 'string' ? i : i.value);
-const formatBytes = b => b < 1024 ? b + 'B' : b < 1048576 ? (b/1024).toFixed(1) + 'KB' : (b/1048576).toFixed(1) + 'MB';
-
-function addMeta(arr, val) {
-    const v = val.toLowerCase().trim();
-    const ex = arr.find(i => (typeof i === 'string' ? i : i.value) === v);
-    if (ex) {
-        if (typeof ex === 'object' && ex.deleted) {
-            ex.deleted = false; ex.deletedAt = null; ex.addedAt = Date.now();
-            return true;
-        }
-        return false;
-    }
-    arr.unshift({ value: v, addedAt: Date.now(), deleted: false, deletedAt: null });
-    return true;
-}
-
-function delMeta(arr, val) {
-    const v = val.toLowerCase().trim();
-    const idx = arr.findIndex(i => {
-        const iv = typeof i === 'string' ? i : i.value;
-        return iv === v && !(typeof i === 'object' && i.deleted);
-    });
-    if (idx === -1) return false;
-    const i = arr[idx];
-    if (typeof i === 'string') arr[idx] = { value: i, addedAt: Date.now() - 1000, deleted: true, deletedAt: Date.now() };
-    else { i.deleted = true; i.deletedAt = Date.now(); }
-    return true;
-}
-
-function smartMerge(local, cloud) {
-    const m = new Map();
-    const proc = arr => (arr || []).forEach(i => {
-        const o = typeof i === 'string' ? { value: i, addedAt: Date.now(), deleted: false, deletedAt: null } : i;
-        const ex = m.get(o.value);
-        if (!ex) m.set(o.value, { ...o });
-        else {
-            const et = ex.deleted ? ex.deletedAt : ex.addedAt;
-            const nt = o.deleted ? o.deletedAt : o.addedAt;
-            if (nt > et) m.set(o.value, { ...o });
-        }
-    });
-    proc(local); proc(cloud);
-    return Array.from(m.values()).sort((a, b) => a.deleted !== b.deleted ? (a.deleted ? 1 : -1) : (b.addedAt || 0) - (a.addedAt || 0));
-}
-
-function isInVocab(item) {
-    const check = arr => arr.some(i => {
-        const v = typeof i === 'string' ? i : i.value;
-        return v === item && !(typeof i === 'object' && i.deleted);
-    });
-    return check(wordsMeta) || check(phrasesMeta) || check(familyMeta) || check(ignoredMeta) || sessionIgnored.has(item);
-}
-
-function updateArrays() {
-    words = getActive(wordsMeta);
-    phrases = getActive(phrasesMeta);
-    family = getActive(familyMeta);
-    ignored = getActive(ignoredMeta);
-}
-
-// ═══════════════════════════════════════════════════════════════
-// SYNC MANAGER
-// ═══════════════════════════════════════════════════════════════
-const syncManager = {
-    etag: null, lastMod: null, lastSync: null,
-    pending: [], online: navigator.onLine, syncing: false,
-    timer: null, apiSaved: 0, conflict: null,
-
-    init() {
-        this.load();
-        window.addEventListener('online', () => { this.online = true; this.updateBanner(); toast('Online!', 'success'); if (this.pending.length) this.smartSync(); });
-        window.addEventListener('offline', () => { this.online = false; this.updateBanner(); toast('Offline', 'warning'); });
-        this.updateBanner();
-        this.updateStats();
-        setInterval(() => this.cleanup(), 3600000);
-    },
-
-    load() {
-        const s = JSON.parse(localStorage.getItem('syncState') || '{}');
-        this.etag = s.etag; this.lastMod = s.lastMod; this.lastSync = s.lastSync;
-        this.pending = s.pending || []; this.apiSaved = s.apiSaved || 0;
-    },
-
-    save() {
-        localStorage.setItem('syncState', JSON.stringify({
-            etag: this.etag, lastMod: this.lastMod, lastSync: this.lastSync,
-            pending: this.pending, apiSaved: this.apiSaved
-        }));
-        this.updateStats();
-    },
-
-    updateBanner() {
-        const b = $('offlineBanner');
-        $('pendingCount').textContent = this.pending.length;
-        b.classList.toggle('hidden', this.online);
-    },
-
-    setStatus(icon, text, cls) {
-        $('syncIcon').innerHTML = icon;
-        $('syncIcon').className = cls;
-        $('syncText').textContent = text;
-        $('syncText').className = 'ml-1 truncate ' + cls;
-    },
-
-    updateStats() {
-        const el = id => $(id);
-        if (el('statSync')) el('statSync').textContent = this.lastSync ? new Date(this.lastSync).toLocaleTimeString() : '-';
-        if (el('statEtag')) el('statEtag').textContent = this.etag?.slice(0, 8) || '-';
-        if (el('statPending')) el('statPending').textContent = this.pending.length;
-        if (el('statApi')) el('statApi').textContent = this.apiSaved;
-        
-        const st = Compressor.stats({ words: wordsMeta, phrases: phrasesMeta, family: familyMeta, ignored: ignoredMeta });
-        if (el('statSize')) el('statSize').textContent = formatBytes(st.comp);
-        if (el('statSave')) el('statSave').textContent = st.savings;
-    },
-
-    getData() {
-        return Compressor.compress({ words: wordsMeta, phrases: phrasesMeta, family: familyMeta, ignored: ignoredMeta });
-    },
-
-    getLocal() {
-        return { words: wordsMeta, phrases: phrasesMeta, family: familyMeta, ignored: ignoredMeta };
-    },
-
-    apply(comp, showDiff = true) {
-        const old = this.getLocal();
-        const data = Compressor.decompress(comp);
-        
-        wordsMeta = data.words; phrasesMeta = data.phrases;
-        familyMeta = data.family; ignoredMeta = data.ignored;
-        updateArrays();
-        saveLocal();
-        renderCounts();
-        handleInput();
-        updatePhrases();
-        
-        if (!$('dictionaryModal').classList.contains('hidden')) renderDict();
-
-        if (showDiff) {
-            const diff = Compressor.diff(old, data);
-            const added = diff.words.added.length + diff.phrases.added.length + diff.family.added.length;
-            const removed = diff.words.removed.length + diff.phrases.removed.length + diff.family.removed.length;
-            if (added || removed) {
-                let msg = '';
-                if (added) msg += `<span class="text-green-600">+${added}</span>`;
-                if (removed) msg += `${msg ? ' ' : ''}<span class="text-red-600">-${removed}</span>`;
-                toast(`Synced: ${msg}`, 'success');
-            }
-        }
-    },
-
-    merge(cloudComp, localComp) {
-        const c = Compressor.decompress(cloudComp);
-        const l = Compressor.decompress(localComp);
-        return Compressor.compress({
-            words: smartMerge(l.words, c.words),
-            phrases: smartMerge(l.phrases, c.phrases),
-            family: smartMerge(l.family, c.family),
-            ignored: smartMerge(l.ignored, c.ignored)
-        });
-    },
-
-    // ═══ PULL SETTINGS TRƯỚC ═══
-    async pullSettings() {
-        if (!cfg.token || !cfg.gistId) return false;
-        try {
-            const res = await fetch(`https://api.github.com/gists/${cfg.gistId}`, {
-                headers: { 'Authorization': `token ${cfg.token}` }
-            });
-            if (!res.ok) return false;
-            const json = await res.json();
-            const content = json.files[cfg.settingsFile]?.content;
-            if (content) {
-                const s = JSON.parse(content);
-                if (s.extractPrompt !== undefined) cfg.extractPrompt = s.extractPrompt;
-                if (s.wordPrompt !== undefined) cfg.wordPrompt = s.wordPrompt;
-                if (s.phrasePrompt !== undefined) cfg.phrasePrompt = s.phrasePrompt;
-                if (s.autoMerge !== undefined) cfg.autoMerge = s.autoMerge;
-                localStorage.setItem('config', JSON.stringify(cfg));
-                this.updateConfigUI();
-                return true;
-            }
-        } catch (e) { console.warn('Pull settings failed:', e); }
-        return false;
-    },
-
-    updateConfigUI() {
-        if ($('cfgExtract')) $('cfgExtract').value = cfg.extractPrompt;
-        if ($('cfgWord')) $('cfgWord').value = cfg.wordPrompt;
-        if ($('cfgPhrase')) $('cfgPhrase').value = cfg.phrasePrompt;
-        if ($('cfgAutoMerge')) $('cfgAutoMerge').checked = cfg.autoMerge;
-    },
-
-    async pushSettings() {
-        if (!cfg.token || !cfg.gistId) return;
-        try {
-            await fetch(`https://api.github.com/gists/${cfg.gistId}`, {
-                method: 'PATCH',
-                headers: { 'Authorization': `token ${cfg.token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    files: { [cfg.settingsFile]: { content: JSON.stringify({
-                        extractPrompt: cfg.extractPrompt,
-                        wordPrompt: cfg.wordPrompt,
-                        phrasePrompt: cfg.phrasePrompt,
-                        autoMerge: cfg.autoMerge
-                    }, null, 2) } }
-                })
-            });
-        } catch (e) { console.warn('Push settings failed:', e); }
-    },
-
-    // ═══ SMART SYNC: Pull settings → Pull data → Handle conflict ═══
-    async smartSync() {
-        if (!cfg.token || !cfg.gistId) { toast('Chưa cấu hình!', 'error'); return; }
-        if (this.syncing) return;
-
-        this.syncing = true;
-        this.setStatus('<i class="fas fa-circle-notch fa-spin"></i>', 'Syncing...', 'sync-pending');
-
-        try {
-            // 1. Pull settings TRƯỚC
-            await this.pullSettings();
-
-            // 2. Pull vocab data
-            const headers = { 'Authorization': `token ${cfg.token}`, 'Accept': 'application/vnd.github.v3+json' };
-            if (this.etag) headers['If-None-Match'] = this.etag;
-
-            const res = await fetch(`https://api.github.com/gists/${cfg.gistId}`, { headers });
-
-            if (res.status === 304) {
-                this.apiSaved++;
-                this.setStatus('<i class="fas fa-check-circle"></i>', 'Cached', 'sync-cached');
-                toast('Không có thay đổi (304)', 'info');
-            } else if (res.ok) {
-                await this.handlePull(res);
-            } else {
-                this.setStatus('<i class="fas fa-exclamation-triangle"></i>', `Error ${res.status}`, 'sync-error');
-                toast(`Lỗi: ${res.status}`, 'error');
-            }
-        } catch (e) {
-            this.handleError(e, 'sync');
-        } finally {
-            this.syncing = false;
-            this.save();
-        }
-    },
-
-    async handlePull(res) {
-        const newEtag = res.headers.get('ETag');
-        const json = await res.json();
-        const content = json.files[cfg.vocabFile]?.content;
-
-        if (!content) {
-            this.setStatus('<i class="fas fa-file"></i>', 'Empty', 'sync-cached');
-            toast('Cloud trống', 'warning');
-            return;
-        }
-
-        const cloudData = JSON.parse(content);
-
-        // Check conflict
-        if (this.pending.length > 0) {
-            this.conflict = { cloud: cloudData, local: this.getData(), newEtag };
-
-            // Auto-merge hoặc hiện modal (settings đã được pull trước)
-            if (cfg.autoMerge) {
-                await this.resolve('merge');
-                return;
-            }
-            this.showConflict();
-            return;
-        }
-
-        // No conflict → Apply
-        this.apply(cloudData);
-        this.etag = newEtag;
-        this.lastSync = Date.now();
-        this.setStatus('<i class="fas fa-cloud-download-alt"></i>', 'Synced', 'sync-success');
-    },
-
-    async forcePull() {
-        this.etag = null;
-        await this.smartSync();
-    },
-
-    async forcePush() {
-        if (!cfg.token || !cfg.gistId) { toast('Chưa cấu hình!', 'error'); return; }
-        if (!this.online) { this.queue('push'); toast('Offline - Đã queue', 'warning'); return; }
-        if (this.syncing) return;
-
-        this.syncing = true;
-        this.setStatus('<i class="fas fa-cloud-upload-alt fa-spin"></i>', 'Pushing...', 'sync-pending');
-
-        try {
-            const data = this.getData();
-            const res = await fetch(`https://api.github.com/gists/${cfg.gistId}`, {
-                method: 'PATCH',
-                headers: { 'Authorization': `token ${cfg.token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ files: { [cfg.vocabFile]: { content: JSON.stringify(data) } } })
-            });
-
-            if (res.ok) {
-                this.etag = res.headers.get('ETag');
-                this.lastSync = Date.now();
-                this.pending = [];
-                await this.pushSettings();
-                this.setStatus('<i class="fas fa-check-circle"></i>', 'Pushed', 'sync-success');
-                toast('Đã push!', 'success');
-            } else {
-                this.setStatus('<i class="fas fa-exclamation-triangle"></i>', `Error ${res.status}`, 'sync-error');
-                toast(`Push failed: ${res.status}`, 'error');
-            }
-        } catch (e) {
-            this.handleError(e, 'push');
-        } finally {
-            this.syncing = false;
-            this.save();
-        }
-    },
-
-    schedulePush() {
-        if (this.timer) clearTimeout(this.timer);
-        this.setStatus('<i class="fas fa-clock"></i>', 'Pending...', 'sync-pending');
-        this.timer = setTimeout(() => {
-            this.online ? this.forcePush() : this.queue('auto');
-        }, 1500);
-    },
-
-    queue(type) {
-        this.pending.push({ type, ts: Date.now() });
-        if (this.pending.length > 10) this.pending = this.pending.slice(-10);
-        this.save();
-        this.updateBanner();
-        this.setStatus('<i class="fas fa-clock"></i>', `${this.pending.length} pending`, 'sync-offline');
-    },
-
-    showConflict() {
-        const c = Compressor.decompress(this.conflict.cloud);
-        const l = Compressor.decompress(this.conflict.local);
-        const m = Compressor.decompress(this.merge(this.conflict.cloud, this.conflict.local));
-
-        const cOnly = getActive(c.words).filter(w => !getActive(l.words).includes(w));
-        const lOnly = getActive(l.words).filter(w => !getActive(c.words).includes(w));
-
-        $('conflictDetails').innerHTML = `
-            <div class="grid grid-cols-2 gap-2 text-xs">
-                <div><span class="font-bold text-blue-700">Cloud có:</span> <span class="text-blue-600">${cOnly.slice(0, 5).join(', ')}${cOnly.length > 5 ? '...' : ''}</span> (${cOnly.length})</div>
-                <div><span class="font-bold text-green-700">Local có:</span> <span class="text-green-600">${lOnly.slice(0, 5).join(', ')}${lOnly.length > 5 ? '...' : ''}</span> (${lOnly.length})</div>
-            </div>
-            <div class="mt-2 text-xs text-orange-600"><i class="fas fa-info-circle mr-1"></i>Bạn có ${this.pending.length} thay đổi local. Chọn <strong>Merge</strong> để giữ cả hai.</div>
-        `;
-
-        $('conflictCloud').innerHTML = `W: ${getActive(c.words).length} | P: ${getActive(c.phrases).length}`;
-        $('conflictLocal').innerHTML = `W: ${getActive(l.words).length} | P: ${getActive(l.phrases).length}`;
-        $('conflictMerge').innerHTML = `W: ${getActive(m.words).length} | P: ${getActive(m.phrases).length}`;
-
-        openModal('conflictModal');
-        this.setStatus('<i class="fas fa-exclamation-triangle"></i>', 'Conflict', 'sync-error');
-    },
-
-    async resolve(choice) {
-        closeModal('conflictModal');
-        
-        const old = this.getLocal();
-        let data;
-
-        switch (choice) {
-            case 'cloud':
-                data = this.conflict.cloud;
-                this.apply(data, false);
-                this.etag = this.conflict.newEtag;
-                this.pending = [];
-                toast('Đã dùng Cloud (Local bị bỏ)', 'info');
-                break;
-
-            case 'local':
-                this.pending = [];
-                await this.forcePush();
-                this.conflict = null;
-                toast('Đã giữ Local và push', 'success');
-                return;
-
-            case 'merge':
-                data = this.merge(this.conflict.cloud, this.conflict.local);
-                this.apply(data, false);
-                this.etag = this.conflict.newEtag;
-                this.pending = [];
-                await this.forcePush();
-                
-                const diff = Compressor.diff(old, Compressor.decompress(data));
-                const added = diff.words.added.length + diff.phrases.added.length;
-                const removed = diff.words.removed.length + diff.phrases.removed.length;
-                toast(`Merged: +${added} -${removed}`, 'success');
-                break;
-        }
-
-        this.lastSync = Date.now();
-        this.save();
-        this.conflict = null;
-        this.setStatus('<i class="fas fa-check-circle"></i>', 'Resolved', 'sync-success');
-    },
-
-    cleanup() {
-        const cutoff = Date.now() - TOMBSTONE_TTL;
-        const clean = arr => arr.filter(i => !i.deleted || i.deletedAt > cutoff);
-        wordsMeta = clean(wordsMeta);
-        phrasesMeta = clean(phrasesMeta);
-        familyMeta = clean(familyMeta);
-        ignoredMeta = clean(ignoredMeta);
-        saveLocal();
-    },
-
-    handleError(e, op) {
-        console.error(`${op} error:`, e);
-        if (!this.online) {
-            this.updateBanner();
-            if (op === 'push') this.queue('failed');
-        }
-        this.setStatus('<i class="fas fa-exclamation-triangle"></i>', 'Error', 'sync-error');
-        toast(`Lỗi: ${e.message}`, 'error');
-    }
-};
-
-// ═══════════════════════════════════════════════════════════════
-// UI HELPERS
 // ═══════════════════════════════════════════════════════════════
 const $ = id => document.getElementById(id);
 
@@ -913,9 +259,85 @@ function toast(msg, type = 'info') {
     setTimeout(() => { div.style.opacity = '0'; div.style.transition = 'opacity 0.3s'; setTimeout(() => div.remove(), 300); }, 3000);
 }
 
-function openModal(id) { $(id).classList.remove('hidden'); if (id === 'dictionaryModal') renderDict(); if (id === 'settingsModal') syncManager.updateStats(); }
+function openModal(id) { $(id).classList.remove('hidden'); if (id === 'dictionaryModal') renderDict(); }
 function closeModal(id) { $(id).classList.add('hidden'); }
 
+function isInVocab(item) {
+    return words.includes(item) || phrases.includes(item) || family.includes(item) || ignored.includes(item) || sessionIgnored.has(item);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SYNC - MANUAL OVERWRITE ONLY
+// ═══════════════════════════════════════════════════════════════
+async function syncPull() {
+    if (!cfg.token || !cfg.gistId) { toast('Chưa cấu hình Gist!', 'error'); return; }
+    
+    if (!confirm('Pull sẽ GHI ĐÈ toàn bộ dữ liệu local. Tiếp tục?')) return;
+    
+    try {
+        toast('Đang pull...', 'info');
+        const res = await fetch(`https://api.github.com/gists/${cfg.gistId}`, {
+            headers: { 'Authorization': `token ${cfg.token}` }
+        });
+        
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        
+        const json = await res.json();
+        const content = json.files[cfg.filename]?.content;
+        
+        if (!content) { toast('File không tồn tại trên Gist', 'warning'); return; }
+        
+        const data = JSON.parse(content);
+        words = data.words || [];
+        phrases = data.phrases || [];
+        family = data.family || [];
+        ignored = data.ignored || [];
+        
+        saveLocal();
+        renderCounts();
+        handleInput();
+        updatePhrases();
+        renderList();
+        
+        toast(`Pull thành công! W:${words.length} P:${phrases.length}`, 'success');
+    } catch (e) {
+        console.error('Pull error:', e);
+        toast(`Pull lỗi: ${e.message}`, 'error');
+    }
+}
+
+async function syncPush() {
+    if (!cfg.token || !cfg.gistId) { toast('Chưa cấu hình Gist!', 'error'); return; }
+    
+    if (!confirm('Push sẽ GHI ĐÈ toàn bộ dữ liệu trên cloud. Tiếp tục?')) return;
+    
+    try {
+        toast('Đang push...', 'info');
+        const data = { words, phrases, family, ignored };
+        
+        const res = await fetch(`https://api.github.com/gists/${cfg.gistId}`, {
+            method: 'PATCH',
+            headers: { 
+                'Authorization': `token ${cfg.token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                files: { [cfg.filename]: { content: JSON.stringify(data, null, 2) } }
+            })
+        });
+        
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        
+        toast(`Push thành công! W:${words.length} P:${phrases.length}`, 'success');
+    } catch (e) {
+        console.error('Push error:', e);
+        toast(`Push lỗi: ${e.message}`, 'error');
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UI
+// ═══════════════════════════════════════════════════════════════
 function switchTab(tab) {
     curTab = tab;
     $('tabWord').classList.toggle('tab-active', tab === 'word');
@@ -929,7 +351,7 @@ function switchTab(tab) {
 
 function switchOutTab(tab) {
     curOut = tab;
-    ['Result', 'Extract', 'Word', 'Phrase'].forEach(t => {
+    ['Result', 'Word', 'Phrase'].forEach(t => {
         const l = t.toLowerCase();
         $(`panel${t}`)?.classList.toggle('hidden', l !== tab);
         const btn = $(`outTab${t}`);
@@ -964,13 +386,13 @@ function renderCounts() {
     $('wordCount').textContent = words.length;
     $('phraseCount').textContent = phrases.length;
     $('familyCount').textContent = family.length;
-    $('personalCount').textContent = ignored.length;
+    $('ignoredCount').textContent = ignored.length;
 }
 
 function renderDict() {
     const q = $('searchVocab').value.toLowerCase();
     const render = (arr, el, type) => {
-        el.innerHTML = getActive(arr).filter(i => i.includes(q)).map(i => {
+        el.innerHTML = arr.filter(i => i.includes(q)).map(i => {
             const e = i.replace(/'/g, "\\'").replace(/"/g, '\\"');
             return `<div class="flex justify-between text-xs bg-white p-1.5 rounded border shadow-sm">
                 <span class="truncate pr-2">${i}</span>
@@ -978,10 +400,10 @@ function renderDict() {
             </div>`;
         }).join('');
     };
-    render(wordsMeta, $('dictWordList'), 'word');
-    render(phrasesMeta, $('dictPhraseList'), 'phrase');
-    render(familyMeta, $('dictFamilyList'), 'family');
-    render(ignoredMeta, $('dictIgnoredList'), 'ignored');
+    render(words, $('dictWordList'), 'word');
+    render(phrases, $('dictPhraseList'), 'phrase');
+    render(family, $('dictFamilyList'), 'family');
+    render(ignored, $('dictIgnoredList'), 'ignored');
     $('dictWord').textContent = words.length;
     $('dictPhrase').textContent = phrases.length;
     $('dictFamily').textContent = family.length;
@@ -989,10 +411,12 @@ function renderDict() {
 }
 
 function updatePrompts() {
-    const txt = $('inputText').value;
-    $('extractPreview').textContent = txt.trim() ? cfg.extractPrompt.replace('{text}', txt) : '(Nhập văn bản...)';
-    $('wordPreview').textContent = detected.length ? cfg.wordPrompt.replace('{words}', detected.join(', ')) : '(Chưa có từ)';
-    $('phrasePreview').textContent = detectedPhrases.length ? cfg.phrasePrompt.replace('{phrases}', detectedPhrases.join(', ')) : '(Chưa có phrase)';
+    $('wordPreview').textContent = detected.length 
+        ? (cfg.wordPrompt || '{words}').replace('{words}', detected.join(', ')) 
+        : '(Chưa có từ)';
+    $('phrasePreview').textContent = detectedPhrases.length 
+        ? (cfg.phrasePrompt || '{phrases}').replace('{phrases}', detectedPhrases.join(', ')) 
+        : '(Chưa có phrase)';
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1021,35 +445,35 @@ function updatePhrases() { detectedPhrases = manualPhrases.filter(p => !isInVoca
 // VOCAB ACTIONS
 // ═══════════════════════════════════════════════════════════════
 function addVocab(item) {
-    const arr = curTab === 'word' ? wordsMeta : phrasesMeta;
-    if (addMeta(arr, item)) {
-        updateArrays();
+    const arr = curTab === 'word' ? words : phrases;
+    if (!arr.includes(item)) {
+        arr.unshift(item);
         pushUndo(curTab === 'word' ? 'word' : 'phrase', item);
         saveLocal();
-        syncManager.schedulePush();
         removeItem(item);
+        renderCounts();
         toast(`+${item}`, 'success');
     }
 }
 
 function addIgnored(item) {
-    if (addMeta(ignoredMeta, item)) {
-        updateArrays();
+    if (!ignored.includes(item)) {
+        ignored.unshift(item);
         pushUndo('ignored', item);
         saveLocal();
-        syncManager.schedulePush();
         removeItem(item);
+        renderCounts();
         toast(`Ignored: ${item}`, 'success');
     }
 }
 
 function addFamily(item) {
-    if (addMeta(familyMeta, item)) {
-        updateArrays();
+    if (!family.includes(item)) {
+        family.unshift(item);
         pushUndo('family', item);
         saveLocal();
-        syncManager.schedulePush();
         removeItem(item);
+        renderCounts();
         toast(`Family: ${item}`, 'success');
     }
 }
@@ -1057,11 +481,9 @@ function addFamily(item) {
 function addAllToVocab() {
     const items = curTab === 'word' ? [...detected] : [...detectedPhrases];
     if (!items.length) return;
-    const arr = curTab === 'word' ? wordsMeta : phrasesMeta;
-    items.forEach(i => { if (addMeta(arr, i)) pushUndo(curTab === 'word' ? 'word' : 'phrase', i); });
-    updateArrays();
+    const arr = curTab === 'word' ? words : phrases;
+    items.forEach(i => { if (!arr.includes(i)) { arr.unshift(i); pushUndo(curTab === 'word' ? 'word' : 'phrase', i); } });
     saveLocal();
-    syncManager.schedulePush();
     if (curTab === 'word') detected = [];
     else { manualPhrases = manualPhrases.filter(p => !items.includes(p)); updatePhrases(); }
     renderList();
@@ -1079,12 +501,13 @@ function removeItem(item) {
 
 function delDict(item, type) {
     if (!confirm(`Xóa "${item}"?`)) return;
-    const arr = { word: wordsMeta, phrase: phrasesMeta, family: familyMeta, ignored: ignoredMeta }[type];
-    if (delMeta(arr, item)) {
-        updateArrays();
+    const arr = { word: words, phrase: phrases, family: family, ignored: ignored }[type];
+    const idx = arr.indexOf(item);
+    if (idx > -1) {
+        arr.splice(idx, 1);
         saveLocal();
-        syncManager.schedulePush();
         renderDict();
+        renderCounts();
         handleInput();
         updatePhrases();
         toast(`Đã xóa: ${item}`, 'success');
@@ -1095,7 +518,7 @@ function delDict(item, type) {
 // UNDO
 // ═══════════════════════════════════════════════════════════════
 function pushUndo(type, item) {
-    undoStack.push({ type, item, ts: Date.now() });
+    undoStack.push({ type, item });
     if (undoStack.length > 50) undoStack.shift();
     updateUndo();
 }
@@ -1108,14 +531,15 @@ function updateUndo() {
 function undoLast() {
     if (!undoStack.length) return;
     const { type, item } = undoStack.pop();
-    const arr = { word: wordsMeta, phrase: phrasesMeta, family: familyMeta, ignored: ignoredMeta }[type];
-    if (delMeta(arr, item)) {
-        updateArrays();
+    const arr = { word: words, phrase: phrases, family: family, ignored: ignored }[type];
+    const idx = arr.indexOf(item);
+    if (idx > -1) {
+        arr.splice(idx, 1);
         saveLocal();
-        syncManager.schedulePush();
         analyze();
         updatePhrases();
         renderList();
+        renderCounts();
         updateUndo();
         toast(`Undo: ${item}`, 'success');
     }
@@ -1161,7 +585,6 @@ function clearManual() {
 
 function copyItem(i) { navigator.clipboard.writeText(i).then(() => toast(`Copied: ${i}`, 'success')); }
 function searchG(i) { window.open(`https://www.google.com/search?q=${encodeURIComponent(i + ' meaning')}`, '_blank'); }
-function copyExtract() { const t = $('extractPreview').textContent; if (!t.includes('Nhập')) navigator.clipboard.writeText(t).then(() => toast('Copied!', 'success')); }
 function copyWord() { const t = $('wordPreview').textContent; if (!t.includes('Chưa có')) navigator.clipboard.writeText(t).then(() => toast('Copied!', 'success')); }
 function copyPhrase() { const t = $('phrasePreview').textContent; if (!t.includes('Chưa có')) navigator.clipboard.writeText(t).then(() => toast('Copied!', 'success')); }
 
@@ -1169,68 +592,45 @@ function copyPhrase() { const t = $('phrasePreview').textContent; if (!t.include
 // STORAGE
 // ═══════════════════════════════════════════════════════════════
 function saveLocal() {
-    localStorage.setItem('wordsMeta', JSON.stringify(wordsMeta));
-    localStorage.setItem('phrasesMeta', JSON.stringify(phrasesMeta));
-    localStorage.setItem('familyMeta', JSON.stringify(familyMeta));
-    localStorage.setItem('ignoredMeta', JSON.stringify(ignoredMeta));
-    renderCounts();
+    localStorage.setItem('words', JSON.stringify(words));
+    localStorage.setItem('phrases', JSON.stringify(phrases));
+    localStorage.setItem('family', JSON.stringify(family));
+    localStorage.setItem('ignored', JSON.stringify(ignored));
 }
 
 function loadVocab() {
-    const load = (key, old) => {
-        const d = localStorage.getItem(key);
-        if (d) return JSON.parse(d);
-        const o = localStorage.getItem(old);
-        if (o) return JSON.parse(o).map(i => typeof i === 'string' ? { value: i, addedAt: Date.now(), deleted: false, deletedAt: null } : i);
-        return [];
-    };
-    wordsMeta = load('wordsMeta', 'myVocabWords');
-    phrasesMeta = load('phrasesMeta', 'myVocabPhrases');
-    familyMeta = load('familyMeta', 'myVocabFamily');
-    ignoredMeta = load('ignoredMeta', 'myPersonalDict');
-    updateArrays();
+    words = JSON.parse(localStorage.getItem('words') || '[]');
+    phrases = JSON.parse(localStorage.getItem('phrases') || '[]');
+    family = JSON.parse(localStorage.getItem('family') || '[]');
+    ignored = JSON.parse(localStorage.getItem('ignored') || '[]');
 }
 
 function loadConfig() {
     const s = JSON.parse(localStorage.getItem('config') || '{}');
-    Object.assign(cfg, {
-        token: s.token || '', gistId: s.gistId || '',
-        vocabFile: s.vocabFile || 'vocab_data.json',
-        settingsFile: s.settingsFile || 'vocab_settings.json',
-        extractPrompt: s.extractPrompt || defaultExtract,
-        wordPrompt: s.wordPrompt || defaultWord,
-        phrasePrompt: s.phrasePrompt || defaultPhrase,
-        autoMerge: s.autoMerge || false
-    });
+    cfg.token = s.token || '';
+    cfg.gistId = s.gistId || '';
+    cfg.filename = s.filename || 'vocab_data.json';
+    cfg.wordPrompt = s.wordPrompt || '';
+    cfg.phrasePrompt = s.phrasePrompt || '';
+    
     $('cfgToken').value = cfg.token;
     $('cfgGistId').value = cfg.gistId;
-    $('cfgVocabFile').value = cfg.vocabFile;
-    $('cfgSettingsFile').value = cfg.settingsFile;
-    $('cfgExtract').value = cfg.extractPrompt;
+    $('cfgFilename').value = cfg.filename;
     $('cfgWord').value = cfg.wordPrompt;
     $('cfgPhrase').value = cfg.phrasePrompt;
-    $('cfgAutoMerge').checked = cfg.autoMerge;
 }
 
 function saveConfig() {
     cfg.token = $('cfgToken').value;
     cfg.gistId = $('cfgGistId').value;
-    cfg.vocabFile = $('cfgVocabFile').value;
-    cfg.settingsFile = $('cfgSettingsFile').value;
-    cfg.extractPrompt = $('cfgExtract').value;
+    cfg.filename = $('cfgFilename').value;
     cfg.wordPrompt = $('cfgWord').value;
     cfg.phrasePrompt = $('cfgPhrase').value;
-    cfg.autoMerge = $('cfgAutoMerge').checked;
-
+    
     localStorage.setItem('config', JSON.stringify(cfg));
     closeModal('settingsModal');
     updatePrompts();
     toast('Đã lưu!', 'success');
-
-    if (cfg.token && cfg.gistId) {
-        syncManager.pushSettings();
-        syncManager.forcePush();
-    }
 }
 
 // File upload
@@ -1254,15 +654,13 @@ $('fileInput')?.addEventListener('change', e => {
 window.onload = () => {
     loadConfig();
     loadVocab();
-    syncManager.init();
     
     $('inputText').addEventListener('input', handleInput);
     $('manualInput').addEventListener('input', handleManual);
     
     renderCounts();
     updateUndo();
-    
-    if (cfg.token && cfg.gistId) setTimeout(() => syncManager.smartSync(), 1000);
+    updatePrompts();
 };
 </script>
 </body>
