@@ -378,55 +378,55 @@
         }
 
         // --- FIND IN PAGE FUNCTION ---
-        function findInPage(item) {
-            const textarea = currentTab === 'word' ? document.getElementById('inputText') : document.getElementById('manualPhraseInput');
-            const text = textarea.value.toLowerCase();
-            const searchTerm = item.toLowerCase();
-            
-            // Reset index if searching for different item
-            if (lastFindItem !== item) {
-                currentFindIndex = -1;
-                lastFindItem = item;
-            }
-            
-            // Find all occurrences
-            const positions = [];
-            let pos = 0;
-            while ((pos = text.indexOf(searchTerm, pos)) !== -1) {
-                positions.push(pos);
-                pos += 1;
-            }
-            
-            if (positions.length === 0) {
-                showToast(`Không tìm thấy "${item}" trong văn bản`);
-                return;
-            }
-            
-            // Cycle to next occurrence
-            currentFindIndex = (currentFindIndex + 1) % positions.length;
-            const targetPos = positions[currentFindIndex];
-            
-            // Switch to correct tab if needed
-            if (currentTab === 'manual') {
-                switchTab('word');
-            }
-            
-            // Focus textarea and select the word
-            textarea.focus();
-            textarea.setSelectionRange(targetPos, targetPos + searchTerm.length);
-            
-            // Scroll to make selection visible
-            // Calculate approximate scroll position
-            const lineHeight = 24; // approximate
-            const charsPerLine = 50; // approximate
-            const lineNumber = Math.floor(targetPos / charsPerLine);
-            textarea.scrollTop = Math.max(0, lineNumber * lineHeight - textarea.clientHeight / 2);
-            
-            // Show position info
-            const totalOccurrences = positions.length;
-            const currentOccurrence = currentFindIndex + 1;
-            showToast(`"${item}" - vị trí ${currentOccurrence}/${totalOccurrences}`);
-        }
+function findInPage(item) {
+    const textarea = currentTab === 'word' ? document.getElementById('inputText') : document.getElementById('manualPhraseInput');
+    const text = textarea.value.toLowerCase();
+    const searchTerm = item.toLowerCase();
+    
+    // Reset index if searching for different item
+    if (lastFindItem !== item) {
+        currentFindIndex = -1;
+        lastFindItem = item;
+    }
+    
+    // Find all occurrences
+    const positions = [];
+    let pos = 0;
+    while ((pos = text.indexOf(searchTerm, pos)) !== -1) {
+        positions.push(pos);
+        pos += 1;
+    }
+    
+    if (positions.length === 0) {
+        showToast(`Không tìm thấy "${item}" trong văn bản`);
+        return;
+    }
+    
+    // Cycle to next occurrence
+    currentFindIndex = (currentFindIndex + 1) % positions.length;
+    const targetPos = positions[currentFindIndex];
+    
+    // Switch to correct tab if needed
+    if (currentTab === 'manual') {
+        switchTab('word');
+    }
+    
+    // Focus textarea and select the word
+    textarea.focus();
+    textarea.setSelectionRange(targetPos, targetPos + searchTerm.length);
+    
+    // Scroll to make selection visible
+    // Calculate approximate scroll position
+    const lineHeight = 24; // approximate
+    const charsPerLine = 50; // approximate
+    const lineNumber = Math.floor(targetPos / charsPerLine);
+    textarea.scrollTop = Math.max(0, lineNumber * lineHeight - textarea.clientHeight / 2);
+    
+    // Show position info
+    const totalOccurrences = positions.length;
+    const currentOccurrence = currentFindIndex + 1;
+    showToast(`"${item}" - vị trí ${currentOccurrence}/${totalOccurrences}`);
+}
 
         // --- INIT ---
         window.onload = () => {
