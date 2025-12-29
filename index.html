@@ -307,7 +307,7 @@
         let currentTab = 'word';
         let currentOutputTab = 'result';
         
-        // Cloud data in RAM (not cache)
+        // Cloud data in RAM (temporary storage)
         let cloudDataInMemory = null;
         
         // Undo Stack
@@ -318,6 +318,7 @@
         let pushLocked = false;
         let pushQueue = [];
         let pushDebounceTimer = null;
+        const MAX_RETRY = 3;
 
         const defaultPrompt = `Phân tích các từ này : {words}`;
         const defaultPhrasePrompt = `Phân tích các cụm từ này : {phrases}`;
@@ -342,6 +343,31 @@
         function addItem(arr, item) { if (!arr.includes(item)) arr.unshift(item); }
         function removeItem(arr, item) { const i = arr.indexOf(item); if (i > -1) arr.splice(i, 1); }
         function updateCombinedPhrases() { detectedPhrases = manualPhrases.filter(p => !isInAnyVocab(p)); }
+
+        // --- FIX #1: So sánh nội dung thực sự, không chỉ length ---
+        function arraysEqual(a, b) {
+            if (a.length !== b.length) return false;
+            const setA = new Set(a);
+            return b.every(item => setA.has(item));
+        }
+
+        function checkDataDifference(cloudData) {
+            const cloud = cloudData.vocab || {};
+            const cloudSettings = cloudData.settings || {};
+            
+            // So sánh nội dung từng mảng
+            if (!arraysEqual(cloud.words || [], vocabWords)) return true;
+            if (!arraysEqual(cloud.phrases || [], vocabPhrases)) return true;
+            if (!arraysEqual(cloud.family || [], vocabFamily)) return true;
+            if (!arraysEqual(cloud.personal || [], personalDict)) return true;
+            
+            // So sánh settings
+            if (cloudSettings.extractPromptTemplate && cloudSettings.extractPromptTemplate !== config.extractPromptTemplate) return true;
+            if (cloudSettings.promptTemplate && cloudSettings.promptTemplate !== config.promptTemplate) return true;
+            if (cloudSettings.phrasePromptTemplate && cloudSettings.phrasePromptTemplate !== config.phrasePromptTemplate) return true;
+            
+            return false;
+        }
 
         // --- INIT ---
         window.onload = () => {
@@ -376,35 +402,12 @@
                 } else {
                     statusEl.innerHTML = '<i class="fas fa-check-circle text-green-500"></i> Synced';
                     showToast('Dữ liệu đã đồng bộ với Cloud!');
+                    cloudDataInMemory = null; // Clear, không cần nữa
                 }
             } catch (err) {
                 console.error('Startup check error:', err);
                 statusEl.innerHTML = '<i class="fas fa-wifi text-gray-400"></i> Offline';
             }
-        }
-
-        // Check if local and cloud data are different
-        function checkDataDifference(cloudData) {
-            const cloud = cloudData.vocab || {};
-            const cloudSettings = cloudData.settings || {};
-            
-            // Compare vocab counts
-            const cw = (cloud.words || []).length;
-            const cp = (cloud.phrases || []).length;
-            const cf = (cloud.family || []).length;
-            const cd = (cloud.personal || []).length;
-            
-            if (cw !== vocabWords.length) return true;
-            if (cp !== vocabPhrases.length) return true;
-            if (cf !== vocabFamily.length) return true;
-            if (cd !== personalDict.length) return true;
-            
-            // Compare settings
-            if (cloudSettings.extractPromptTemplate && cloudSettings.extractPromptTemplate !== config.extractPromptTemplate) return true;
-            if (cloudSettings.promptTemplate && cloudSettings.promptTemplate !== config.promptTemplate) return true;
-            if (cloudSettings.phrasePromptTemplate && cloudSettings.phrasePromptTemplate !== config.phrasePromptTemplate) return true;
-            
-            return false;
         }
 
         // --- Manual Phrase Input Handler ---
@@ -781,7 +784,7 @@
             if (!res.ok) throw new Error(`Push failed: ${res.status}`);
         }
 
-        // --- MUTEX LOCK + QUEUE for Push ---
+        // --- FIX #2 & #3: MUTEX LOCK + QUEUE + RETRY LOGIC ---
         function schedulePush() {
             if (!config.githubToken || !config.gistId) return;
             
@@ -793,19 +796,22 @@
             
             // Debounce: wait 2s after last change
             if (pushDebounceTimer) clearTimeout(pushDebounceTimer);
-            pushDebounceTimer = setTimeout(() => processQueue(), 2000);
+            pushDebounceTimer = setTimeout(() => processQueue(0), 2000);
         }
 
-        async function processQueue() {
-            if (pushLocked || pushQueue.length === 0) return;
+        async function processQueue(retryCount = 0) {
+            // Check lock và queue
+            if (pushLocked) return;
+            if (pushQueue.length === 0) return;
             
             pushLocked = true;
-            pushQueue = []; // Clear queue, we're processing
+            pushQueue = []; // Clear queue
             
             const statusEl = document.getElementById('syncStatusIndicator');
             statusEl.innerHTML = '<i class="fas fa-cloud-upload-alt fa-spin text-blue-500"></i> Pushing...';
             
             try {
+                // Lấy data MỚI NHẤT tại thời điểm push
                 const data = {
                     vocab: { words: vocabWords, phrases: vocabPhrases, family: vocabFamily, personal: personalDict },
                     settings: { extractPromptTemplate: config.extractPromptTemplate, promptTemplate: config.promptTemplate, phrasePromptTemplate: config.phrasePromptTemplate }
@@ -813,15 +819,33 @@
                 await pushGist(data);
                 statusEl.innerHTML = '<i class="fas fa-check-circle text-green-500"></i> Synced';
                 statusEl.title = `Pushed @ ${new Date().toLocaleTimeString()}`;
+                
             } catch (err) {
                 console.error('Push error:', err);
-                statusEl.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500"></i> Error';
-                showToast('Lỗi push: ' + err.message);
+                
+                // --- RETRY LOGIC với Exponential Backoff ---
+                if (retryCount < MAX_RETRY) {
+                    const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s
+                    statusEl.innerHTML = `<i class="fas fa-redo fa-spin text-orange-500"></i> Retry ${retryCount + 1}/${MAX_RETRY}...`;
+                    
+                    pushLocked = false; // Unlock trước khi retry
+                    setTimeout(() => {
+                        pushQueue.push(Date.now()); // Re-queue
+                        processQueue(retryCount + 1);
+                    }, delay);
+                    return; // Không chạy finally block
+                } else {
+                    statusEl.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500"></i> Failed';
+                    showToast('Không thể sync sau 3 lần thử. Sẽ thử lại khi có thay đổi mới.');
+                    // Queue lại để retry khi user thao tác tiếp
+                    pushQueue.push(Date.now());
+                }
             } finally {
                 pushLocked = false;
-                // Check if new items were queued during push
+                
+                // Nếu có pending mới trong khi đang push, xử lý tiếp
                 if (pushQueue.length > 0) {
-                    setTimeout(() => processQueue(), 1000);
+                    setTimeout(() => processQueue(0), 1000);
                 }
             }
         }
@@ -845,10 +869,25 @@
             }
         }
 
+        // --- FIX #3: pushToCloud() respect the lock ---
         async function pushToCloud() {
-            if (!config.githubToken || !config.gistId) { showToast('Chưa cấu hình Github!'); return; }
+            if (!config.githubToken || !config.gistId) { 
+                showToast('Chưa cấu hình Github!'); 
+                return; 
+            }
+            
+            // Respect the lock - không bypass
+            if (pushLocked) {
+                showToast('Đang sync, vui lòng đợi...');
+                return;
+            }
+            
+            // Clear pending debounce và queue
+            if (pushDebounceTimer) clearTimeout(pushDebounceTimer);
+            pushQueue = [];
             
             const statusEl = document.getElementById('syncStatusIndicator');
+            pushLocked = true;
             statusEl.innerHTML = '<i class="fas fa-cloud-upload-alt fa-spin text-blue-500"></i> Pushing...';
             
             try {
@@ -863,40 +902,41 @@
                 console.error('Push error:', err);
                 statusEl.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500"></i> Error';
                 showToast('Lỗi push: ' + err.message);
+            } finally {
+                pushLocked = false;
             }
         }
 
         // --- COMPARE MODAL ---
         async function openCompareModal() {
-            openModal('compareModal');
-            
-            const loadingEl = document.getElementById('compareLoading');
-            const errorEl = document.getElementById('compareError');
-            const contentEl = document.getElementById('compareContent');
-            const noConfigEl = document.getElementById('compareNoConfig');
-            
-            loadingEl.classList.remove('hidden');
-            errorEl.classList.add('hidden');
-            contentEl.classList.add('hidden');
-            noConfigEl.classList.add('hidden');
-            
             if (!config.githubToken || !config.gistId) {
-                loadingEl.classList.add('hidden');
-                noConfigEl.classList.remove('hidden');
+                openModal('compareModal');
+                document.getElementById('compareLoading').classList.add('hidden');
+                document.getElementById('compareNoConfig').classList.remove('hidden');
                 return;
             }
+            
+            const statusEl = document.getElementById('syncStatusIndicator');
+            statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin text-blue-500"></i> Comparing...';
             
             try {
                 const cloudData = await fetchGist();
                 cloudDataInMemory = cloudData;
-                renderCompareTable(cloudData);
-                loadingEl.classList.add('hidden');
-                contentEl.classList.remove('hidden');
+                
+                const hasDiff = checkDataDifference(cloudData);
+                
+                if (hasDiff) {
+                    statusEl.innerHTML = '<i class="fas fa-exclamation-circle text-yellow-500"></i> Khác biệt';
+                    openCompareModalWithData(cloudData);
+                } else {
+                    statusEl.innerHTML = '<i class="fas fa-check-circle text-green-500"></i> Synced';
+                    showToast('Dữ liệu đã đồng bộ với Cloud!');
+                    cloudDataInMemory = null;
+                }
             } catch (err) {
                 console.error('Compare error:', err);
-                loadingEl.classList.add('hidden');
-                errorEl.classList.remove('hidden');
-                document.getElementById('compareErrorMsg').innerText = err.message || 'Lỗi kết nối';
+                statusEl.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500"></i> Error';
+                showToast('Lỗi: ' + err.message);
             }
         }
 
@@ -987,6 +1027,13 @@
         function openModal(id) {
             document.getElementById(id).classList.remove('hidden');
             if (id === 'dictionaryModal') renderDictionary();
+            if (id === 'compareModal') {
+                // Reset modal state
+                document.getElementById('compareLoading').classList.remove('hidden');
+                document.getElementById('compareError').classList.add('hidden');
+                document.getElementById('compareContent').classList.add('hidden');
+                document.getElementById('compareNoConfig').classList.add('hidden');
+            }
         }
 
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
