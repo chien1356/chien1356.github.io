@@ -87,10 +87,15 @@
                     <button onclick="goToSubtitle('first')" class="p-0.5 md:p-1 text-purple-600 hover:bg-purple-100 rounded text-xs md:text-sm" title="Câu đầu"><i class="fas fa-angle-double-left"></i></button>
                     <button onclick="goToSubtitle('prev')" class="p-0.5 md:p-1 text-purple-600 hover:bg-purple-100 rounded text-xs md:text-sm" title="Câu trước"><i class="fas fa-angle-left"></i></button>
                     
-                    <!-- Nút hiển thị số - click để nhập -->
-                    <button onclick="promptJumpToSubtitle()" class="min-w-[3rem] md:min-w-[4rem] text-center text-xs font-medium bg-white border border-purple-200 rounded px-1 py-0.5 hover:bg-purple-100 transition" title="Nhấn để nhảy đến câu">
-                        <span id="subtitleCurrent">0</span>/<span id="subtitleTotal">0</span>
-                    </button>
+                    <!-- Input để nhảy đến câu -->
+                    <input type="text" 
+                           inputmode="numeric" 
+                           id="subtitleJumpInput" 
+                           class="w-8 md:w-10 text-center text-xs font-medium bg-white border border-purple-200 rounded px-0.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-purple-400" 
+                           placeholder="#"
+                           onkeydown="if(event.key==='Enter'){event.preventDefault();jumpToSubtitle();}">
+                    <span class="text-xs text-purple-600">/</span>
+                    <span id="subtitleTotal" class="text-xs font-medium text-purple-700">0</span>
                     
                     <button onclick="goToSubtitle('next')" class="p-0.5 md:p-1 text-purple-600 hover:bg-purple-100 rounded text-xs md:text-sm" title="Câu tiếp"><i class="fas fa-angle-right"></i></button>
                     <button onclick="goToSubtitle('last')" class="p-0.5 md:p-1 text-purple-600 hover:bg-purple-100 rounded text-xs md:text-sm" title="Câu cuối"><i class="fas fa-angle-double-right"></i></button>
@@ -385,6 +390,26 @@
             return false;
         }
 
+        // --- FOCUS WITHOUT KEYBOARD (Mobile) ---
+        function focusWithoutKeyboard(textarea, start, end) {
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isMobile) {
+                // Set readonly tạm → focus không mở keyboard
+                textarea.setAttribute('readonly', 'readonly');
+                textarea.focus();
+                textarea.setSelectionRange(start, end);
+                scrollToSelection(textarea, start);
+                
+                // Bỏ readonly sau 100ms để user vẫn edit được
+                setTimeout(() => textarea.removeAttribute('readonly'), 100);
+            } else {
+                textarea.focus();
+                textarea.setSelectionRange(start, end);
+                scrollToSelection(textarea, start);
+            }
+        }
+
         // --- SENTENCE BOUNDARY DETECTION ---
         function isRealSentenceEnd(text, dotPosition) {
             const before = text.substring(Math.max(0, dotPosition - 15), dotPosition);
@@ -439,9 +464,8 @@
                 switchTab('word');
             }
             
-            textarea.focus();
-            textarea.setSelectionRange(sentence.start, sentence.end);
-            scrollToSelection(textarea, sentence.start);
+            // Dùng focusWithoutKeyboard thay vì focus trực tiếp
+            focusWithoutKeyboard(textarea, sentence.start, sentence.end);
             
             showToast(`"${item}" - ${currentFindIndex + 1}/${positions.length}`);
         }
@@ -492,7 +516,6 @@
             const paddingRight = parseFloat(style.paddingRight) || 0;
             const textareaWidth = textarea.clientWidth - paddingLeft - paddingRight;
             
-            // Tính số dòng có tính word-wrap
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             ctx.font = `${style.fontSize} ${style.fontFamily}`;
@@ -512,9 +535,9 @@
             
             const positionY = paddingTop + (totalLines - 1) * lineHeight;
             
-            // Scroll sao cho text nằm gần TOP
+            // Mobile: 0.02 (gần top), Laptop: 0.5 (giữa màn hình)
             const isMobile = window.innerWidth <= 768;
-            const topOffset = isMobile ? 0.02 : 0.1;
+            const topOffset = isMobile ? 0.02 : 0.5;
             
             textarea.scrollTop = Math.max(0, positionY - textarea.clientHeight * topOffset);
         }
@@ -670,7 +693,10 @@
 
         function updateSubtitleNav() {
             document.getElementById('subtitleTotal').innerText = subtitleSentences.length;
-            document.getElementById('subtitleCurrent').innerText = currentSubtitleIndex >= 0 ? currentSubtitleIndex + 1 : 0;
+            
+            // Cập nhật input value
+            const input = document.getElementById('subtitleJumpInput');
+            input.value = currentSubtitleIndex >= 0 ? currentSubtitleIndex + 1 : '';
             
             if (currentSubtitleIndex >= 0 && subtitleSentences[currentSubtitleIndex]) {
                 const current = subtitleSentences[currentSubtitleIndex];
@@ -680,26 +706,25 @@
             }
         }
 
-        function promptJumpToSubtitle() {
+        function jumpToSubtitle() {
             if (subtitleSentences.length === 0) {
                 showToast('Chưa có subtitle!');
                 return;
             }
             
-            const currentDisplay = currentSubtitleIndex >= 0 ? currentSubtitleIndex + 1 : 1;
-            const input = prompt(`Nhảy đến câu (1 - ${subtitleSentences.length}):`, currentDisplay);
+            const input = document.getElementById('subtitleJumpInput');
+            const num = parseInt(input.value);
             
-            if (input === null) return; // User cancelled
-            
-            const num = parseInt(input);
             if (isNaN(num) || num < 1 || num > subtitleSentences.length) {
-                showToast(`Vui lòng nhập số từ 1 đến ${subtitleSentences.length}`);
+                showToast(`Nhập số từ 1 đến ${subtitleSentences.length}`);
+                input.value = currentSubtitleIndex >= 0 ? currentSubtitleIndex + 1 : '';
                 return;
             }
             
             currentSubtitleIndex = num - 1;
             focusSubtitleSentence(currentSubtitleIndex);
             updateSubtitleNav();
+            input.blur(); // Ẩn keyboard sau khi nhảy
         }
 
         function goToSubtitle(direction) {
@@ -763,9 +788,8 @@
                 switchTab('word');
             }
             
-            textarea.focus();
-            textarea.setSelectionRange(position, position + searchText.length);
-            scrollToSelection(textarea, position);
+            // Dùng focusWithoutKeyboard thay vì focus trực tiếp
+            focusWithoutKeyboard(textarea, position, position + searchText.length);
         }
 
         // --- INIT ---
