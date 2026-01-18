@@ -481,10 +481,51 @@
             const positionY = clone.scrollHeight;
             document.body.removeChild(clone);
             
-            textarea.scrollTop = Math.max(0, positionY - textarea.clientHeight / 2);
+            // Fix mobile: thêm offset để text không bị khuất mép trên
+            const isMobile = window.innerWidth <= 768;
+            const mobileOffset = isMobile ? 25 : 0;
+            
+            textarea.scrollTop = Math.max(0, positionY - textarea.clientHeight / 2 + mobileOffset);
         }
 
         // --- SUBTITLE FUNCTIONS ---
+        function isSoundDescription(text) {
+            const trimmed = text.trim();
+            
+            // [text] - square brackets
+            if (/^\[.+\]$/.test(trimmed)) return true;
+            
+            // (text) - parentheses với từ khóa mô tả
+            if (/^\(.+\)$/.test(trimmed)) {
+                const inner = trimmed.slice(1, -1).toLowerCase();
+                const soundKeywords = [
+                    'music', 'singing', 'song', 'playing', 'applause', 'laughter',
+                    'cheering', 'sobbing', 'crying', 'screaming', 'shouting',
+                    'whispering', 'sighing', 'gasping', 'coughing', 'snoring',
+                    'knocking', 'ringing', 'beeping', 'buzzing', 'clicking',
+                    'thunder', 'rain', 'wind', 'explosion', 'gunshot', 'siren',
+                    'door', 'phone', 'alarm', 'bell', 'horn', 'engine',
+                    'footsteps', 'breathing', 'heartbeat', 'silence',
+                    'inaudible', 'indistinct', 'unintelligible', 'continues',
+                    'in ', 'speaks ', 'speaking '
+                ];
+                if (soundKeywords.some(kw => inner.includes(kw))) return true;
+            }
+            
+            // ♪ text ♪ hoặc ♫ text ♫ - music
+            if (/^[♪♫].*[♪♫]$/.test(trimmed)) return true;
+            if (trimmed.includes('♪') || trimmed.includes('♫')) return true;
+            
+            // * text * - asterisks
+            if (/^\*.+\*$/.test(trimmed)) return true;
+            
+            // ALL CAPS trong ngoặc thường là sound description
+            if (/^\([A-Z\s]+\)$/.test(trimmed)) return true;
+            if (/^\[[A-Z\s]+\]$/.test(trimmed)) return true;
+            
+            return false;
+        }
+
         function parseSRT(content) {
             const rawBlocks = [];
             const blocks = content.trim().split(/\n\s*\n/);
@@ -518,7 +559,8 @@
                 rawBlocks.push({
                     startTime: timeMatch[1],
                     endTime: timeMatch[2],
-                    text: text
+                    text: text,
+                    isSoundDesc: isSoundDescription(text)
                 });
             }
             
@@ -527,6 +569,25 @@
             let currentSentence = null;
             
             for (const block of rawBlocks) {
+                // Sound description luôn là câu riêng
+                if (block.isSoundDesc) {
+                    // Lưu câu đang xây dựng nếu có
+                    if (currentSentence) {
+                        currentSentence.text = currentSentence.text.replace(/\s+/g, ' ').trim();
+                        sentences.push(currentSentence);
+                        currentSentence = null;
+                    }
+                    // Thêm sound description như câu riêng
+                    sentences.push({
+                        index: sentences.length + 1,
+                        startTime: block.startTime,
+                        endTime: block.endTime,
+                        text: block.text,
+                        isSoundDesc: true
+                    });
+                    continue;
+                }
+                
                 if (currentSentence === null) {
                     currentSentence = {
                         index: sentences.length + 1,
@@ -556,6 +617,9 @@
                 sentences.push(currentSentence);
             }
             
+            // Đánh số lại index
+            sentences.forEach((s, i) => s.index = i + 1);
+            
             return { sentences };
         }
 
@@ -563,7 +627,7 @@
             const trimmed = text.trim();
             
             // Không kết thúc bằng dấu câu → chưa hoàn chỉnh
-            if (!/[.!?]$/.test(trimmed) && !/[.!?]["'"']$/.test(trimmed)) {
+            if (!/[.!?]$/.test(trimmed) && !/[.!?]["'"'」』]$/.test(trimmed)) {
                 return false;
             }
             
@@ -571,6 +635,20 @@
             if (/\.{3}$/.test(trimmed) || /\.{3}["'"']$/.test(trimmed)) {
                 return true;
             }
+            
+            // === FIX: Số thập phân và tiền tệ ===
+            // Pattern: số + dấu chấm + số (decimal) → chưa hoàn chỉnh
+            // Ví dụ: "$1.5", "3.14", "2.5 million"
+            if (/\d\.\d+$/.test(trimmed)) {
+                return false;
+            }
+            
+            // Pattern: tiền tệ + số + dấu chấm cuối có thể là kết thúc câu
+            // Ví dụ: "costs $5." → hoàn chỉnh, "costs $5.5" → chưa hoàn chỉnh
+            // Đã được xử lý ở trên
+            
+            // Pattern: số + dấu chấm + không có số sau → có thể là kết thúc câu hoặc abbreviation
+            // Kiểm tra thêm context
             
             // Danh sách abbreviations phổ biến
             const abbreviations = [
@@ -581,7 +659,11 @@
                 'mt.', 'gen.', 'col.', 'lt.', 'sgt.', 'capt.', 'cmdr.',
                 'u.s.', 'u.k.', 'u.n.', 'e.u.', 'a.m.', 'p.m.',
                 'jan.', 'feb.', 'mar.', 'apr.', 'jun.', 'jul.', 'aug.', 
-                'sep.', 'sept.', 'oct.', 'nov.', 'dec.'
+                'sep.', 'sept.', 'oct.', 'nov.', 'dec.',
+                'min.', 'sec.', 'hr.', 'hrs.', 'lb.', 'lbs.', 'oz.', 
+                'pt.', 'qt.', 'gal.', 'sq.', 'cu.', 'mph.', 'kph.',
+                'fig.', 'figs.', 'p.', 'pp.', 'ed.', 'eds.', 'trans.',
+                'tel.', 'fax.', 'ext.', 'ref.', 'attn.', 'approx.'
             ];
             
             const lowerText = trimmed.toLowerCase();
@@ -596,8 +678,14 @@
                 return false;
             }
             
-            // Số + dấu chấm (ví dụ: "No. 1.")
-            if (/\d\.$/.test(trimmed) && !/[.!?]\s*\d\.$/.test(trimmed)) {
+            // Số La Mã + dấu chấm (I., II., III., IV., etc.)
+            if (/\s[IVXLCDM]+\.$/.test(trimmed)) {
+                return false;
+            }
+            
+            // Pattern số thứ tự: "1.", "2.", etc. ở cuối câu
+            // Thường không phải kết thúc câu trừ khi có context
+            if (/\s\d+\.$/.test(trimmed) && trimmed.length < 10) {
                 return false;
             }
             
@@ -834,7 +922,10 @@
                     currentSubtitleIndex = -1;
                     updateSubtitleNav();
                     showSubtitleNav();
-                    showToast(`Đã nhập SRT: ${parsed.sentences.length} câu hoàn chỉnh`);
+                    
+                    const soundDescCount = parsed.sentences.filter(s => s.isSoundDesc).length;
+                    const dialogCount = parsed.sentences.length - soundDescCount;
+                    showToast(`SRT: ${dialogCount} câu + ${soundDescCount} mô tả`);
                 } else {
                     input.value = input.value.trim() ? input.value.trimEnd() + '\n\n---\n\n' + content : content;
                     showToast(`Đã nhập file: ${file.name}`);
