@@ -379,6 +379,47 @@
             return false;
         }
 
+        // --- SENTENCE BOUNDARY DETECTION ---
+        // Kiểm tra xem vị trí có phải là kết thúc câu thực sự không
+        function isRealSentenceEnd(text, dotPosition) {
+            // Lấy context xung quanh dấu chấm
+            const before = text.substring(Math.max(0, dotPosition - 15), dotPosition);
+            const after = text.substring(dotPosition + 1, Math.min(text.length, dotPosition + 10));
+            
+            // Nếu sau dấu chấm là số → decimal, không phải kết thúc câu
+            if (/^\d/.test(after)) {
+                return false;
+            }
+            
+            // Currency + số + dấu chấm: $1. €2. £3. ¥4.
+            if (/[$€£¥]\d+$/.test(before)) {
+                return false;
+            }
+            
+            // Số thập phân: 1.5, 3.14
+            if (/\d$/.test(before) && /^\d/.test(after)) {
+                return false;
+            }
+            
+            // Abbreviations phổ biến
+            const abbrevPatterns = [
+                /\b(Mr|Mrs|Ms|Dr|Prof|Sr|Jr|vs|etc|e\.g|i\.e|no|vol|rev|est|approx|dept|inc|ltd|corp|co|st|ave|blvd|apt|govt|ft|mt|gen|col|lt|sgt|capt|cmdr|min|sec|hr|hrs|lb|lbs|oz|pt|qt|gal|sq|cu|mph|kph|fig|figs|pp?|ed|eds|trans|tel|fax|ext|ref|attn|jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec|u\.s|u\.k|u\.n|e\.u|a\.m|p\.m)$/i
+            ];
+            
+            for (const pattern of abbrevPatterns) {
+                if (pattern.test(before)) {
+                    return false;
+                }
+            }
+            
+            // Single letter abbreviation: A. B. C.
+            if (/\s[A-Za-z]$/.test(before)) {
+                return false;
+            }
+            
+            return true;
+        }
+
         // --- FIND IN PAGE FUNCTION ---
         function findInPage(item) {
             const textarea = document.getElementById('inputText');
@@ -419,33 +460,41 @@
         }
 
         function findSentenceContaining(text, wordStart, wordEnd) {
-            const sentenceEnders = /[.!?;\n]/;
-            
+            // Tìm điểm bắt đầu câu (lùi về trước)
             let start = wordStart;
             while (start > 0) {
                 const char = text[start - 1];
-                if (sentenceEnders.test(char)) {
+                // Kiểm tra có phải sentence ender thực sự không
+                if (/[.!?]/.test(char)) {
+                    if (isRealSentenceEnd(text, start - 1)) {
+                        break;
+                    }
+                }
+                if (char === '\n') {
                     break;
                 }
                 start--;
             }
             
+            // Bỏ qua khoảng trắng đầu câu
             while (start < wordStart && /\s/.test(text[start])) {
                 start++;
             }
             
+            // Tìm điểm kết thúc câu (tiến về sau)
             let end = wordEnd;
             while (end < text.length) {
                 const char = text[end];
-                if (sentenceEnders.test(char)) {
-                    end++;
+                if (/[.!?]/.test(char)) {
+                    if (isRealSentenceEnd(text, end)) {
+                        end++; // Bao gồm dấu câu
+                        break;
+                    }
+                }
+                if (char === '\n') {
                     break;
                 }
                 end++;
-            }
-            
-            while (end > wordEnd && /\s/.test(text[end - 1])) {
-                end--;
             }
             
             return { start, end };
@@ -481,11 +530,11 @@
             const positionY = clone.scrollHeight;
             document.body.removeChild(clone);
             
-            // Fix mobile: thêm offset để text không bị khuất mép trên
+            // Fix mobile: scroll xuống thêm để text không bị khuất mép trên
             const isMobile = window.innerWidth <= 768;
-            const mobileOffset = isMobile ? 25 : 0;
+            const viewportRatio = isMobile ? 0.35 : 0.5; // Mobile: text ở 35% từ trên, PC: giữa màn hình
             
-            textarea.scrollTop = Math.max(0, positionY - textarea.clientHeight / 2 + mobileOffset);
+            textarea.scrollTop = Math.max(0, positionY - textarea.clientHeight * viewportRatio);
         }
 
         // --- SUBTITLE FUNCTIONS ---
@@ -550,9 +599,9 @@
                 
                 const textLines = lines.slice(timeLineIndex + 1);
                 let text = textLines.join(' ')
-                    .replace(/<[^>]*>/g, '')      // Xóa HTML tags
-                    .replace(/\{[^}]*\}/g, '')    // Xóa ASS tags
-                    .replace(/\s+/g, ' ')         // Chuẩn hóa spaces
+                    .replace(/<[^>]*>/g, '')
+                    .replace(/\{[^}]*\}/g, '')
+                    .replace(/\s+/g, ' ')
                     .trim();
                 if (!text) continue;
                 
@@ -571,13 +620,11 @@
             for (const block of rawBlocks) {
                 // Sound description luôn là câu riêng
                 if (block.isSoundDesc) {
-                    // Lưu câu đang xây dựng nếu có
                     if (currentSentence) {
                         currentSentence.text = currentSentence.text.replace(/\s+/g, ' ').trim();
                         sentences.push(currentSentence);
                         currentSentence = null;
                     }
-                    // Thêm sound description như câu riêng
                     sentences.push({
                         index: sentences.length + 1,
                         startTime: block.startTime,
@@ -596,7 +643,6 @@
                         text: block.text
                     };
                 } else {
-                    // Gộp text với space hoặc không tùy thuộc vào ký tự cuối
                     const lastChar = currentSentence.text.slice(-1);
                     const separator = (lastChar === '-') ? '' : ' ';
                     currentSentence.text += separator + block.text;
@@ -611,13 +657,11 @@
                 }
             }
             
-            // Đừng quên phần text còn lại
             if (currentSentence) {
                 currentSentence.text = currentSentence.text.replace(/\s+/g, ' ').trim();
                 sentences.push(currentSentence);
             }
             
-            // Đánh số lại index
             sentences.forEach((s, i) => s.index = i + 1);
             
             return { sentences };
@@ -631,62 +675,18 @@
                 return false;
             }
             
-            // Kết thúc bằng "..." → coi như hoàn chỉnh
+            // Kết thúc bằng "..." → hoàn chỉnh
             if (/\.{3}$/.test(trimmed) || /\.{3}["'"']$/.test(trimmed)) {
                 return true;
             }
             
-            // === FIX: Số thập phân và tiền tệ ===
-            // Pattern: số + dấu chấm + số (decimal) → chưa hoàn chỉnh
-            // Ví dụ: "$1.5", "3.14", "2.5 million"
-            if (/\d\.\d+$/.test(trimmed)) {
-                return false;
-            }
-            
-            // Pattern: tiền tệ + số + dấu chấm cuối có thể là kết thúc câu
-            // Ví dụ: "costs $5." → hoàn chỉnh, "costs $5.5" → chưa hoàn chỉnh
-            // Đã được xử lý ở trên
-            
-            // Pattern: số + dấu chấm + không có số sau → có thể là kết thúc câu hoặc abbreviation
-            // Kiểm tra thêm context
-            
-            // Danh sách abbreviations phổ biến
-            const abbreviations = [
-                'mr.', 'mrs.', 'ms.', 'dr.', 'prof.', 'sr.', 'jr.',
-                'vs.', 'etc.', 'e.g.', 'i.e.', 'no.', 'vol.', 'rev.',
-                'est.', 'approx.', 'dept.', 'inc.', 'ltd.', 'corp.', 
-                'co.', 'st.', 'ave.', 'blvd.', 'apt.', 'govt.', 'ft.',
-                'mt.', 'gen.', 'col.', 'lt.', 'sgt.', 'capt.', 'cmdr.',
-                'u.s.', 'u.k.', 'u.n.', 'e.u.', 'a.m.', 'p.m.',
-                'jan.', 'feb.', 'mar.', 'apr.', 'jun.', 'jul.', 'aug.', 
-                'sep.', 'sept.', 'oct.', 'nov.', 'dec.',
-                'min.', 'sec.', 'hr.', 'hrs.', 'lb.', 'lbs.', 'oz.', 
-                'pt.', 'qt.', 'gal.', 'sq.', 'cu.', 'mph.', 'kph.',
-                'fig.', 'figs.', 'p.', 'pp.', 'ed.', 'eds.', 'trans.',
-                'tel.', 'fax.', 'ext.', 'ref.', 'attn.', 'approx.'
-            ];
-            
-            const lowerText = trimmed.toLowerCase();
-            for (const abbr of abbreviations) {
-                if (lowerText.endsWith(abbr)) {
+            // Lấy vị trí dấu chấm cuối
+            const lastDotMatch = trimmed.match(/[.!?](?=["'"'」』]?$)/);
+            if (lastDotMatch) {
+                const dotPos = trimmed.lastIndexOf(lastDotMatch[0]);
+                if (!isRealSentenceEnd(trimmed, dotPos)) {
                     return false;
                 }
-            }
-            
-            // Single letter + dấu chấm (A., B., etc.)
-            if (/\s[A-Za-z]\.$/.test(trimmed)) {
-                return false;
-            }
-            
-            // Số La Mã + dấu chấm (I., II., III., IV., etc.)
-            if (/\s[IVXLCDM]+\.$/.test(trimmed)) {
-                return false;
-            }
-            
-            // Pattern số thứ tự: "1.", "2.", etc. ở cuối câu
-            // Thường không phải kết thúc câu trừ khi có context
-            if (/\s\d+\.$/.test(trimmed) && trimmed.length < 10) {
-                return false;
             }
             
             return true;
