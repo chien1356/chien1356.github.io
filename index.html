@@ -75,26 +75,28 @@
 
     <div class="flex flex-1 overflow-hidden main-container">
         <div class="input-panel w-1/2 p-2 md:p-4 flex flex-col border-r border-gray-300 bg-gray-50 relative group">
-            <div class="flex space-x-2 md:space-x-4 mb-2 md:mb-3 border-b border-gray-300 pb-1 md:pb-2">
-                <button id="tabWordBtn" class="tab-active pb-1 md:pb-2 px-1 md:px-2 transition text-sm md:text-base" onclick="switchTab('word')">Word</button>
-                <button id="tabManualBtn" class="text-gray-500 pb-1 md:pb-2 px-1 md:px-2 hover:text-gray-700 transition text-sm md:text-base" onclick="switchTab('manual')">Manual</button>
+            <!-- Tabs + Subtitle Nav Row -->
+            <div class="flex items-center gap-2 mb-2 md:mb-3 border-b border-gray-300 pb-1 md:pb-2">
+                <div class="flex space-x-2 md:space-x-4">
+                    <button id="tabWordBtn" class="tab-active pb-1 md:pb-2 px-1 md:px-2 transition text-sm md:text-base" onclick="switchTab('word')">Word</button>
+                    <button id="tabManualBtn" class="text-gray-500 pb-1 md:pb-2 px-1 md:px-2 hover:text-gray-700 transition text-sm md:text-base" onclick="switchTab('manual')">Manual</button>
+                </div>
+                
+                <!-- Subtitle Navigation - inline với tabs -->
+                <div id="subtitleNav" class="hidden flex items-center gap-1 ml-auto bg-purple-50 px-1.5 md:px-2 py-0.5 md:py-1 rounded border border-purple-200">
+                    <button onclick="goToSubtitle('first')" class="p-0.5 md:p-1 text-purple-600 hover:bg-purple-100 rounded text-xs md:text-sm" title="Câu đầu"><i class="fas fa-angle-double-left"></i></button>
+                    <button onclick="goToSubtitle('prev')" class="p-0.5 md:p-1 text-purple-600 hover:bg-purple-100 rounded text-xs md:text-sm" title="Câu trước"><i class="fas fa-angle-left"></i></button>
+                    <input type="number" id="subtitleJumpInput" class="w-8 md:w-12 text-center text-xs border border-purple-200 rounded px-0.5 py-0.5 bg-white" min="1" placeholder="#" onkeydown="if(event.key==='Enter')jumpToSubtitle()">
+                    <span class="text-xs text-purple-700 font-medium">/<span id="subtitleTotal">0</span></span>
+                    <button onclick="goToSubtitle('next')" class="p-0.5 md:p-1 text-purple-600 hover:bg-purple-100 rounded text-xs md:text-sm" title="Câu tiếp"><i class="fas fa-angle-right"></i></button>
+                    <button onclick="goToSubtitle('last')" class="p-0.5 md:p-1 text-purple-600 hover:bg-purple-100 rounded text-xs md:text-sm" title="Câu cuối"><i class="fas fa-angle-double-right"></i></button>
+                    <span id="subtitleTimestamp" class="text-xs text-gray-500 hidden lg:inline ml-1"></span>
+                    <button onclick="hideSubtitleNav()" class="p-0.5 md:p-1 text-gray-400 hover:text-red-500 rounded text-xs" title="Ẩn"><i class="fas fa-times"></i></button>
+                </div>
             </div>
 
             <div id="wordTabContent" class="relative flex-1 min-h-0 flex flex-col">
-                <textarea id="inputText" class="w-full h-full p-2 md:p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none text-sm md:text-lg pr-10 md:pr-12 pb-14"></textarea>
-                
-                <!-- Subtitle Navigation -->
-                <div id="subtitleNav" class="hidden absolute bottom-1 md:bottom-2 left-1 md:left-2 right-12 md:right-14 flex items-center gap-1 md:gap-2 bg-white/95 backdrop-blur px-2 py-1.5 rounded-lg shadow border border-purple-200">
-                    <button onclick="goToSubtitle('first')" class="p-1 md:p-1.5 text-purple-600 hover:bg-purple-100 rounded" title="Câu đầu tiên"><i class="fas fa-angle-double-left"></i></button>
-                    <button onclick="goToSubtitle('prev')" class="p-1 md:p-1.5 text-purple-600 hover:bg-purple-100 rounded" title="Câu trước"><i class="fas fa-angle-left"></i></button>
-                    <input type="number" id="subtitleJumpInput" class="w-12 md:w-16 text-center text-xs border border-purple-200 rounded px-1 py-0.5" min="1" placeholder="#" onkeydown="if(event.key==='Enter')jumpToSubtitle()">
-                    <span class="text-xs text-purple-700 font-medium">/<span id="subtitleTotal">0</span></span>
-                    <button onclick="goToSubtitle('next')" class="p-1 md:p-1.5 text-purple-600 hover:bg-purple-100 rounded" title="Câu tiếp"><i class="fas fa-angle-right"></i></button>
-                    <button onclick="goToSubtitle('last')" class="p-1 md:p-1.5 text-purple-600 hover:bg-purple-100 rounded" title="Câu cuối"><i class="fas fa-angle-double-right"></i></button>
-                    <div class="flex-1"></div>
-                    <span id="subtitleTimestamp" class="text-xs text-gray-500 hidden md:inline truncate max-w-[100px]"></span>
-                    <button onclick="hideSubtitleNav()" class="p-1 text-gray-400 hover:text-red-500 rounded" title="Ẩn điều hướng"><i class="fas fa-times"></i></button>
-                </div>
+                <textarea id="inputText" class="w-full h-full p-2 md:p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none text-sm md:text-lg pr-10 md:pr-12"></textarea>
                 
                 <div class="absolute top-1 md:top-2 right-1 md:right-2 flex flex-col gap-1 md:gap-2">
                     <input type="file" id="fileInput" accept=".txt,.srt" class="hidden">
@@ -380,42 +382,23 @@
         }
 
         // --- SENTENCE BOUNDARY DETECTION ---
-        // Kiểm tra xem vị trí có phải là kết thúc câu thực sự không
         function isRealSentenceEnd(text, dotPosition) {
-            // Lấy context xung quanh dấu chấm
             const before = text.substring(Math.max(0, dotPosition - 15), dotPosition);
             const after = text.substring(dotPosition + 1, Math.min(text.length, dotPosition + 10));
             
-            // Nếu sau dấu chấm là số → decimal, không phải kết thúc câu
-            if (/^\d/.test(after)) {
-                return false;
-            }
+            if (/^\d/.test(after)) return false;
+            if (/[$€£¥]\d+$/.test(before)) return false;
+            if (/\d$/.test(before) && /^\d/.test(after)) return false;
             
-            // Currency + số + dấu chấm: $1. €2. £3. ¥4.
-            if (/[$€£¥]\d+$/.test(before)) {
-                return false;
-            }
-            
-            // Số thập phân: 1.5, 3.14
-            if (/\d$/.test(before) && /^\d/.test(after)) {
-                return false;
-            }
-            
-            // Abbreviations phổ biến
             const abbrevPatterns = [
                 /\b(Mr|Mrs|Ms|Dr|Prof|Sr|Jr|vs|etc|e\.g|i\.e|no|vol|rev|est|approx|dept|inc|ltd|corp|co|st|ave|blvd|apt|govt|ft|mt|gen|col|lt|sgt|capt|cmdr|min|sec|hr|hrs|lb|lbs|oz|pt|qt|gal|sq|cu|mph|kph|fig|figs|pp?|ed|eds|trans|tel|fax|ext|ref|attn|jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec|u\.s|u\.k|u\.n|e\.u|a\.m|p\.m)$/i
             ];
             
             for (const pattern of abbrevPatterns) {
-                if (pattern.test(before)) {
-                    return false;
-                }
+                if (pattern.test(before)) return false;
             }
             
-            // Single letter abbreviation: A. B. C.
-            if (/\s[A-Za-z]$/.test(before)) {
-                return false;
-            }
+            if (/\s[A-Za-z]$/.test(before)) return false;
             
             return true;
         }
@@ -460,40 +443,30 @@
         }
 
         function findSentenceContaining(text, wordStart, wordEnd) {
-            // Tìm điểm bắt đầu câu (lùi về trước)
             let start = wordStart;
             while (start > 0) {
                 const char = text[start - 1];
-                // Kiểm tra có phải sentence ender thực sự không
                 if (/[.!?]/.test(char)) {
-                    if (isRealSentenceEnd(text, start - 1)) {
-                        break;
-                    }
+                    if (isRealSentenceEnd(text, start - 1)) break;
                 }
-                if (char === '\n') {
-                    break;
-                }
+                if (char === '\n') break;
                 start--;
             }
             
-            // Bỏ qua khoảng trắng đầu câu
             while (start < wordStart && /\s/.test(text[start])) {
                 start++;
             }
             
-            // Tìm điểm kết thúc câu (tiến về sau)
             let end = wordEnd;
             while (end < text.length) {
                 const char = text[end];
                 if (/[.!?]/.test(char)) {
                     if (isRealSentenceEnd(text, end)) {
-                        end++; // Bao gồm dấu câu
+                        end++;
                         break;
                     }
                 }
-                if (char === '\n') {
-                    break;
-                }
+                if (char === '\n') break;
                 end++;
             }
             
@@ -505,46 +478,31 @@
         }
 
         function scrollToSelection(textarea, position) {
-            const clone = document.createElement('textarea');
+            const text = textarea.value;
+            const lines = text.substring(0, position).split('\n');
+            const lineNumber = lines.length - 1;
+            
             const style = getComputedStyle(textarea);
+            const lineHeight = parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.2;
+            const paddingTop = parseFloat(style.paddingTop) || 0;
             
-            clone.style.cssText = `
-                position: absolute;
-                top: -9999px;
-                left: -9999px;
-                visibility: hidden;
-                width: ${textarea.offsetWidth}px;
-                height: auto;
-                font-family: ${style.fontFamily};
-                font-size: ${style.fontSize};
-                line-height: ${style.lineHeight};
-                padding: ${style.padding};
-                border: ${style.border};
-                box-sizing: ${style.boxSizing};
-                white-space: pre-wrap;
-                word-wrap: break-word;
-            `;
+            // Tính vị trí Y dựa trên số dòng
+            const positionY = paddingTop + (lineNumber * lineHeight);
             
-            clone.value = textarea.value.substring(0, position);
-            document.body.appendChild(clone);
-            const positionY = clone.scrollHeight;
-            document.body.removeChild(clone);
-            
-            // Fix mobile: scroll xuống thêm để text không bị khuất mép trên
+            // Scroll sao cho text nằm gần TOP của textarea (15% từ trên)
+            // Điều này đảm bảo câu dài nhiều dòng vẫn hiển thị đầy đủ phần đầu
             const isMobile = window.innerWidth <= 768;
-            const viewportRatio = isMobile ? 0.35 : 0.5; // Mobile: text ở 35% từ trên, PC: giữa màn hình
+            const topOffset = isMobile ? 0.1 : 0.2; // Mobile: 10%, PC: 20% từ top
             
-            textarea.scrollTop = Math.max(0, positionY - textarea.clientHeight * viewportRatio);
+            textarea.scrollTop = Math.max(0, positionY - textarea.clientHeight * topOffset);
         }
 
         // --- SUBTITLE FUNCTIONS ---
         function isSoundDescription(text) {
             const trimmed = text.trim();
             
-            // [text] - square brackets
             if (/^\[.+\]$/.test(trimmed)) return true;
             
-            // (text) - parentheses với từ khóa mô tả
             if (/^\(.+\)$/.test(trimmed)) {
                 const inner = trimmed.slice(1, -1).toLowerCase();
                 const soundKeywords = [
@@ -561,14 +519,9 @@
                 if (soundKeywords.some(kw => inner.includes(kw))) return true;
             }
             
-            // ♪ text ♪ hoặc ♫ text ♫ - music
             if (/^[♪♫].*[♪♫]$/.test(trimmed)) return true;
             if (trimmed.includes('♪') || trimmed.includes('♫')) return true;
-            
-            // * text * - asterisks
             if (/^\*.+\*$/.test(trimmed)) return true;
-            
-            // ALL CAPS trong ngoặc thường là sound description
             if (/^\([A-Z\s]+\)$/.test(trimmed)) return true;
             if (/^\[[A-Z\s]+\]$/.test(trimmed)) return true;
             
@@ -579,7 +532,6 @@
             const rawBlocks = [];
             const blocks = content.trim().split(/\n\s*\n/);
             
-            // Bước 1: Parse tất cả blocks thô
             for (const block of blocks) {
                 const lines = block.trim().split('\n');
                 if (lines.length < 2) continue;
@@ -613,12 +565,10 @@
                 });
             }
             
-            // Bước 2: Gộp các blocks thành câu hoàn chỉnh
             const sentences = [];
             let currentSentence = null;
             
             for (const block of rawBlocks) {
-                // Sound description luôn là câu riêng
                 if (block.isSoundDesc) {
                     if (currentSentence) {
                         currentSentence.text = currentSentence.text.replace(/\s+/g, ' ').trim();
@@ -649,7 +599,6 @@
                     currentSentence.endTime = block.endTime;
                 }
                 
-                // Kiểm tra câu đã hoàn chỉnh chưa
                 if (isSentenceComplete(currentSentence.text)) {
                     currentSentence.text = currentSentence.text.replace(/\s+/g, ' ').trim();
                     sentences.push(currentSentence);
@@ -670,17 +619,14 @@
         function isSentenceComplete(text) {
             const trimmed = text.trim();
             
-            // Không kết thúc bằng dấu câu → chưa hoàn chỉnh
             if (!/[.!?]$/.test(trimmed) && !/[.!?]["'"'」』]$/.test(trimmed)) {
                 return false;
             }
             
-            // Kết thúc bằng "..." → hoàn chỉnh
             if (/\.{3}$/.test(trimmed) || /\.{3}["'"']$/.test(trimmed)) {
                 return true;
             }
             
-            // Lấy vị trí dấu chấm cuối
             const lastDotMatch = trimmed.match(/[.!?](?=["'"'」』]?$)/);
             if (lastDotMatch) {
                 const dotPos = trimmed.lastIndexOf(lastDotMatch[0]);
