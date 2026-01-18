@@ -24,10 +24,6 @@
             .group:hover .opacity-0 { opacity: 1 !important; }
             .mobile-always-visible { opacity: 1 !important; }
         }
-        
-        
-        
-        
     </style>
 </head>
 <body class="h-screen md:h-screen flex flex-col overflow-hidden relative" style="height: 100dvh;">
@@ -85,10 +81,25 @@
             </div>
 
             <div id="wordTabContent" class="relative flex-1 min-h-0 flex flex-col">
-                <textarea id="inputText" class="w-full h-full p-2 md:p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none text-sm md:text-lg pr-10 md:pr-12"></textarea>
+                <textarea id="inputText" class="w-full h-full p-2 md:p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none text-sm md:text-lg pr-10 md:pr-12 pb-14"></textarea>
+                
+                <!-- Subtitle Navigation -->
+                <div id="subtitleNav" class="hidden absolute bottom-1 md:bottom-2 left-1 md:left-2 right-12 md:right-14 flex items-center gap-1 md:gap-2 bg-white/95 backdrop-blur px-2 py-1.5 rounded-lg shadow border border-purple-200">
+                    <button onclick="goToSubtitle('first')" class="p-1 md:p-1.5 text-purple-600 hover:bg-purple-100 rounded" title="Câu đầu tiên"><i class="fas fa-angle-double-left"></i></button>
+                    <button onclick="goToSubtitle('prev')" class="p-1 md:p-1.5 text-purple-600 hover:bg-purple-100 rounded" title="Câu trước"><i class="fas fa-angle-left"></i></button>
+                    <span class="text-xs text-purple-700 font-medium min-w-[50px] md:min-w-[60px] text-center">
+                        <span id="subtitleCurrent">0</span>/<span id="subtitleTotal">0</span>
+                    </span>
+                    <button onclick="goToSubtitle('next')" class="p-1 md:p-1.5 text-purple-600 hover:bg-purple-100 rounded" title="Câu tiếp"><i class="fas fa-angle-right"></i></button>
+                    <button onclick="goToSubtitle('last')" class="p-1 md:p-1.5 text-purple-600 hover:bg-purple-100 rounded" title="Câu cuối"><i class="fas fa-angle-double-right"></i></button>
+                    <div class="flex-1"></div>
+                    <span id="subtitleTimestamp" class="text-xs text-gray-500 hidden md:inline truncate max-w-[120px]"></span>
+                    <button onclick="hideSubtitleNav()" class="p-1 text-gray-400 hover:text-red-500 rounded" title="Ẩn điều hướng"><i class="fas fa-times"></i></button>
+                </div>
+                
                 <div class="absolute top-1 md:top-2 right-1 md:right-2 flex flex-col gap-1 md:gap-2">
-                    <input type="file" id="fileInput" accept=".txt" class="hidden">
-                    <button onclick="document.getElementById('fileInput').click()" class="bg-white p-1.5 md:p-2 rounded shadow hover:bg-blue-50 text-blue-500 border border-gray-200 transition text-xs md:text-base" title="Nhập file .txt"><i class="fas fa-file-upload"></i></button>
+                    <input type="file" id="fileInput" accept=".txt,.srt" class="hidden">
+                    <button onclick="document.getElementById('fileInput').click()" class="bg-white p-1.5 md:p-2 rounded shadow hover:bg-blue-50 text-blue-500 border border-gray-200 transition text-xs md:text-base" title="Nhập file .txt hoặc .srt"><i class="fas fa-file-upload"></i></button>
                     <button onclick="pasteFromClipboard()" class="bg-white p-1.5 md:p-2 rounded shadow hover:bg-gray-100 text-gray-600 border border-gray-200 transition text-xs md:text-base" title="Dán nối tiếp từ Clipboard"><i class="fas fa-paste"></i></button>
                     <button onclick="clearInput()" class="bg-white p-1.5 md:p-2 rounded shadow hover:text-red-500 text-gray-400 border border-gray-200 transition text-xs md:text-base" title="Xóa hết"><i class="fas fa-trash-alt"></i></button>
                 </div>
@@ -321,6 +332,10 @@
         let currentFindIndex = -1;
         let lastFindItem = '';
 
+        // Subtitle navigation state
+        let subtitleSentences = [];
+        let currentSubtitleIndex = -1;
+
         const defaultPrompt = `Phân tích các từ này : {words}`;
         const defaultPhrasePrompt = `Phân tích các cụm từ này : {phrases}`;
         const defaultExtractPrompt = `ONLY Extract Expressions from the text. Ignore common single words. Return a JSON array of strings in lowercase. Text: "{text}"`;
@@ -368,122 +383,256 @@
         }
 
         // --- FIND IN PAGE FUNCTION ---
-function findInPage(item) {
-    const textarea = document.getElementById('inputText');
-    const text = textarea.value;
-    const searchTerm = item.toLowerCase();
-    
-    // Reset index if searching for different item
-    if (lastFindItem !== item) {
-        currentFindIndex = -1;
-        lastFindItem = item;
-    }
-    
-    // Find all occurrences với regex whole word
-    const positions = [];
-    const regex = new RegExp(`\\b${escapeRegex(searchTerm)}\\b`, 'gi');
-    let match;
-    while ((match = regex.exec(text)) !== null) {
-        positions.push({ start: match.index, end: match.index + match[0].length });
-    }
-    
-    if (positions.length === 0) {
-        showToast(`Không tìm thấy "${item}"`);
-        return;
-    }
-    
-    // Cycle to next occurrence
-    currentFindIndex = (currentFindIndex + 1) % positions.length;
-    const target = positions[currentFindIndex];
-    
-    // Tìm câu chứa từ đó
-    const sentence = findSentenceContaining(text, target.start, target.end);
-    
-    // Switch to Word tab if needed
-    if (currentTab !== 'word') {
-        switchTab('word');
-    }
-    
-    // Focus và select cả câu
-    textarea.focus();
-    textarea.setSelectionRange(sentence.start, sentence.end);
-    
-    // Scroll chính xác đến vị trí
-    scrollToSelection(textarea, sentence.start);
-    
-    showToast(`"${item}" - ${currentFindIndex + 1}/${positions.length}`);
-}
-
-function findSentenceContaining(text, wordStart, wordEnd) {
-    // Các ký tự kết thúc câu
-    const sentenceEnders = /[.!?;\n]/;
-    
-    // Tìm điểm bắt đầu câu (lùi về trước)
-    let start = wordStart;
-    while (start > 0) {
-        const char = text[start - 1];
-        if (sentenceEnders.test(char)) {
-            break;
+        function findInPage(item) {
+            const textarea = document.getElementById('inputText');
+            const text = textarea.value;
+            const searchTerm = item.toLowerCase();
+            
+            // Reset index if searching for different item
+            if (lastFindItem !== item) {
+                currentFindIndex = -1;
+                lastFindItem = item;
+            }
+            
+            // Find all occurrences với regex whole word
+            const positions = [];
+            const regex = new RegExp(`\\b${escapeRegex(searchTerm)}\\b`, 'gi');
+            let match;
+            while ((match = regex.exec(text)) !== null) {
+                positions.push({ start: match.index, end: match.index + match[0].length });
+            }
+            
+            if (positions.length === 0) {
+                showToast(`Không tìm thấy "${item}"`);
+                return;
+            }
+            
+            // Cycle to next occurrence
+            currentFindIndex = (currentFindIndex + 1) % positions.length;
+            const target = positions[currentFindIndex];
+            
+            // Tìm câu chứa từ đó
+            const sentence = findSentenceContaining(text, target.start, target.end);
+            
+            // Switch to Word tab if needed
+            if (currentTab !== 'word') {
+                switchTab('word');
+            }
+            
+            // Focus và select cả câu
+            textarea.focus();
+            textarea.setSelectionRange(sentence.start, sentence.end);
+            
+            // Scroll chính xác đến vị trí
+            scrollToSelection(textarea, sentence.start);
+            
+            showToast(`"${item}" - ${currentFindIndex + 1}/${positions.length}`);
         }
-        start--;
-    }
-    
-    // Bỏ qua khoảng trắng đầu câu
-    while (start < wordStart && /\s/.test(text[start])) {
-        start++;
-    }
-    
-    // Tìm điểm kết thúc câu (tiến về sau)
-    let end = wordEnd;
-    while (end < text.length) {
-        const char = text[end];
-        if (sentenceEnders.test(char)) {
-            end++; // Bao gồm cả dấu kết thúc câu
-            break;
+
+        function findSentenceContaining(text, wordStart, wordEnd) {
+            // Các ký tự kết thúc câu
+            const sentenceEnders = /[.!?;\n]/;
+            
+            // Tìm điểm bắt đầu câu (lùi về trước)
+            let start = wordStart;
+            while (start > 0) {
+                const char = text[start - 1];
+                if (sentenceEnders.test(char)) {
+                    break;
+                }
+                start--;
+            }
+            
+            // Bỏ qua khoảng trắng đầu câu
+            while (start < wordStart && /\s/.test(text[start])) {
+                start++;
+            }
+            
+            // Tìm điểm kết thúc câu (tiến về sau)
+            let end = wordEnd;
+            while (end < text.length) {
+                const char = text[end];
+                if (sentenceEnders.test(char)) {
+                    end++; // Bao gồm cả dấu kết thúc câu
+                    break;
+                }
+                end++;
+            }
+            
+            // Bỏ qua khoảng trắng cuối câu
+            while (end > wordEnd && /\s/.test(text[end - 1])) {
+                end--;
+            }
+            
+            return { start, end };
         }
-        end++;
-    }
-    
-    // Bỏ qua khoảng trắng cuối câu
-    while (end > wordEnd && /\s/.test(text[end - 1])) {
-        end--;
-    }
-    
-    return { start, end };
-}
 
-function escapeRegex(string) {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
+        function escapeRegex(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
 
-function scrollToSelection(textarea, position) {
-    const clone = document.createElement('textarea');
-    const style = getComputedStyle(textarea);
-    
-    clone.style.cssText = `
-        position: absolute;
-        top: -9999px;
-        left: -9999px;
-        visibility: hidden;
-        width: ${textarea.offsetWidth}px;
-        height: auto;
-        font-family: ${style.fontFamily};
-        font-size: ${style.fontSize};
-        line-height: ${style.lineHeight};
-        padding: ${style.padding};
-        border: ${style.border};
-        box-sizing: ${style.boxSizing};
-        white-space: pre-wrap;
-        word-wrap: break-word;
-    `;
-    
-    clone.value = textarea.value.substring(0, position);
-    document.body.appendChild(clone);
-    const positionY = clone.scrollHeight;
-    document.body.removeChild(clone);
-    
-    textarea.scrollTop = Math.max(0, positionY - textarea.clientHeight / 2);
-}
+        function scrollToSelection(textarea, position) {
+            const clone = document.createElement('textarea');
+            const style = getComputedStyle(textarea);
+            
+            clone.style.cssText = `
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+                visibility: hidden;
+                width: ${textarea.offsetWidth}px;
+                height: auto;
+                font-family: ${style.fontFamily};
+                font-size: ${style.fontSize};
+                line-height: ${style.lineHeight};
+                padding: ${style.padding};
+                border: ${style.border};
+                box-sizing: ${style.boxSizing};
+                white-space: pre-wrap;
+                word-wrap: break-word;
+            `;
+            
+            clone.value = textarea.value.substring(0, position);
+            document.body.appendChild(clone);
+            const positionY = clone.scrollHeight;
+            document.body.removeChild(clone);
+            
+            textarea.scrollTop = Math.max(0, positionY - textarea.clientHeight / 2);
+        }
+
+        // --- SUBTITLE FUNCTIONS ---
+        function parseSRT(content) {
+            const sentences = [];
+            const blocks = content.trim().split(/\n\s*\n/);
+            
+            for (const block of blocks) {
+                const lines = block.trim().split('\n');
+                if (lines.length < 2) continue;
+                
+                // Tìm dòng timestamp
+                let timeLineIndex = -1;
+                for (let i = 0; i < lines.length; i++) {
+                    if (lines[i].includes('-->')) {
+                        timeLineIndex = i;
+                        break;
+                    }
+                }
+                
+                if (timeLineIndex === -1) continue;
+                
+                // Parse timestamp
+                const timeMatch = lines[timeLineIndex].match(/(\d{2}:\d{2}:\d{2}[,\.]\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}[,\.]\d{3})/);
+                if (!timeMatch) continue;
+                
+                // Lấy số thứ tự (dòng trước timestamp)
+                const index = timeLineIndex > 0 ? parseInt(lines[timeLineIndex - 1]) || sentences.length + 1 : sentences.length + 1;
+                
+                // Lấy text (các dòng sau timestamp)
+                const textLines = lines.slice(timeLineIndex + 1);
+                const text = textLines.join(' ').replace(/<[^>]*>/g, '').replace(/\{[^}]*\}/g, '').trim();
+                if (!text) continue;
+                
+                sentences.push({
+                    index: index,
+                    startTime: timeMatch[1],
+                    endTime: timeMatch[2],
+                    text: text
+                });
+            }
+            
+            return { sentences };
+        }
+
+        function showSubtitleNav() {
+            document.getElementById('subtitleNav').classList.remove('hidden');
+        }
+
+        function hideSubtitleNav() {
+            document.getElementById('subtitleNav').classList.add('hidden');
+        }
+
+        function updateSubtitleNav() {
+            document.getElementById('subtitleTotal').innerText = subtitleSentences.length;
+            document.getElementById('subtitleCurrent').innerText = currentSubtitleIndex >= 0 ? currentSubtitleIndex + 1 : 0;
+            
+            if (currentSubtitleIndex >= 0 && subtitleSentences[currentSubtitleIndex]) {
+                const current = subtitleSentences[currentSubtitleIndex];
+                document.getElementById('subtitleTimestamp').innerText = `${current.startTime} → ${current.endTime}`;
+            } else {
+                document.getElementById('subtitleTimestamp').innerText = '';
+            }
+        }
+
+        function goToSubtitle(direction) {
+            if (subtitleSentences.length === 0) {
+                showToast('Chưa có subtitle!');
+                return;
+            }
+            
+            switch(direction) {
+                case 'first':
+                    currentSubtitleIndex = 0;
+                    break;
+                case 'prev':
+                    currentSubtitleIndex = Math.max(0, currentSubtitleIndex - 1);
+                    break;
+                case 'next':
+                    currentSubtitleIndex = Math.min(subtitleSentences.length - 1, currentSubtitleIndex + 1);
+                    break;
+                case 'last':
+                    currentSubtitleIndex = subtitleSentences.length - 1;
+                    break;
+            }
+            
+            focusSubtitleSentence(currentSubtitleIndex);
+            updateSubtitleNav();
+        }
+
+        function focusSubtitleSentence(index) {
+            if (index < 0 || index >= subtitleSentences.length) return;
+            
+            const sentence = subtitleSentences[index];
+            const textarea = document.getElementById('inputText');
+            const text = textarea.value;
+            
+            // Tìm vị trí của câu trong textarea
+            const searchText = sentence.text;
+            let position = -1;
+            let currentPos = 0;
+            
+            // Tìm occurrence theo thứ tự
+            for (let i = 0; i <= index; i++) {
+                const searchTarget = subtitleSentences[i].text;
+                const foundPos = text.indexOf(searchTarget, currentPos);
+                if (foundPos !== -1) {
+                    if (i === index) {
+                        position = foundPos;
+                        break;
+                    }
+                    currentPos = foundPos + searchTarget.length;
+                }
+            }
+            
+            // Fallback: tìm trực tiếp
+            if (position === -1) {
+                position = text.indexOf(searchText);
+            }
+            
+            if (position === -1) {
+                showToast(`Không tìm thấy câu ${index + 1}`);
+                return;
+            }
+            
+            // Switch to Word tab if needed
+            if (currentTab !== 'word') {
+                switchTab('word');
+            }
+            
+            // Focus và select câu
+            textarea.focus();
+            textarea.setSelectionRange(position, position + searchText.length);
+            scrollToSelection(textarea, position);
+        }
 
         // --- INIT ---
         window.onload = () => {
@@ -592,6 +741,9 @@ function scrollToSelection(textarea, position) {
         function clearInput() {
             document.getElementById('inputText').value = '';
             detectedWords = [];
+            subtitleSentences = [];
+            currentSubtitleIndex = -1;
+            hideSubtitleNav();
             handleInput();
         }
 
@@ -600,10 +752,27 @@ function scrollToSelection(textarea, position) {
             if (!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
+                const content = e.target.result;
                 const input = document.getElementById('inputText');
-                input.value = input.value.trim() ? input.value.trimEnd() + '\n\n---\n\n' + e.target.result : e.target.result;
+                const isSrt = file.name.toLowerCase().endsWith('.srt');
+                
+                if (isSrt) {
+                    const parsed = parseSRT(content);
+                    const textOnly = parsed.sentences.map(s => s.text).join('\n\n');
+                    input.value = input.value.trim() ? input.value.trimEnd() + '\n\n---\n\n' + textOnly : textOnly;
+                    
+                    // Lưu subtitle data để navigate
+                    subtitleSentences = parsed.sentences;
+                    currentSubtitleIndex = -1;
+                    updateSubtitleNav();
+                    showSubtitleNav();
+                    showToast(`Đã nhập SRT: ${parsed.sentences.length} câu`);
+                } else {
+                    input.value = input.value.trim() ? input.value.trimEnd() + '\n\n---\n\n' + content : content;
+                    showToast(`Đã nhập file: ${file.name}`);
+                }
+                
                 handleInput();
-                showToast(`Đã nhập file: ${file.name}`);
                 event.target.value = '';
             };
             reader.readAsText(file);
@@ -1063,7 +1232,7 @@ function scrollToSelection(textarea, position) {
                 totalLocal += cat.local;
                 const diff = cat.local - cat.cloud;
                 let diffText = diff > 0 ? `+${diff}` : diff < 0 ? `${diff}` : '0';
-                let diffClass = diff > 0 ? 'diff-positive' : diff < 0 ? 'diff-negative' : 'diff-neutral';
+                let diffClass = diff > 0 ? 'text-green-600' : diff < 0 ? 'text-red-600' : 'text-gray-500';
                 
                 const row = document.createElement('tr');
                 row.className = 'border-b hover:bg-gray-50';
@@ -1079,7 +1248,7 @@ function scrollToSelection(textarea, position) {
             const totalDiff = totalLocal - totalCloud;
             const totalDiffEl = document.getElementById('totalDiff');
             totalDiffEl.innerText = totalDiff > 0 ? `+${totalDiff}` : `${totalDiff}`;
-            totalDiffEl.className = `p-3 text-center border-t font-bold ${totalDiff > 0 ? 'diff-positive' : totalDiff < 0 ? 'diff-negative' : 'diff-neutral'}`;
+            totalDiffEl.className = `p-3 text-center border-t font-bold ${totalDiff > 0 ? 'text-green-600' : totalDiff < 0 ? 'text-red-600' : 'text-gray-500'}`;
             document.getElementById('compareTimestamp').innerText = `Cập nhật: ${new Date().toLocaleString('vi-VN')}`;
         }
 
