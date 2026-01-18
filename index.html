@@ -87,13 +87,12 @@
                 <div id="subtitleNav" class="hidden absolute bottom-1 md:bottom-2 left-1 md:left-2 right-12 md:right-14 flex items-center gap-1 md:gap-2 bg-white/95 backdrop-blur px-2 py-1.5 rounded-lg shadow border border-purple-200">
                     <button onclick="goToSubtitle('first')" class="p-1 md:p-1.5 text-purple-600 hover:bg-purple-100 rounded" title="Câu đầu tiên"><i class="fas fa-angle-double-left"></i></button>
                     <button onclick="goToSubtitle('prev')" class="p-1 md:p-1.5 text-purple-600 hover:bg-purple-100 rounded" title="Câu trước"><i class="fas fa-angle-left"></i></button>
-                    <span class="text-xs text-purple-700 font-medium min-w-[50px] md:min-w-[60px] text-center">
-                        <span id="subtitleCurrent">0</span>/<span id="subtitleTotal">0</span>
-                    </span>
+                    <input type="number" id="subtitleJumpInput" class="w-12 md:w-16 text-center text-xs border border-purple-200 rounded px-1 py-0.5" min="1" placeholder="#" onkeydown="if(event.key==='Enter')jumpToSubtitle()">
+                    <span class="text-xs text-purple-700 font-medium">/<span id="subtitleTotal">0</span></span>
                     <button onclick="goToSubtitle('next')" class="p-1 md:p-1.5 text-purple-600 hover:bg-purple-100 rounded" title="Câu tiếp"><i class="fas fa-angle-right"></i></button>
                     <button onclick="goToSubtitle('last')" class="p-1 md:p-1.5 text-purple-600 hover:bg-purple-100 rounded" title="Câu cuối"><i class="fas fa-angle-double-right"></i></button>
                     <div class="flex-1"></div>
-                    <span id="subtitleTimestamp" class="text-xs text-gray-500 hidden md:inline truncate max-w-[120px]"></span>
+                    <span id="subtitleTimestamp" class="text-xs text-gray-500 hidden md:inline truncate max-w-[100px]"></span>
                     <button onclick="hideSubtitleNav()" class="p-1 text-gray-400 hover:text-red-500 rounded" title="Ẩn điều hướng"><i class="fas fa-times"></i></button>
                 </div>
                 
@@ -328,11 +327,9 @@
         let pushDebounceTimer = null;
         const MAX_RETRY = 3;
 
-        // Track current find position for cycling through results
         let currentFindIndex = -1;
         let lastFindItem = '';
 
-        // Subtitle navigation state
         let subtitleSentences = [];
         let currentSubtitleIndex = -1;
 
@@ -388,13 +385,11 @@
             const text = textarea.value;
             const searchTerm = item.toLowerCase();
             
-            // Reset index if searching for different item
             if (lastFindItem !== item) {
                 currentFindIndex = -1;
                 lastFindItem = item;
             }
             
-            // Find all occurrences với regex whole word
             const positions = [];
             const regex = new RegExp(`\\b${escapeRegex(searchTerm)}\\b`, 'gi');
             let match;
@@ -407,33 +402,25 @@
                 return;
             }
             
-            // Cycle to next occurrence
             currentFindIndex = (currentFindIndex + 1) % positions.length;
             const target = positions[currentFindIndex];
             
-            // Tìm câu chứa từ đó
             const sentence = findSentenceContaining(text, target.start, target.end);
             
-            // Switch to Word tab if needed
             if (currentTab !== 'word') {
                 switchTab('word');
             }
             
-            // Focus và select cả câu
             textarea.focus();
             textarea.setSelectionRange(sentence.start, sentence.end);
-            
-            // Scroll chính xác đến vị trí
             scrollToSelection(textarea, sentence.start);
             
             showToast(`"${item}" - ${currentFindIndex + 1}/${positions.length}`);
         }
 
         function findSentenceContaining(text, wordStart, wordEnd) {
-            // Các ký tự kết thúc câu
             const sentenceEnders = /[.!?;\n]/;
             
-            // Tìm điểm bắt đầu câu (lùi về trước)
             let start = wordStart;
             while (start > 0) {
                 const char = text[start - 1];
@@ -443,23 +430,20 @@
                 start--;
             }
             
-            // Bỏ qua khoảng trắng đầu câu
             while (start < wordStart && /\s/.test(text[start])) {
                 start++;
             }
             
-            // Tìm điểm kết thúc câu (tiến về sau)
             let end = wordEnd;
             while (end < text.length) {
                 const char = text[end];
                 if (sentenceEnders.test(char)) {
-                    end++; // Bao gồm cả dấu kết thúc câu
+                    end++;
                     break;
                 }
                 end++;
             }
             
-            // Bỏ qua khoảng trắng cuối câu
             while (end > wordEnd && /\s/.test(text[end - 1])) {
                 end--;
             }
@@ -502,14 +486,14 @@
 
         // --- SUBTITLE FUNCTIONS ---
         function parseSRT(content) {
-            const sentences = [];
+            const rawBlocks = [];
             const blocks = content.trim().split(/\n\s*\n/);
             
+            // Bước 1: Parse tất cả blocks thô
             for (const block of blocks) {
                 const lines = block.trim().split('\n');
                 if (lines.length < 2) continue;
                 
-                // Tìm dòng timestamp
                 let timeLineIndex = -1;
                 for (let i = 0; i < lines.length; i++) {
                     if (lines[i].includes('-->')) {
@@ -520,27 +504,104 @@
                 
                 if (timeLineIndex === -1) continue;
                 
-                // Parse timestamp
                 const timeMatch = lines[timeLineIndex].match(/(\d{2}:\d{2}:\d{2}[,\.]\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}[,\.]\d{3})/);
                 if (!timeMatch) continue;
                 
-                // Lấy số thứ tự (dòng trước timestamp)
-                const index = timeLineIndex > 0 ? parseInt(lines[timeLineIndex - 1]) || sentences.length + 1 : sentences.length + 1;
-                
-                // Lấy text (các dòng sau timestamp)
                 const textLines = lines.slice(timeLineIndex + 1);
-                const text = textLines.join(' ').replace(/<[^>]*>/g, '').replace(/\{[^}]*\}/g, '').trim();
+                let text = textLines.join(' ')
+                    .replace(/<[^>]*>/g, '')      // Xóa HTML tags
+                    .replace(/\{[^}]*\}/g, '')    // Xóa ASS tags
+                    .replace(/\s+/g, ' ')         // Chuẩn hóa spaces
+                    .trim();
                 if (!text) continue;
                 
-                sentences.push({
-                    index: index,
+                rawBlocks.push({
                     startTime: timeMatch[1],
                     endTime: timeMatch[2],
                     text: text
                 });
             }
             
+            // Bước 2: Gộp các blocks thành câu hoàn chỉnh
+            const sentences = [];
+            let currentSentence = null;
+            
+            for (const block of rawBlocks) {
+                if (currentSentence === null) {
+                    currentSentence = {
+                        index: sentences.length + 1,
+                        startTime: block.startTime,
+                        endTime: block.endTime,
+                        text: block.text
+                    };
+                } else {
+                    // Gộp text với space hoặc không tùy thuộc vào ký tự cuối
+                    const lastChar = currentSentence.text.slice(-1);
+                    const separator = (lastChar === '-') ? '' : ' ';
+                    currentSentence.text += separator + block.text;
+                    currentSentence.endTime = block.endTime;
+                }
+                
+                // Kiểm tra câu đã hoàn chỉnh chưa
+                if (isSentenceComplete(currentSentence.text)) {
+                    currentSentence.text = currentSentence.text.replace(/\s+/g, ' ').trim();
+                    sentences.push(currentSentence);
+                    currentSentence = null;
+                }
+            }
+            
+            // Đừng quên phần text còn lại
+            if (currentSentence) {
+                currentSentence.text = currentSentence.text.replace(/\s+/g, ' ').trim();
+                sentences.push(currentSentence);
+            }
+            
             return { sentences };
+        }
+
+        function isSentenceComplete(text) {
+            const trimmed = text.trim();
+            
+            // Không kết thúc bằng dấu câu → chưa hoàn chỉnh
+            if (!/[.!?]$/.test(trimmed) && !/[.!?]["'"']$/.test(trimmed)) {
+                return false;
+            }
+            
+            // Kết thúc bằng "..." → coi như hoàn chỉnh
+            if (/\.{3}$/.test(trimmed) || /\.{3}["'"']$/.test(trimmed)) {
+                return true;
+            }
+            
+            // Danh sách abbreviations phổ biến
+            const abbreviations = [
+                'mr.', 'mrs.', 'ms.', 'dr.', 'prof.', 'sr.', 'jr.',
+                'vs.', 'etc.', 'e.g.', 'i.e.', 'no.', 'vol.', 'rev.',
+                'est.', 'approx.', 'dept.', 'inc.', 'ltd.', 'corp.', 
+                'co.', 'st.', 'ave.', 'blvd.', 'apt.', 'govt.', 'ft.',
+                'mt.', 'gen.', 'col.', 'lt.', 'sgt.', 'capt.', 'cmdr.',
+                'u.s.', 'u.k.', 'u.n.', 'e.u.', 'a.m.', 'p.m.',
+                'jan.', 'feb.', 'mar.', 'apr.', 'jun.', 'jul.', 'aug.', 
+                'sep.', 'sept.', 'oct.', 'nov.', 'dec.'
+            ];
+            
+            const lowerText = trimmed.toLowerCase();
+            for (const abbr of abbreviations) {
+                if (lowerText.endsWith(abbr)) {
+                    return false;
+                }
+            }
+            
+            // Single letter + dấu chấm (A., B., etc.)
+            if (/\s[A-Za-z]\.$/.test(trimmed)) {
+                return false;
+            }
+            
+            // Số + dấu chấm (ví dụ: "No. 1.")
+            if (/\d\.$/.test(trimmed) && !/[.!?]\s*\d\.$/.test(trimmed)) {
+                return false;
+            }
+            
+            return true;
         }
 
         function showSubtitleNav() {
@@ -553,14 +614,27 @@
 
         function updateSubtitleNav() {
             document.getElementById('subtitleTotal').innerText = subtitleSentences.length;
-            document.getElementById('subtitleCurrent').innerText = currentSubtitleIndex >= 0 ? currentSubtitleIndex + 1 : 0;
+            document.getElementById('subtitleJumpInput').value = currentSubtitleIndex >= 0 ? currentSubtitleIndex + 1 : '';
+            document.getElementById('subtitleJumpInput').max = subtitleSentences.length;
             
             if (currentSubtitleIndex >= 0 && subtitleSentences[currentSubtitleIndex]) {
                 const current = subtitleSentences[currentSubtitleIndex];
-                document.getElementById('subtitleTimestamp').innerText = `${current.startTime} → ${current.endTime}`;
+                document.getElementById('subtitleTimestamp').innerText = `${current.startTime.substring(0, 8)}`;
             } else {
                 document.getElementById('subtitleTimestamp').innerText = '';
             }
+        }
+
+        function jumpToSubtitle() {
+            const input = document.getElementById('subtitleJumpInput');
+            const num = parseInt(input.value);
+            if (isNaN(num) || num < 1 || num > subtitleSentences.length) {
+                showToast(`Nhập số từ 1 đến ${subtitleSentences.length}`);
+                return;
+            }
+            currentSubtitleIndex = num - 1;
+            focusSubtitleSentence(currentSubtitleIndex);
+            updateSubtitleNav();
         }
 
         function goToSubtitle(direction) {
@@ -595,12 +669,10 @@
             const textarea = document.getElementById('inputText');
             const text = textarea.value;
             
-            // Tìm vị trí của câu trong textarea
             const searchText = sentence.text;
             let position = -1;
             let currentPos = 0;
             
-            // Tìm occurrence theo thứ tự
             for (let i = 0; i <= index; i++) {
                 const searchTarget = subtitleSentences[i].text;
                 const foundPos = text.indexOf(searchTarget, currentPos);
@@ -613,7 +685,6 @@
                 }
             }
             
-            // Fallback: tìm trực tiếp
             if (position === -1) {
                 position = text.indexOf(searchText);
             }
@@ -623,12 +694,10 @@
                 return;
             }
             
-            // Switch to Word tab if needed
             if (currentTab !== 'word') {
                 switchTab('word');
             }
             
-            // Focus và select câu
             textarea.focus();
             textarea.setSelectionRange(position, position + searchText.length);
             scrollToSelection(textarea, position);
@@ -761,12 +830,11 @@
                     const textOnly = parsed.sentences.map(s => s.text).join('\n\n');
                     input.value = input.value.trim() ? input.value.trimEnd() + '\n\n---\n\n' + textOnly : textOnly;
                     
-                    // Lưu subtitle data để navigate
                     subtitleSentences = parsed.sentences;
                     currentSubtitleIndex = -1;
                     updateSubtitleNav();
                     showSubtitleNav();
-                    showToast(`Đã nhập SRT: ${parsed.sentences.length} câu`);
+                    showToast(`Đã nhập SRT: ${parsed.sentences.length} câu hoàn chỉnh`);
                 } else {
                     input.value = input.value.trim() ? input.value.trimEnd() + '\n\n---\n\n' + content : content;
                     showToast(`Đã nhập file: ${file.name}`);
