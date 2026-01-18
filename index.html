@@ -457,18 +457,32 @@ function escapeRegex(string) {
 }
 
 function scrollToSelection(textarea, position) {
-    const text = textarea.value.substring(0, position);
-    const lines = text.split('\n');
-    const lineNumber = lines.length - 1;
-    
+    const clone = document.createElement('textarea');
     const style = getComputedStyle(textarea);
-    const lineHeight = parseFloat(style.lineHeight) || 20;
-    const paddingTop = parseFloat(style.paddingTop) || 0;
     
-    const targetY = paddingTop + (lineNumber * lineHeight);
-    const viewportHeight = textarea.clientHeight;
+    clone.style.cssText = `
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+        visibility: hidden;
+        width: ${textarea.offsetWidth}px;
+        height: auto;
+        font-family: ${style.fontFamily};
+        font-size: ${style.fontSize};
+        line-height: ${style.lineHeight};
+        padding: ${style.padding};
+        border: ${style.border};
+        box-sizing: ${style.boxSizing};
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    `;
     
-    textarea.scrollTop = Math.max(0, targetY - viewportHeight / 2 + lineHeight / 2);
+    clone.value = textarea.value.substring(0, position);
+    document.body.appendChild(clone);
+    const positionY = clone.scrollHeight;
+    document.body.removeChild(clone);
+    
+    textarea.scrollTop = Math.max(0, positionY - textarea.clientHeight / 2);
 }
 
         // --- INIT ---
