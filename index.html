@@ -86,8 +86,12 @@
                 <div id="subtitleNav" class="hidden flex items-center gap-1 ml-auto bg-purple-50 px-1.5 md:px-2 py-0.5 md:py-1 rounded border border-purple-200">
                     <button onclick="goToSubtitle('first')" class="p-0.5 md:p-1 text-purple-600 hover:bg-purple-100 rounded text-xs md:text-sm" title="Câu đầu"><i class="fas fa-angle-double-left"></i></button>
                     <button onclick="goToSubtitle('prev')" class="p-0.5 md:p-1 text-purple-600 hover:bg-purple-100 rounded text-xs md:text-sm" title="Câu trước"><i class="fas fa-angle-left"></i></button>
-                    <input type="number" id="subtitleJumpInput" class="w-8 md:w-12 text-center text-xs border border-purple-200 rounded px-0.5 py-0.5 bg-white" min="1" placeholder="#" onkeydown="if(event.key==='Enter')jumpToSubtitle()">
-                    <span class="text-xs text-purple-700 font-medium">/<span id="subtitleTotal">0</span></span>
+                    
+                    <!-- Nút hiển thị số - click để nhập -->
+                    <button onclick="promptJumpToSubtitle()" class="min-w-[3rem] md:min-w-[4rem] text-center text-xs font-medium bg-white border border-purple-200 rounded px-1 py-0.5 hover:bg-purple-100 transition" title="Nhấn để nhảy đến câu">
+                        <span id="subtitleCurrent">0</span>/<span id="subtitleTotal">0</span>
+                    </button>
+                    
                     <button onclick="goToSubtitle('next')" class="p-0.5 md:p-1 text-purple-600 hover:bg-purple-100 rounded text-xs md:text-sm" title="Câu tiếp"><i class="fas fa-angle-right"></i></button>
                     <button onclick="goToSubtitle('last')" class="p-0.5 md:p-1 text-purple-600 hover:bg-purple-100 rounded text-xs md:text-sm" title="Câu cuối"><i class="fas fa-angle-double-right"></i></button>
                     <span id="subtitleTimestamp" class="text-xs text-gray-500 hidden lg:inline ml-1"></span>
@@ -479,20 +483,38 @@
 
         function scrollToSelection(textarea, position) {
             const text = textarea.value;
-            const lines = text.substring(0, position).split('\n');
-            const lineNumber = lines.length - 1;
+            const textBefore = text.substring(0, position);
             
             const style = getComputedStyle(textarea);
             const lineHeight = parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.2;
             const paddingTop = parseFloat(style.paddingTop) || 0;
+            const paddingLeft = parseFloat(style.paddingLeft) || 0;
+            const paddingRight = parseFloat(style.paddingRight) || 0;
+            const textareaWidth = textarea.clientWidth - paddingLeft - paddingRight;
             
-            // Tính vị trí Y dựa trên số dòng
-            const positionY = paddingTop + (lineNumber * lineHeight);
+            // Tính số dòng có tính word-wrap
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.font = `${style.fontSize} ${style.fontFamily}`;
             
-            // Scroll sao cho text nằm gần TOP của textarea (15% từ trên)
-            // Điều này đảm bảo câu dài nhiều dòng vẫn hiển thị đầy đủ phần đầu
+            let totalLines = 0;
+            const paragraphs = textBefore.split('\n');
+            
+            for (const para of paragraphs) {
+                if (para === '') {
+                    totalLines += 1;
+                } else {
+                    const textWidth = ctx.measureText(para).width;
+                    const linesForPara = Math.max(1, Math.ceil(textWidth / textareaWidth));
+                    totalLines += linesForPara;
+                }
+            }
+            
+            const positionY = paddingTop + (totalLines - 1) * lineHeight;
+            
+            // Scroll sao cho text nằm gần TOP
             const isMobile = window.innerWidth <= 768;
-            const topOffset = isMobile ? 0.1 : 0.2; // Mobile: 10%, PC: 20% từ top
+            const topOffset = isMobile ? 0.02 : 0.1;
             
             textarea.scrollTop = Math.max(0, positionY - textarea.clientHeight * topOffset);
         }
@@ -648,8 +670,7 @@
 
         function updateSubtitleNav() {
             document.getElementById('subtitleTotal').innerText = subtitleSentences.length;
-            document.getElementById('subtitleJumpInput').value = currentSubtitleIndex >= 0 ? currentSubtitleIndex + 1 : '';
-            document.getElementById('subtitleJumpInput').max = subtitleSentences.length;
+            document.getElementById('subtitleCurrent').innerText = currentSubtitleIndex >= 0 ? currentSubtitleIndex + 1 : 0;
             
             if (currentSubtitleIndex >= 0 && subtitleSentences[currentSubtitleIndex]) {
                 const current = subtitleSentences[currentSubtitleIndex];
@@ -659,13 +680,23 @@
             }
         }
 
-        function jumpToSubtitle() {
-            const input = document.getElementById('subtitleJumpInput');
-            const num = parseInt(input.value);
-            if (isNaN(num) || num < 1 || num > subtitleSentences.length) {
-                showToast(`Nhập số từ 1 đến ${subtitleSentences.length}`);
+        function promptJumpToSubtitle() {
+            if (subtitleSentences.length === 0) {
+                showToast('Chưa có subtitle!');
                 return;
             }
+            
+            const currentDisplay = currentSubtitleIndex >= 0 ? currentSubtitleIndex + 1 : 1;
+            const input = prompt(`Nhảy đến câu (1 - ${subtitleSentences.length}):`, currentDisplay);
+            
+            if (input === null) return; // User cancelled
+            
+            const num = parseInt(input);
+            if (isNaN(num) || num < 1 || num > subtitleSentences.length) {
+                showToast(`Vui lòng nhập số từ 1 đến ${subtitleSentences.length}`);
+                return;
+            }
+            
             currentSubtitleIndex = num - 1;
             focusSubtitleSentence(currentSubtitleIndex);
             updateSubtitleNav();
