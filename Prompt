@@ -1,0 +1,45 @@
+Extract phrasal verbs, collocations and idioms from the text. Ignore common single words.
+
+Create an interactive artifact with:
+1. A "Copy All Phrases" button at the top that copies all phrases (one per line) to clipboard
+2. A table with columns: Phrase | Vietnamese Meaning
+
+Text: "{text}"
+
+
+Analyze the following English words and create a artifact downloadable CSV file (UTF-8 encoded) with these columns:
+
+1. **Word**: The original word
+2. **Phonetic (US)**
+3. **POS**: Part of speech
+4. **Vietnamese Meaning**
+5. **Definition**: Search Cambridge Dictionary in real-time to extract the most common English definition(s). If unavailable, use Oxford Learner's Dictionary, then Merriam-Webster as fallbacks
+6. **Definition Translation**: Vietnamese translation of the definition
+
+**Important formatting requirements:**
+- Do NOT include column headers in the file
+- Add the following three lines at the beginning of the file:
+  #notetype:Words
+  #deck:vocab
+  #separator:Comma
+
+Words to analyze: {words}
+
+
+Analyze the following English phrases and create a artifact downloadable CSV file (UTF-8 encoded) with these columns:
+
+1. **Phrase**: The original phrase/idiom
+2. **Phonetic (US)**
+3. **Type**: Phrase type (use dictionary's classification if available, otherwise infer)
+4. **Vietnamese Meaning**
+5. **Definition**: Search Cambridge and Merriam-Webster in real-time. If the phrase is found in multiple dictionaries, use Cambridge. If found in only one, use that dictionary's definition.
+6. **Definition Translation**: Vietnamese translation of the definition
+
+**Important formatting requirements:**
+- Do NOT include column headers in the file
+- Add the following three lines at the beginning of the file:
+  #notetype:MyExpressions
+  #deck:expressions
+  #separator:Comma
+
+Phrases to analyze: {phrases}
