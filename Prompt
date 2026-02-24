@@ -11,7 +11,7 @@ Analyze the following English words and create a artifact downloadable CSV file 
 1. **Word**: The original word
 2. **Phonetic (US)**: dictionary-style
 3. **POS**: Part of speech
-4. **Vietnamese Meaning**
+4. **Vietnamese meanings of the word**
 5. **Sentence**: The sentence containing that word is in the document (Original quote, unedited, If a word appears multiple times, choose the sentence that best illustrates its meaning) 
 6. **Sentence Translation**: Vietnamese translation of the sentence
 **Important formatting requirements:**
