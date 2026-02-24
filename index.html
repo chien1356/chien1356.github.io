@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; transition: background-color 0.3s, color 0.3s; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; }
         .tab-active { border-bottom: 3px solid #3b82f6; color: #3b82f6; font-weight: bold; }
         .output-tab-active { background-color: #3b82f6; color: white; }
         ::-webkit-scrollbar { width: 8px; }
@@ -17,6 +17,12 @@
         .toast { animation: slideIn 0.3s ease-out forwards; }
         @keyframes slideIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
+        /* Smooth transition for dark mode */
+        body, header, .input-panel, .output-panel, textarea, input, 
+        .modal-content, button, div, span, table, th, td, tr {
+            transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+        }
+
         @media (max-width: 768px) {
             .main-container { flex-direction: column; height: 100dvh; }
             .input-panel { width: 100% !important; height: 25dvh !important; min-height: 25dvh; max-height: 25dvh; border-right: none !important; border-bottom: 1px solid #d1d5db; }
@@ -25,202 +31,191 @@
             .mobile-always-visible { opacity: 1 !important; }
         }
 
-        /* ============ DARK MODE ============ */
-        body.dark-mode {
-            background-color: #181926;
-            color: #cdd4de;
-        }
-        body.dark-mode header {
-            background-color: #1e2033 !important;
-            border-bottom-color: #2b2d48 !important;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.4);
-        }
-        body.dark-mode .input-panel {
-            background-color: #181926 !important;
-            border-color: #2b2d48 !important;
-        }
-        body.dark-mode .output-panel {
-            background-color: #1e2033 !important;
-        }
+        /* ========================================
+           DARK MODE — Astigmatism-Friendly
+           Nền: slate-900 (#0f172a)
+           Chữ: slate-300 (#cbd5e1)
+           ======================================== */
+        body.dark-mode { background-color: #0f172a; color: #cbd5e1; }
 
         /* Scrollbar */
-        body.dark-mode ::-webkit-scrollbar-track { background: #181926; }
-        body.dark-mode ::-webkit-scrollbar-thumb { background: #3a3d5c; border-radius: 4px; }
-        body.dark-mode ::-webkit-scrollbar-thumb:hover { background: #4e5178; }
+        body.dark-mode ::-webkit-scrollbar-track { background: #1e293b; }
+        body.dark-mode ::-webkit-scrollbar-thumb { background: #475569; }
+        body.dark-mode ::-webkit-scrollbar-thumb:hover { background: #64748b; }
 
-        /* Inputs & Textareas */
+        /* Header */
+        body.dark-mode header {
+            background-color: #1e293b !important;
+            border-color: #334155 !important;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Headings */
+        body.dark-mode h1, body.dark-mode h2, body.dark-mode h3 { color: #e2e8f0 !important; }
+
+        /* Generic text overrides */
+        body.dark-mode .text-gray-800 { color: #e2e8f0 !important; }
+        body.dark-mode .text-gray-700 { color: #cbd5e1 !important; }
+        body.dark-mode .text-gray-600 { color: #94a3b8 !important; }
+        body.dark-mode .text-gray-500 { color: #94a3b8 !important; }
+        body.dark-mode .text-gray-400 { color: #64748b !important; }
+
+        /* Generic border overrides */
+        body.dark-mode .border-gray-300 { border-color: #334155 !important; }
+        body.dark-mode .border-gray-200 { border-color: #1e293b !important; }
+        body.dark-mode .border-gray-100 { border-color: #1e293b !important; }
+
+        /* Panels */
+        body.dark-mode .input-panel { background-color: #1e293b !important; border-color: #334155 !important; }
+        body.dark-mode .output-panel { background-color: #0f172a !important; }
+
+        /* Textareas & inputs */
         body.dark-mode textarea,
         body.dark-mode input[type="text"],
         body.dark-mode input[type="password"] {
-            background-color: #23253e !important;
-            border-color: #363958 !important;
-            color: #dce1ea !important;
+            background-color: #0f172a !important;
+            border-color: #475569 !important;
+            color: #cbd5e1 !important;
         }
         body.dark-mode textarea::placeholder,
-        body.dark-mode input::placeholder {
-            color: #5c6078 !important;
-        }
+        body.dark-mode input::placeholder { color: #64748b !important; }
         body.dark-mode textarea:focus,
-        body.dark-mode input[type="text"]:focus,
-        body.dark-mode input[type="password"]:focus {
-            border-color: #6173e0 !important;
-            box-shadow: 0 0 0 2px rgba(97,115,224,0.25) !important;
-        }
+        body.dark-mode input:focus { ring-color: #60a5fa; }
 
-        /* Generic Tailwind bg overrides */
-        body.dark-mode .bg-white { background-color: #1e2033; }
-        body.dark-mode .bg-gray-50 { background-color: #23253e; }
-        body.dark-mode .bg-gray-100 { background-color: #282a46; }
-        body.dark-mode .bg-gray-200 { background-color: #33365a; }
+        /* bg-white elements (sidebar buttons, cards) */
+        body.dark-mode .bg-white { background-color: #1e293b !important; }
+        body.dark-mode .bg-gray-50 { background-color: #1e293b !important; }
+        body.dark-mode .bg-gray-100 { background-color: #334155 !important; }
+        body.dark-mode .bg-gray-200 { background-color: #475569 !important; }
 
-        /* Borders */
-        body.dark-mode .border-gray-100 { border-color: #23253e; }
-        body.dark-mode .border-gray-200 { border-color: #2b2d48; }
-        body.dark-mode .border-gray-300 { border-color: #363958; }
-        body.dark-mode .border-b { border-bottom-color: #2b2d48; }
-        body.dark-mode .border-t { border-top-color: #2b2d48; }
+        /* Colored tinted backgrounds */
+        body.dark-mode .bg-blue-50 { background-color: rgba(59,130,246,0.1) !important; }
+        body.dark-mode .bg-indigo-50 { background-color: rgba(99,102,241,0.1) !important; }
+        body.dark-mode .bg-purple-50 { background-color: rgba(168,85,247,0.1) !important; }
+        body.dark-mode .bg-teal-50 { background-color: rgba(20,184,166,0.1) !important; }
+        body.dark-mode .bg-green-50 { background-color: rgba(34,197,94,0.1) !important; }
+        body.dark-mode .bg-orange-50 { background-color: rgba(249,115,22,0.1) !important; }
+        body.dark-mode .bg-red-100 { background-color: rgba(239,68,68,0.12) !important; }
+        body.dark-mode .bg-purple-100 { background-color: rgba(168,85,247,0.15) !important; }
+        body.dark-mode .bg-indigo-100 { background-color: rgba(99,102,241,0.15) !important; }
+        body.dark-mode .bg-green-100 { background-color: rgba(34,197,94,0.15) !important; }
 
-        /* Text overrides */
-        body.dark-mode .text-gray-800 { color: #dce1ea; }
-        body.dark-mode .text-gray-700 { color: #c4cad6; }
-        body.dark-mode .text-gray-600 { color: #9aa1b4; }
-        body.dark-mode .text-gray-500 { color: #7d8497; }
-        body.dark-mode .text-gray-400 { color: #5e6580; }
+        /* Colored borders */
+        body.dark-mode .border-blue-200 { border-color: rgba(59,130,246,0.3) !important; }
+        body.dark-mode .border-indigo-200 { border-color: rgba(99,102,241,0.3) !important; }
+        body.dark-mode .border-purple-200 { border-color: rgba(168,85,247,0.3) !important; }
+        body.dark-mode .border-purple-300 { border-color: rgba(168,85,247,0.35) !important; }
+        body.dark-mode .border-teal-200 { border-color: rgba(20,184,166,0.3) !important; }
+        body.dark-mode .border-green-200 { border-color: rgba(34,197,94,0.3) !important; }
+        body.dark-mode .border-green-100 { border-color: rgba(34,197,94,0.2) !important; }
+        body.dark-mode .border-orange-200 { border-color: rgba(249,115,22,0.3) !important; }
 
-        /* Colored bg chips */
-        body.dark-mode .bg-blue-50 { background-color: #1b2544; }
-        body.dark-mode .bg-indigo-50 { background-color: #1d1f44; }
-        body.dark-mode .bg-teal-50 { background-color: #182c2e; }
-        body.dark-mode .bg-purple-50 { background-color: #261e3e; }
-        body.dark-mode .bg-green-50 { background-color: #192e22; }
-        body.dark-mode .bg-red-100 { background-color: #3a1f27; }
-        body.dark-mode .bg-orange-50 { background-color: #3a2a1c; }
-
-        body.dark-mode .border-blue-100,
-        body.dark-mode .border-blue-200 { border-color: #283a6b; }
-        body.dark-mode .border-indigo-200 { border-color: #2d2d6b; }
-        body.dark-mode .border-teal-200 { border-color: #1d4848; }
-        body.dark-mode .border-purple-200 { border-color: #472a6b; }
-        body.dark-mode .border-green-100,
-        body.dark-mode .border-green-200 { border-color: #1f4a30; }
-        body.dark-mode .border-orange-200 { border-color: #5a4020; }
-
-        /* Hover */
-        body.dark-mode .hover\:bg-white:hover { background-color: #282a46 !important; }
-        body.dark-mode .hover\:bg-gray-100:hover { background-color: #2d3050 !important; }
-        body.dark-mode .hover\:bg-gray-200:hover { background-color: #363958 !important; }
-        body.dark-mode .hover\:shadow-sm:hover { box-shadow: 0 1px 3px rgba(0,0,0,0.35); }
-        body.dark-mode .hover\:border-blue-200:hover { border-color: #3a4f8a !important; }
-
-        /* Shadows */
-        body.dark-mode .shadow-sm { box-shadow: 0 1px 3px rgba(0,0,0,0.35); }
-        body.dark-mode .shadow-lg { box-shadow: 0 4px 15px rgba(0,0,0,0.45); }
-        body.dark-mode .shadow-2xl { box-shadow: 0 10px 40px rgba(0,0,0,0.55); }
-
-        /* Modals */
-        body.dark-mode #dictionaryModal > div {
-            background-color: #1e2033 !important;
-        }
-        body.dark-mode #settingsModal > div > div {
-            background-color: #1e2033 !important;
-        }
-        body.dark-mode #compareModal > div {
-            background-color: #1e2033 !important;
-        }
-
-        /* Compare table */
-        body.dark-mode table { color: #cdd4de; }
-        body.dark-mode thead tr,
-        body.dark-mode tr.bg-gray-100 { background-color: #23253e !important; }
-        body.dark-mode tfoot tr { background-color: #23253e !important; }
-        body.dark-mode td, body.dark-mode th { border-color: #2b2d48 !important; }
-        body.dark-mode .hover\:bg-gray-50:hover,
-        body.dark-mode tr:hover { background-color: #282a46 !important; }
-
-        /* Settings sections */
-        body.dark-mode .bg-gradient-to-r.from-gray-50.to-gray-100 {
-            background: linear-gradient(to right, #23253e, #282a46) !important;
-            border-color: #363958 !important;
-        }
-        body.dark-mode .bg-purple-50.p-4 { background-color: #261e3e !important; border-color: #472a6b !important; }
-        body.dark-mode .bg-gray-50.p-4 { background-color: #23253e !important; border-color: #363958 !important; }
-        body.dark-mode .bg-indigo-50.p-4 { background-color: #1d1f44 !important; border-color: #2d2d6b !important; }
-
-        /* Dictionary columns inside modal */
-        body.dark-mode .bg-blue-50.rounded { background-color: #1b2544; }
-        body.dark-mode .bg-indigo-50.rounded { background-color: #1d1f44; }
-        body.dark-mode .bg-teal-50.rounded { background-color: #182c2e; }
-        body.dark-mode .bg-gray-100.rounded { background-color: #282a46; }
-        body.dark-mode .border-blue-200 { border-color: #283a6b; }
-        body.dark-mode .border-indigo-200 { border-color: #2d2d6b; }
-        body.dark-mode .border-teal-200 { border-color: #1d4848; }
-
-        /* Dict items inside columns */
-        body.dark-mode #dictWordList .bg-white,
-        body.dark-mode #dictPhraseList .bg-white,
-        body.dark-mode #dictFamilyList .bg-white,
-        body.dark-mode #dictPersonalList .bg-white {
-            background-color: #23253e !important;
-            border-color: #2b2d48 !important;
-        }
+        /* Tab active */
+        body.dark-mode .tab-active { border-color: #60a5fa !important; color: #60a5fa !important; }
+        body.dark-mode .output-tab-active { background-color: #3b82f6 !important; color: #fff !important; }
 
         /* Output list items */
-        body.dark-mode #outputList .bg-gray-50 {
-            background-color: #23253e;
+        body.dark-mode #outputList > div {
+            background-color: #1e293b !important;
+            border-color: transparent !important;
         }
-        body.dark-mode #outputList .bg-gray-50:hover {
-            background-color: #282a46 !important;
-            border-color: #3a4f8a !important;
+        body.dark-mode #outputList > div:hover {
+            background-color: #334155 !important;
+            border-color: #475569 !important;
+            box-shadow: none !important;
+        }
+        body.dark-mode #outputList .font-medium { color: #e2e8f0 !important; }
+        body.dark-mode #outputList .text-center.text-gray-400 { color: #64748b !important; }
+
+        /* Prompt previews */
+        body.dark-mode .bg-gray-800 { background-color: #0f172a !important; }
+        body.dark-mode .bg-purple-900 { background-color: #1a0f2e !important; }
+        body.dark-mode .bg-indigo-900 { background-color: #171033 !important; }
+
+        /* Modals */
+        body.dark-mode #compareModal > div > div,
+        body.dark-mode #dictionaryModal > div > div,
+        body.dark-mode #settingsModal > div > div {
+            background-color: #1e293b !important;
+            color: #cbd5e1;
         }
 
-        /* Prompt preview areas already dark, just tweak */
-        body.dark-mode .bg-gray-800 { background-color: #14152a; }
-        body.dark-mode .bg-purple-900 { background-color: #1a0f2e; }
-        body.dark-mode .bg-indigo-900 { background-color: #100f2e; }
+        /* Modal tables */
+        body.dark-mode table { color: #cbd5e1; }
+        body.dark-mode thead tr { background-color: #0f172a !important; }
+        body.dark-mode tbody tr { border-color: #334155 !important; }
+        body.dark-mode tbody tr:hover { background-color: #334155 !important; }
+        body.dark-mode tfoot tr { background-color: #0f172a !important; }
+        body.dark-mode th { color: #94a3b8 !important; border-color: #334155 !important; }
+        body.dark-mode td { border-color: #334155 !important; }
 
-        /* Output tabs */
-        body.dark-mode .output-tab-active { background-color: #4f6ae6; color: #fff; }
+        /* Dictionary columns */
+        body.dark-mode #dictWordList > div,
+        body.dark-mode #dictPhraseList > div,
+        body.dark-mode #dictFamilyList > div,
+        body.dark-mode #dictPersonalList > div {
+            background-color: #0f172a !important;
+            border-color: #334155 !important;
+            color: #cbd5e1;
+        }
 
-        /* Tab active override */
-        body.dark-mode .tab-active { border-bottom-color: #6b85f0; color: #8da0f7; }
+        body.dark-mode .border-blue-200.pb-1,
+        body.dark-mode .border-indigo-200.pb-1,
+        body.dark-mode .border-teal-200.pb-1,
+        body.dark-mode .border-gray-300.pb-1 {
+            border-color: #475569 !important;
+        }
 
-        /* Action buttons in header */
-        body.dark-mode .bg-purple-100 { background-color: #2e1f50; }
-        body.dark-mode .bg-indigo-100 { background-color: #1f2050; }
+        /* Settings gradient sections */
+        body.dark-mode .bg-gradient-to-r.from-gray-50 { background: #0f172a !important; }
+        body.dark-mode [class*="from-gray-50"][class*="to-gray-100"] { background: #0f172a !important; }
+        body.dark-mode .bg-purple-50.p-4 { background-color: rgba(168,85,247,0.08) !important; }
+        body.dark-mode .bg-gray-50.p-4 { background-color: #0f172a !important; }
+        body.dark-mode .bg-indigo-50.p-4 { background-color: rgba(99,102,241,0.08) !important; }
 
-        /* Toast */
-        body.dark-mode .toast { background-color: #2d3050 !important; color: #dce1ea; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        /* Toast in dark mode */
+        body.dark-mode #toastContainer > div {
+            background-color: #334155 !important;
+            border: 1px solid #475569;
+        }
 
         /* Subtitle nav */
-        body.dark-mode .bg-purple-50.border-purple-200,
         body.dark-mode #subtitleNav {
-            background-color: #261e3e !important;
-            border-color: #472a6b !important;
+            background-color: rgba(168,85,247,0.1) !important;
+            border-color: rgba(168,85,247,0.3) !important;
         }
         body.dark-mode #subtitleJumpInput {
-            background-color: #1e2033 !important;
-            border-color: #472a6b !important;
+            background-color: #0f172a !important;
+            border-color: rgba(168,85,247,0.3) !important;
+            color: #cbd5e1 !important;
         }
 
-        /* Bottom copy buttons row */
-        body.dark-mode .bg-purple-100.hover\:bg-purple-200 { background-color: #2e1f50; }
-        body.dark-mode .bg-purple-100.hover\:bg-purple-200:hover { background-color: #3b2866 !important; }
-        body.dark-mode .bg-gray-200.hover\:bg-gray-300 { background-color: #33365a; }
-        body.dark-mode .bg-gray-200.hover\:bg-gray-300:hover { background-color: #3e4170 !important; }
-        body.dark-mode .bg-indigo-100.hover\:bg-indigo-200 { background-color: #1f2050; }
-        body.dark-mode .bg-indigo-100.hover\:bg-indigo-200:hover { background-color: #2a2b66 !important; }
+        /* Hover overrides */
+        body.dark-mode .hover\:bg-blue-50:hover { background-color: rgba(59,130,246,0.15) !important; }
+        body.dark-mode .hover\:bg-green-50:hover { background-color: rgba(34,197,94,0.15) !important; }
+        body.dark-mode .hover\:bg-purple-50:hover { background-color: rgba(168,85,247,0.15) !important; }
+        body.dark-mode .hover\:bg-orange-50:hover { background-color: rgba(249,115,22,0.15) !important; }
+        body.dark-mode .hover\:bg-gray-100:hover { background-color: #334155 !important; }
+        body.dark-mode .hover\:bg-gray-200:hover { background-color: #475569 !important; }
+        body.dark-mode .hover\:bg-gray-300:hover { background-color: #475569 !important; }
+        body.dark-mode .hover\:bg-purple-100:hover { background-color: rgba(168,85,247,0.2) !important; }
+        body.dark-mode .hover\:bg-purple-200:hover { background-color: rgba(168,85,247,0.25) !important; }
+        body.dark-mode .hover\:bg-indigo-100:hover { background-color: rgba(99,102,241,0.2) !important; }
+        body.dark-mode .hover\:bg-indigo-200:hover { background-color: rgba(99,102,241,0.25) !important; }
+        body.dark-mode .hover\:bg-blue-100:hover { background-color: rgba(59,130,246,0.2) !important; }
+        body.dark-mode .hover\:bg-green-100:hover { background-color: rgba(34,197,94,0.2) !important; }
+        body.dark-mode .hover\:bg-green-200:hover { background-color: rgba(34,197,94,0.25) !important; }
+        body.dark-mode .hover\:bg-teal-50:hover { background-color: rgba(20,184,166,0.15) !important; }
+        body.dark-mode .hover\:bg-yellow-50:hover { background-color: rgba(234,179,8,0.15) !important; }
 
-        /* Dark mode toggle button glow */
-        body.dark-mode #darkModeToggle {
-            color: #f6c547;
-            text-shadow: 0 0 8px rgba(246,197,71,0.3);
-        }
+        /* Dark mode toggle btn */
+        .dm-toggle { position: relative; width: 2rem; height: 2rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
+        .dm-toggle .fa-sun { color: #fbbf24; }
+        .dm-toggle .fa-moon { color: #94a3b8; }
 
-        /* Mobile border fix */
+        /* Mobile dark-mode input-panel border */
         @media (max-width: 768px) {
-            body.dark-mode .input-panel {
-                border-bottom-color: #2b2d48 !important;
-            }
+            body.dark-mode .input-panel { border-bottom-color: #334155 !important; }
         }
     </style>
 </head>
@@ -243,7 +238,8 @@
                     <i class="fas fa-balance-scale"></i>
                 </button>
                 <div class="h-4 w-px bg-gray-300"></div>
-                <button id="darkModeToggle" onclick="toggleDarkMode()" class="text-gray-500 hover:text-yellow-500 transition px-1 md:px-2 py-1" title="Dark Mode">
+                <!-- Dark Mode Toggle -->
+                <button id="darkModeBtn" onclick="toggleDarkMode()" class="dm-toggle bg-transparent hover:bg-gray-200 transition" title="Dark / Light Mode">
                     <i id="darkModeIcon" class="fas fa-moon"></i>
                 </button>
                 <button onclick="openModal('settingsModal')" class="text-gray-500 hover:text-blue-600 transition px-1 md:px-2 py-1" title="Cấu hình">
@@ -285,7 +281,9 @@
                 <div id="subtitleNav" class="hidden flex items-center gap-1 ml-auto bg-purple-50 px-1.5 md:px-2 py-0.5 md:py-1 rounded border border-purple-200">
                     <button onclick="goToSubtitle('first')" class="p-0.5 md:p-1 text-purple-600 hover:bg-purple-100 rounded text-xs md:text-sm" title="Câu đầu"><i class="fas fa-angle-double-left"></i></button>
                     <button onclick="goToSubtitle('prev')" class="p-0.5 md:p-1 text-purple-600 hover:bg-purple-100 rounded text-xs md:text-sm" title="Câu trước"><i class="fas fa-angle-left"></i></button>
-                    <input type="text" inputmode="numeric" id="subtitleJumpInput" class="w-8 md:w-10 text-center text-xs font-medium bg-white border border-purple-200 rounded px-0.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-purple-400" placeholder="#" onkeydown="if(event.key==='Enter'){event.preventDefault();jumpToSubtitle();}">
+                    <input type="text" inputmode="numeric" id="subtitleJumpInput"
+                           class="w-8 md:w-10 text-center text-xs font-medium bg-white border border-purple-200 rounded px-0.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-purple-400"
+                           placeholder="#" onkeydown="if(event.key==='Enter'){event.preventDefault();jumpToSubtitle();}">
                     <span class="text-xs text-purple-600">/</span>
                     <span id="subtitleTotal" class="text-xs font-medium text-purple-700">0</span>
                     <button onclick="goToSubtitle('next')" class="p-0.5 md:p-1 text-purple-600 hover:bg-purple-100 rounded text-xs md:text-sm" title="Câu tiếp"><i class="fas fa-angle-right"></i></button>
@@ -530,6 +528,8 @@
         let subtitleSentences = [];
         let currentSubtitleIndex = -1;
 
+        let isDarkMode = false;
+
         const defaultPrompt = `Phân tích các từ này : {words}`;
         const defaultPhrasePrompt = `Phân tích các cụm từ này : {phrases}`;
         const defaultExtractPrompt = `ONLY Extract Expressions from the text. Ignore common single words. Return a JSON array of strings in lowercase. Text: "{text}"`;
@@ -544,18 +544,31 @@
         };
 
         // --- DARK MODE ---
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-            const isDark = document.body.classList.contains('dark-mode');
-            localStorage.setItem('darkMode', isDark ? 'on' : 'off');
-            document.getElementById('darkModeIcon').className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+        function initDarkMode() {
+            const saved = localStorage.getItem('vocabCanvasTheme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            isDarkMode = saved ? saved === 'dark' : prefersDark;
+            applyDarkMode();
+
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                if (!localStorage.getItem('vocabCanvasTheme')) {
+                    isDarkMode = e.matches;
+                    applyDarkMode();
+                }
+            });
         }
 
-        function loadDarkMode() {
-            if (localStorage.getItem('darkMode') === 'on') {
-                document.body.classList.add('dark-mode');
-                document.getElementById('darkModeIcon').className = 'fas fa-sun';
-            }
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            localStorage.setItem('vocabCanvasTheme', isDarkMode ? 'dark' : 'light');
+            applyDarkMode();
+            showToast(isDarkMode ? '🌙 Dark Mode (Astigmatism-friendly)' : '☀️ Light Mode');
+        }
+
+        function applyDarkMode() {
+            document.body.classList.toggle('dark-mode', isDarkMode);
+            const icon = document.getElementById('darkModeIcon');
+            if (icon) icon.className = isDarkMode ? 'fas fa-sun' : 'fas fa-moon';
         }
 
         // --- HELPER FUNCTIONS ---
@@ -678,8 +691,8 @@
             let totalLines = 0;
             const paragraphs = textBefore.split('\n');
             for (const para of paragraphs) {
-                if (para === '') totalLines += 1;
-                else { const textWidth = ctx.measureText(para).width; totalLines += Math.max(1, Math.ceil(textWidth / textareaWidth)); }
+                if (para === '') { totalLines += 1; }
+                else { totalLines += Math.max(1, Math.ceil(ctx.measureText(para).width / textareaWidth)); }
             }
             const positionY = paddingTop + (totalLines - 1) * lineHeight;
             const isMobile = window.innerWidth <= 768;
@@ -728,14 +741,8 @@
                     sentences.push({ index: sentences.length + 1, startTime: block.startTime, endTime: block.endTime, text: block.text, isSoundDesc: true });
                     continue;
                 }
-                if (currentSentence === null) {
-                    currentSentence = { index: sentences.length + 1, startTime: block.startTime, endTime: block.endTime, text: block.text };
-                } else {
-                    const lastChar = currentSentence.text.slice(-1);
-                    const separator = (lastChar === '-') ? '' : ' ';
-                    currentSentence.text += separator + block.text;
-                    currentSentence.endTime = block.endTime;
-                }
+                if (currentSentence === null) { currentSentence = { index: sentences.length + 1, startTime: block.startTime, endTime: block.endTime, text: block.text }; }
+                else { const lastChar = currentSentence.text.slice(-1); const separator = (lastChar === '-') ? '' : ' '; currentSentence.text += separator + block.text; currentSentence.endTime = block.endTime; }
                 if (isSentenceComplete(currentSentence.text)) { currentSentence.text = currentSentence.text.replace(/\s+/g, ' ').trim(); sentences.push(currentSentence); currentSentence = null; }
             }
             if (currentSentence) { currentSentence.text = currentSentence.text.replace(/\s+/g, ' ').trim(); sentences.push(currentSentence); }
@@ -805,7 +812,7 @@
 
         // --- INIT ---
         window.onload = () => {
-            loadDarkMode();
+            initDarkMode();
             loadSettings();
             loadVocab();
             document.getElementById('inputText').addEventListener('input', handleInput);
@@ -813,7 +820,9 @@
             document.getElementById('fileInput').addEventListener('change', handleFileUpload);
             renderCounts();
             updateUndoButton();
-            if (config.githubToken && config.gistId) setTimeout(() => checkCloudOnStartup(), 1000);
+            if (config.githubToken && config.gistId) {
+                setTimeout(() => checkCloudOnStartup(), 1000);
+            }
         };
 
         async function checkCloudOnStartup() {
@@ -841,7 +850,12 @@
             const input = document.getElementById('manualPhraseInput');
             if (!input.value.trim()) { showToast('Không có gì để xóa!'); return; }
             if (!confirm('Xóa tất cả phrases đã nhập?')) return;
-            input.value = ''; manualPhrases = []; updateCombinedPhrases(); renderView(); updatePrompts(); showToast('Đã xóa tất cả!');
+            input.value = '';
+            manualPhrases = [];
+            updateCombinedPhrases();
+            renderView();
+            updatePrompts();
+            showToast('Đã xóa tất cả!');
         }
 
         async function quickPasteManualPhrase() {
@@ -868,13 +882,20 @@
                 const clipboardText = await navigator.clipboard.readText();
                 const input = document.getElementById('inputText');
                 input.value = input.value.trim() ? input.value.trimEnd() + '\n\n---\n\n' + clipboardText : clipboardText;
-                input.focus(); input.scrollTop = input.scrollHeight; handleInput(); showToast('Đã dán nối tiếp!');
+                input.focus();
+                input.scrollTop = input.scrollHeight;
+                handleInput();
+                showToast('Đã dán nối tiếp!');
             } catch (err) { showToast('Lỗi clipboard: Hãy cấp quyền.'); }
         }
 
         function clearInput() {
             document.getElementById('inputText').value = '';
-            detectedWords = []; subtitleSentences = []; currentSubtitleIndex = -1; hideSubtitleNav(); handleInput();
+            detectedWords = [];
+            subtitleSentences = [];
+            currentSubtitleIndex = -1;
+            hideSubtitleNav();
+            handleInput();
         }
 
         function handleFileUpload(event) {
@@ -889,18 +910,25 @@
                     const parsed = parseSRT(content);
                     const textOnly = parsed.sentences.map(s => s.text).join('\n\n');
                     input.value = input.value.trim() ? input.value.trimEnd() + '\n\n---\n\n' + textOnly : textOnly;
-                    subtitleSentences = parsed.sentences; currentSubtitleIndex = -1; updateSubtitleNav(); showSubtitleNav();
+                    subtitleSentences = parsed.sentences;
+                    currentSubtitleIndex = -1;
+                    updateSubtitleNav();
+                    showSubtitleNav();
                     const soundDescCount = parsed.sentences.filter(s => s.isSoundDesc).length;
                     showToast(`SRT: ${parsed.sentences.length - soundDescCount} câu + ${soundDescCount} mô tả`);
-                } else { input.value = input.value.trim() ? input.value.trimEnd() + '\n\n---\n\n' + content : content; showToast(`Đã nhập file: ${file.name}`); }
-                handleInput(); event.target.value = '';
+                } else {
+                    input.value = input.value.trim() ? input.value.trimEnd() + '\n\n---\n\n' + content : content;
+                    showToast(`Đã nhập file: ${file.name}`);
+                }
+                handleInput();
+                event.target.value = '';
             };
             reader.readAsText(file);
         }
 
         function copyPrompt() {
             const text = document.getElementById('promptPreview').innerText;
-            if (!text || text.includes('Chưa có từ')) { showToast('Không có Word Prompt!'); return; }
+            if (!text || text.includes('Chưa có')) { showToast('Không có Word Prompt!'); return; }
             navigator.clipboard.writeText(text).then(() => showToast('Đã copy Word Prompt!'));
         }
 
@@ -938,12 +966,13 @@
             const btn = document.getElementById('undoBtn');
             const countEl = document.getElementById('undoCount');
             if (undoStack.length > 0) { btn.classList.remove('hidden'); countEl.innerText = undoStack.length; }
-            else btn.classList.add('hidden');
+            else { btn.classList.add('hidden'); }
         }
 
         function undoLastAction() {
             if (undoStack.length === 0) return;
-            const { type, item, sourceTab } = undoStack.pop();
+            const action = undoStack.pop();
+            const { type, item, sourceTab } = action;
             if (type === 'word') removeItem(vocabWords, item);
             else if (type === 'phrase') removeItem(vocabPhrases, item);
             else if (type === 'family') removeItem(vocabFamily, item);
@@ -970,8 +999,14 @@
                 const el = document.getElementById(`output${t}Tab`);
                 const btn = document.getElementById(`outputTab${t}`);
                 if (t.toLowerCase() === tab || (t === 'Result' && tab === 'result') || (t === 'Extract' && tab === 'extract') || (t === 'Prompt' && tab === 'prompt') || (t === 'PhrasePrompt' && tab === 'phrasePrompt')) {
-                    el.classList.remove('hidden'); btn.classList.add('output-tab-active'); btn.classList.remove('text-gray-500');
-                } else { el.classList.add('hidden'); btn.classList.remove('output-tab-active'); btn.classList.add('text-gray-500'); }
+                    el.classList.remove('hidden');
+                    btn.classList.add('output-tab-active');
+                    btn.classList.remove('text-gray-500');
+                } else {
+                    el.classList.add('hidden');
+                    btn.classList.remove('output-tab-active');
+                    btn.classList.add('text-gray-500');
+                }
             });
         }
 
@@ -1007,30 +1042,53 @@
             updatePrompts();
         }
 
+        // ===== CẢI TIẾN: {text} dùng được trong cả Word & Phrase Prompt =====
+        function buildPromptText(template, replacements) {
+            let result = template;
+            for (const [key, value] of Object.entries(replacements)) {
+                result = result.replaceAll(key, value);
+            }
+            return result;
+        }
+
         function updatePrompts() {
             const inputText = document.getElementById('inputText').value;
+            const hasText = inputText.trim().length > 0;
+            const wordsStr = detectedWords.join(', ');
+            const phrasesStr = detectedPhrases.join(', ');
 
-            // Extract prompt
-            document.getElementById('extractPromptPreview').innerText = inputText.trim()
-                ? config.extractPromptTemplate.replace('{text}', inputText)
-                : '(Nhập văn bản để xem Extract Prompt)';
-
-            // Word prompt — supports {words} and {text}
-            if (detectedWords.length === 0) {
-                document.getElementById('promptPreview').innerText = "(Chưa có từ để phân tích)";
+            // Extract Prompt: chỉ cần {text}
+            if (hasText) {
+                document.getElementById('extractPromptPreview').innerText = buildPromptText(config.extractPromptTemplate, { '{text}': inputText });
             } else {
-                document.getElementById('promptPreview').innerText = config.promptTemplate
-                    .replace('{words}', detectedWords.join(', '))
-                    .replace('{text}', inputText);
+                document.getElementById('extractPromptPreview').innerText = '(Nhập văn bản để xem Extract Prompt)';
             }
 
-            // Phrase prompt — supports {phrases} and {text}
-            if (detectedPhrases.length === 0) {
-                document.getElementById('phrasePromptPreview').innerText = "(Chưa có phrases để phân tích)";
+            // Word Prompt: hỗ trợ {words} và {text}
+            const wordTemplateHasWords = config.promptTemplate.includes('{words}');
+            const wordTemplateHasText = config.promptTemplate.includes('{text}');
+            if ((wordTemplateHasWords && detectedWords.length === 0) && (!wordTemplateHasText || !hasText)) {
+                document.getElementById('promptPreview').innerText = '(Chưa có từ hoặc văn bản để phân tích)';
+            } else if (wordTemplateHasWords && detectedWords.length === 0 && wordTemplateHasText && hasText) {
+                // Có {text} nhưng không có {words} → vẫn render, {words} sẽ rỗng
+                document.getElementById('promptPreview').innerText = buildPromptText(config.promptTemplate, { '{words}': '(none)', '{text}': inputText });
+            } else if (!wordTemplateHasWords && wordTemplateHasText && !hasText) {
+                document.getElementById('promptPreview').innerText = '(Chưa có văn bản để phân tích)';
             } else {
-                document.getElementById('phrasePromptPreview').innerText = config.phrasePromptTemplate
-                    .replace('{phrases}', detectedPhrases.join(', '))
-                    .replace('{text}', inputText);
+                document.getElementById('promptPreview').innerText = buildPromptText(config.promptTemplate, { '{words}': wordsStr, '{text}': inputText });
+            }
+
+            // Phrase Prompt: hỗ trợ {phrases} và {text}
+            const phraseTemplateHasPhrases = config.phrasePromptTemplate.includes('{phrases}');
+            const phraseTemplateHasText = config.phrasePromptTemplate.includes('{text}');
+            if ((phraseTemplateHasPhrases && detectedPhrases.length === 0) && (!phraseTemplateHasText || !hasText)) {
+                document.getElementById('phrasePromptPreview').innerText = '(Chưa có phrases hoặc văn bản để phân tích)';
+            } else if (phraseTemplateHasPhrases && detectedPhrases.length === 0 && phraseTemplateHasText && hasText) {
+                document.getElementById('phrasePromptPreview').innerText = buildPromptText(config.phrasePromptTemplate, { '{phrases}': '(none)', '{text}': inputText });
+            } else if (!phraseTemplateHasPhrases && phraseTemplateHasText && !hasText) {
+                document.getElementById('phrasePromptPreview').innerText = '(Chưa có văn bản để phân tích)';
+            } else {
+                document.getElementById('phrasePromptPreview').innerText = buildPromptText(config.phrasePromptTemplate, { '{phrases}': phrasesStr, '{text}': inputText });
             }
         }
 
@@ -1051,22 +1109,40 @@
 
         function addItemToCurrentVocab(item) {
             let type = currentTab === 'word' ? 'word' : 'phrase';
-            if (type === 'word') addItem(vocabWords, item); else addItem(vocabPhrases, item);
-            pushToUndoStack(type, item, currentTab); updateVocabAndSync(); removeCurrentItem(item); showToast(`Đã thêm: ${item}`);
+            if (type === 'word') addItem(vocabWords, item);
+            else addItem(vocabPhrases, item);
+            pushToUndoStack(type, item, currentTab);
+            updateVocabAndSync(); removeCurrentItem(item);
+            showToast(`Đã thêm: ${item}`);
         }
 
-        function addToPersonalDict(item) { addItem(personalDict, item); pushToUndoStack('personal', item, currentTab); updateVocabAndSync(); removeCurrentItem(item); showToast(`Đã thêm vào Ignored: ${item}`); }
-        function addToWordFamily(item) { addItem(vocabFamily, item); pushToUndoStack('family', item, currentTab); updateVocabAndSync(); removeCurrentItem(item); showToast(`Đã thêm vào Family: ${item}`); }
+        function addToPersonalDict(item) {
+            addItem(personalDict, item);
+            pushToUndoStack('personal', item, currentTab);
+            updateVocabAndSync(); removeCurrentItem(item);
+            showToast(`Đã thêm vào Ignored: ${item}`);
+        }
+
+        function addToWordFamily(item) {
+            addItem(vocabFamily, item);
+            pushToUndoStack('family', item, currentTab);
+            updateVocabAndSync(); removeCurrentItem(item);
+            showToast(`Đã thêm vào Family: ${item}`);
+        }
 
         function addAllCurrentToVocab() {
             let list = currentTab === 'word' ? [...detectedWords] : [...detectedPhrases];
             let type = currentTab === 'word' ? 'word' : 'phrase';
             if (list.length === 0) return;
-            list.forEach(item => { if (type === 'word') { addItem(vocabWords, item); pushToUndoStack('word', item, 'word'); } else { addItem(vocabPhrases, item); pushToUndoStack('phrase', item, currentTab); } });
+            list.forEach(item => {
+                if (type === 'word') { addItem(vocabWords, item); pushToUndoStack('word', item, 'word'); }
+                else { addItem(vocabPhrases, item); pushToUndoStack('phrase', item, currentTab); }
+            });
             updateVocabAndSync();
             if (currentTab === 'word') detectedWords = [];
             else { manualPhrases = manualPhrases.filter(p => !list.includes(p)); updateCombinedPhrases(); }
-            renderView(); renderCounts(); showToast(`Đã thêm ${list.length} items`);
+            renderView(); renderCounts();
+            showToast(`Đã thêm ${list.length} items`);
         }
 
         function ignoreItem(item) { sessionIgnored.add(item); removeCurrentItem(item); }
@@ -1087,7 +1163,10 @@
 
         function loadVocab() {
             const parse = (key) => { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : []; } catch { return []; } };
-            vocabWords = parse('myVocabWords'); vocabPhrases = parse('myVocabPhrases'); vocabFamily = parse('myVocabFamily'); personalDict = parse('myPersonalDict');
+            vocabWords = parse('myVocabWords');
+            vocabPhrases = parse('myVocabPhrases');
+            vocabFamily = parse('myVocabFamily');
+            personalDict = parse('myPersonalDict');
         }
 
         function renderCounts() {
@@ -1161,11 +1240,15 @@
         async function processQueue(retryCount = 0) {
             if (pushLocked) return;
             if (pushQueue.length === 0) return;
-            pushLocked = true; pushQueue = [];
+            pushLocked = true;
+            pushQueue = [];
             const statusEl = document.getElementById('syncStatusIndicator');
             statusEl.innerHTML = '<i class="fas fa-cloud-upload-alt fa-spin text-blue-500"></i> Pushing...';
             try {
-                const data = { vocab: { words: vocabWords, phrases: vocabPhrases, family: vocabFamily, personal: personalDict }, settings: { extractPromptTemplate: config.extractPromptTemplate, promptTemplate: config.promptTemplate, phrasePromptTemplate: config.phrasePromptTemplate } };
+                const data = {
+                    vocab: { words: vocabWords, phrases: vocabPhrases, family: vocabFamily, personal: personalDict },
+                    settings: { extractPromptTemplate: config.extractPromptTemplate, promptTemplate: config.promptTemplate, phrasePromptTemplate: config.phrasePromptTemplate }
+                };
                 await pushGist(data);
                 statusEl.innerHTML = '<i class="fas fa-check-circle text-green-500"></i> Synced';
                 statusEl.title = `Pushed @ ${new Date().toLocaleTimeString()}`;
@@ -1177,7 +1260,11 @@
                     pushLocked = false;
                     setTimeout(() => { pushQueue.push(Date.now()); processQueue(retryCount + 1); }, delay);
                     return;
-                } else { statusEl.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500"></i> Failed'; showToast('Không thể sync sau 3 lần thử.'); pushQueue.push(Date.now()); }
+                } else {
+                    statusEl.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500"></i> Failed';
+                    showToast('Không thể sync sau 3 lần thử.');
+                    pushQueue.push(Date.now());
+                }
             } finally {
                 pushLocked = false;
                 if (pushQueue.length > 0) setTimeout(() => processQueue(0), 1000);
@@ -1188,8 +1275,12 @@
             if (!config.githubToken || !config.gistId) { showToast('Chưa cấu hình Github!'); return; }
             const statusEl = document.getElementById('syncStatusIndicator');
             statusEl.innerHTML = '<i class="fas fa-cloud-download-alt fa-spin text-blue-500"></i> Pulling...';
-            try { const data = await fetchGist(); applyDataFromCloud(data); statusEl.innerHTML = '<i class="fas fa-check-circle text-green-500"></i> Synced'; showToast('Đã tải từ Cloud!'); }
-            catch (err) { console.error('Pull error:', err); statusEl.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500"></i> Error'; showToast('Lỗi pull: ' + err.message); }
+            try {
+                const data = await fetchGist();
+                applyDataFromCloud(data);
+                statusEl.innerHTML = '<i class="fas fa-check-circle text-green-500"></i> Synced';
+                showToast('Đã tải từ Cloud!');
+            } catch (err) { console.error('Pull error:', err); statusEl.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500"></i> Error'; showToast('Lỗi pull: ' + err.message); }
         }
 
         async function pushToCloud() {
@@ -1201,20 +1292,31 @@
             pushLocked = true;
             statusEl.innerHTML = '<i class="fas fa-cloud-upload-alt fa-spin text-blue-500"></i> Pushing...';
             try {
-                const data = { vocab: { words: vocabWords, phrases: vocabPhrases, family: vocabFamily, personal: personalDict }, settings: { extractPromptTemplate: config.extractPromptTemplate, promptTemplate: config.promptTemplate, phrasePromptTemplate: config.phrasePromptTemplate } };
+                const data = {
+                    vocab: { words: vocabWords, phrases: vocabPhrases, family: vocabFamily, personal: personalDict },
+                    settings: { extractPromptTemplate: config.extractPromptTemplate, promptTemplate: config.promptTemplate, phrasePromptTemplate: config.phrasePromptTemplate }
+                };
                 await pushGist(data);
-                statusEl.innerHTML = '<i class="fas fa-check-circle text-green-500"></i> Synced'; showToast('Đã đẩy lên Cloud!');
+                statusEl.innerHTML = '<i class="fas fa-check-circle text-green-500"></i> Synced';
+                showToast('Đã đẩy lên Cloud!');
             } catch (err) { console.error('Push error:', err); statusEl.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500"></i> Error'; showToast('Lỗi push: ' + err.message); }
             finally { pushLocked = false; }
         }
 
         async function openCompareModal() {
-            if (!config.githubToken || !config.gistId) { openModal('compareModal'); document.getElementById('compareLoading').classList.add('hidden'); document.getElementById('compareNoConfig').classList.remove('hidden'); return; }
+            if (!config.githubToken || !config.gistId) {
+                openModal('compareModal');
+                document.getElementById('compareLoading').classList.add('hidden');
+                document.getElementById('compareNoConfig').classList.remove('hidden');
+                return;
+            }
             const statusEl = document.getElementById('syncStatusIndicator');
             statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin text-blue-500"></i> Comparing...';
             try {
-                const cloudData = await fetchGist(); cloudDataInMemory = cloudData;
-                if (checkDataDifference(cloudData)) { statusEl.innerHTML = '<i class="fas fa-exclamation-circle text-yellow-500"></i> Khác biệt'; openCompareModalWithData(cloudData); }
+                const cloudData = await fetchGist();
+                cloudDataInMemory = cloudData;
+                const hasDiff = checkDataDifference(cloudData);
+                if (hasDiff) { statusEl.innerHTML = '<i class="fas fa-exclamation-circle text-yellow-500"></i> Khác biệt'; openCompareModalWithData(cloudData); }
                 else { statusEl.innerHTML = '<i class="fas fa-check-circle text-green-500"></i> Synced'; showToast('Dữ liệu đã đồng bộ với Cloud!'); cloudDataInMemory = null; }
             } catch (err) { console.error('Compare error:', err); statusEl.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500"></i> Error'; showToast('Lỗi: ' + err.message); }
         }
@@ -1246,7 +1348,10 @@
                 let diffClass = diff > 0 ? 'text-green-600' : diff < 0 ? 'text-red-600' : 'text-gray-500';
                 const row = document.createElement('tr');
                 row.className = 'border-b hover:bg-gray-50';
-                row.innerHTML = `<td class="p-3"><i class="${cat.icon} text-${cat.color}-500 mr-2"></i>${cat.name}</td><td class="p-3 text-center font-semibold text-blue-600">${cat.cloud}</td><td class="p-3 text-center font-semibold text-green-600">${cat.local}</td><td class="p-3 text-center font-semibold ${diffClass}">${diffText}</td>`;
+                row.innerHTML = `<td class="p-3"><i class="${cat.icon} text-${cat.color}-500 mr-2"></i>${cat.name}</td>
+                    <td class="p-3 text-center font-semibold text-blue-600">${cat.cloud}</td>
+                    <td class="p-3 text-center font-semibold text-green-600">${cat.local}</td>
+                    <td class="p-3 text-center font-semibold ${diffClass}">${diffText}</td>`;
                 tableBody.appendChild(row);
             });
             document.getElementById('totalCloud').innerText = totalCloud;
@@ -1260,7 +1365,8 @@
 
         function applyCloudData() {
             if (cloudDataInMemory) { applyDataFromCloud(cloudDataInMemory); cloudDataInMemory = null; }
-            closeModal('compareModal'); showToast('Đã áp dụng dữ liệu Cloud!');
+            closeModal('compareModal');
+            showToast('Đã áp dụng dữ liệu Cloud!');
         }
 
         function applyDataFromCloud(data) {
@@ -1277,13 +1383,9 @@
             document.getElementById('extractPromptTemplate').value = config.extractPromptTemplate;
             document.getElementById('promptTemplate').value = config.promptTemplate;
             document.getElementById('phrasePromptTemplate').value = config.phrasePromptTemplate;
-
-            saveVocabLocal();
-            renderCounts();
+            saveVocabLocal(); renderCounts();
             if (!document.getElementById('dictionaryModal').classList.contains('hidden')) renderDictionary();
-            handleInput();
-            updateCombinedPhrases();
-
+            handleInput(); updateCombinedPhrases();
             document.getElementById('syncStatusIndicator').innerHTML = '<i class="fas fa-check-circle text-green-500"></i> Synced';
         }
 
