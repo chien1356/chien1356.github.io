@@ -17,8 +17,7 @@
         .toast { animation: slideIn 0.3s ease-out forwards; }
         @keyframes slideIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        /* Smooth transition for dark mode */
-        body, header, .input-panel, .output-panel, textarea, input, 
+        body, header, .input-panel, .output-panel, textarea, input,
         .modal-content, button, div, span, table, th, td, tr {
             transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
         }
@@ -31,64 +30,28 @@
             .mobile-always-visible { opacity: 1 !important; }
         }
 
-        /* ========================================
-           DARK MODE — Astigmatism-Friendly
-           Nền: slate-900 (#0f172a)
-           Chữ: slate-300 (#cbd5e1)
-           ======================================== */
         body.dark-mode { background-color: #0f172a; color: #cbd5e1; }
-
-        /* Scrollbar */
         body.dark-mode ::-webkit-scrollbar-track { background: #1e293b; }
         body.dark-mode ::-webkit-scrollbar-thumb { background: #475569; }
         body.dark-mode ::-webkit-scrollbar-thumb:hover { background: #64748b; }
-
-        /* Header */
-        body.dark-mode header {
-            background-color: #1e293b !important;
-            border-color: #334155 !important;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.5);
-        }
-
-        /* Headings */
+        body.dark-mode header { background-color: #1e293b !important; border-color: #334155 !important; box-shadow: 0 1px 4px rgba(0,0,0,0.5); }
         body.dark-mode h1, body.dark-mode h2, body.dark-mode h3 { color: #e2e8f0 !important; }
-
-        /* Generic text overrides */
         body.dark-mode .text-gray-800 { color: #e2e8f0 !important; }
         body.dark-mode .text-gray-700 { color: #cbd5e1 !important; }
         body.dark-mode .text-gray-600 { color: #94a3b8 !important; }
         body.dark-mode .text-gray-500 { color: #94a3b8 !important; }
         body.dark-mode .text-gray-400 { color: #64748b !important; }
-
-        /* Generic border overrides */
         body.dark-mode .border-gray-300 { border-color: #334155 !important; }
         body.dark-mode .border-gray-200 { border-color: #1e293b !important; }
         body.dark-mode .border-gray-100 { border-color: #1e293b !important; }
-
-        /* Panels */
         body.dark-mode .input-panel { background-color: #1e293b !important; border-color: #334155 !important; }
         body.dark-mode .output-panel { background-color: #0f172a !important; }
-
-        /* Textareas & inputs */
-        body.dark-mode textarea,
-        body.dark-mode input[type="text"],
-        body.dark-mode input[type="password"] {
-            background-color: #0f172a !important;
-            border-color: #475569 !important;
-            color: #cbd5e1 !important;
-        }
-        body.dark-mode textarea::placeholder,
-        body.dark-mode input::placeholder { color: #64748b !important; }
-        body.dark-mode textarea:focus,
-        body.dark-mode input:focus { ring-color: #60a5fa; }
-
-        /* bg-white elements (sidebar buttons, cards) */
+        body.dark-mode textarea, body.dark-mode input[type="text"], body.dark-mode input[type="password"] { background-color: #0f172a !important; border-color: #475569 !important; color: #cbd5e1 !important; }
+        body.dark-mode textarea::placeholder, body.dark-mode input::placeholder { color: #64748b !important; }
         body.dark-mode .bg-white { background-color: #1e293b !important; }
         body.dark-mode .bg-gray-50 { background-color: #1e293b !important; }
         body.dark-mode .bg-gray-100 { background-color: #334155 !important; }
         body.dark-mode .bg-gray-200 { background-color: #475569 !important; }
-
-        /* Colored tinted backgrounds */
         body.dark-mode .bg-blue-50 { background-color: rgba(59,130,246,0.1) !important; }
         body.dark-mode .bg-indigo-50 { background-color: rgba(99,102,241,0.1) !important; }
         body.dark-mode .bg-purple-50 { background-color: rgba(168,85,247,0.1) !important; }
@@ -99,8 +62,6 @@
         body.dark-mode .bg-purple-100 { background-color: rgba(168,85,247,0.15) !important; }
         body.dark-mode .bg-indigo-100 { background-color: rgba(99,102,241,0.15) !important; }
         body.dark-mode .bg-green-100 { background-color: rgba(34,197,94,0.15) !important; }
-
-        /* Colored borders */
         body.dark-mode .border-blue-200 { border-color: rgba(59,130,246,0.3) !important; }
         body.dark-mode .border-indigo-200 { border-color: rgba(99,102,241,0.3) !important; }
         body.dark-mode .border-purple-200 { border-color: rgba(168,85,247,0.3) !important; }
@@ -109,38 +70,16 @@
         body.dark-mode .border-green-200 { border-color: rgba(34,197,94,0.3) !important; }
         body.dark-mode .border-green-100 { border-color: rgba(34,197,94,0.2) !important; }
         body.dark-mode .border-orange-200 { border-color: rgba(249,115,22,0.3) !important; }
-
-        /* Tab active */
         body.dark-mode .tab-active { border-color: #60a5fa !important; color: #60a5fa !important; }
         body.dark-mode .output-tab-active { background-color: #3b82f6 !important; color: #fff !important; }
-
-        /* Output list items */
-        body.dark-mode #outputList > div {
-            background-color: #1e293b !important;
-            border-color: transparent !important;
-        }
-        body.dark-mode #outputList > div:hover {
-            background-color: #334155 !important;
-            border-color: #475569 !important;
-            box-shadow: none !important;
-        }
+        body.dark-mode #outputList > div { background-color: #1e293b !important; border-color: transparent !important; }
+        body.dark-mode #outputList > div:hover { background-color: #334155 !important; border-color: #475569 !important; box-shadow: none !important; }
         body.dark-mode #outputList .font-medium { color: #e2e8f0 !important; }
         body.dark-mode #outputList .text-center.text-gray-400 { color: #64748b !important; }
-
-        /* Prompt previews */
         body.dark-mode .bg-gray-800 { background-color: #0f172a !important; }
         body.dark-mode .bg-purple-900 { background-color: #1a0f2e !important; }
         body.dark-mode .bg-indigo-900 { background-color: #171033 !important; }
-
-        /* Modals */
-        body.dark-mode #compareModal > div > div,
-        body.dark-mode #dictionaryModal > div > div,
-        body.dark-mode #settingsModal > div > div {
-            background-color: #1e293b !important;
-            color: #cbd5e1;
-        }
-
-        /* Modal tables */
+        body.dark-mode #compareModal > div > div, body.dark-mode #dictionaryModal > div > div, body.dark-mode #settingsModal > div > div { background-color: #1e293b !important; color: #cbd5e1; }
         body.dark-mode table { color: #cbd5e1; }
         body.dark-mode thead tr { background-color: #0f172a !important; }
         body.dark-mode tbody tr { border-color: #334155 !important; }
@@ -148,49 +87,16 @@
         body.dark-mode tfoot tr { background-color: #0f172a !important; }
         body.dark-mode th { color: #94a3b8 !important; border-color: #334155 !important; }
         body.dark-mode td { border-color: #334155 !important; }
-
-        /* Dictionary columns */
-        body.dark-mode #dictWordList > div,
-        body.dark-mode #dictPhraseList > div,
-        body.dark-mode #dictFamilyList > div,
-        body.dark-mode #dictPersonalList > div {
-            background-color: #0f172a !important;
-            border-color: #334155 !important;
-            color: #cbd5e1;
-        }
-
-        body.dark-mode .border-blue-200.pb-1,
-        body.dark-mode .border-indigo-200.pb-1,
-        body.dark-mode .border-teal-200.pb-1,
-        body.dark-mode .border-gray-300.pb-1 {
-            border-color: #475569 !important;
-        }
-
-        /* Settings gradient sections */
+        body.dark-mode #dictWordList > div, body.dark-mode #dictPhraseList > div, body.dark-mode #dictFamilyList > div, body.dark-mode #dictPersonalList > div { background-color: #0f172a !important; border-color: #334155 !important; color: #cbd5e1; }
+        body.dark-mode .border-blue-200.pb-1, body.dark-mode .border-indigo-200.pb-1, body.dark-mode .border-teal-200.pb-1, body.dark-mode .border-gray-300.pb-1 { border-color: #475569 !important; }
         body.dark-mode .bg-gradient-to-r.from-gray-50 { background: #0f172a !important; }
         body.dark-mode [class*="from-gray-50"][class*="to-gray-100"] { background: #0f172a !important; }
         body.dark-mode .bg-purple-50.p-4 { background-color: rgba(168,85,247,0.08) !important; }
         body.dark-mode .bg-gray-50.p-4 { background-color: #0f172a !important; }
         body.dark-mode .bg-indigo-50.p-4 { background-color: rgba(99,102,241,0.08) !important; }
-
-        /* Toast in dark mode */
-        body.dark-mode #toastContainer > div {
-            background-color: #334155 !important;
-            border: 1px solid #475569;
-        }
-
-        /* Subtitle nav */
-        body.dark-mode #subtitleNav {
-            background-color: rgba(168,85,247,0.1) !important;
-            border-color: rgba(168,85,247,0.3) !important;
-        }
-        body.dark-mode #subtitleJumpInput {
-            background-color: #0f172a !important;
-            border-color: rgba(168,85,247,0.3) !important;
-            color: #cbd5e1 !important;
-        }
-
-        /* Hover overrides */
+        body.dark-mode #toastContainer > div { background-color: #334155 !important; border: 1px solid #475569; }
+        body.dark-mode #subtitleNav { background-color: rgba(168,85,247,0.1) !important; border-color: rgba(168,85,247,0.3) !important; }
+        body.dark-mode #subtitleJumpInput { background-color: #0f172a !important; border-color: rgba(168,85,247,0.3) !important; color: #cbd5e1 !important; }
         body.dark-mode .hover\:bg-blue-50:hover { background-color: rgba(59,130,246,0.15) !important; }
         body.dark-mode .hover\:bg-green-50:hover { background-color: rgba(34,197,94,0.15) !important; }
         body.dark-mode .hover\:bg-purple-50:hover { background-color: rgba(168,85,247,0.15) !important; }
@@ -207,16 +113,38 @@
         body.dark-mode .hover\:bg-green-200:hover { background-color: rgba(34,197,94,0.25) !important; }
         body.dark-mode .hover\:bg-teal-50:hover { background-color: rgba(20,184,166,0.15) !important; }
         body.dark-mode .hover\:bg-yellow-50:hover { background-color: rgba(234,179,8,0.15) !important; }
-
-        /* Dark mode toggle btn */
         .dm-toggle { position: relative; width: 2rem; height: 2rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
         .dm-toggle .fa-sun { color: #fbbf24; }
         .dm-toggle .fa-moon { color: #94a3b8; }
+        @media (max-width: 768px) { body.dark-mode .input-panel { border-bottom-color: #334155 !important; } }
 
-        /* Mobile dark-mode input-panel border */
-        @media (max-width: 768px) {
-            body.dark-mode .input-panel { border-bottom-color: #334155 !important; }
-        }
+        /* Prompt Set Toggle */
+        .prompt-set-btn { min-width: 28px; text-align: center; font-weight: 700; font-size: 11px; padding: 3px 7px; cursor: pointer; border: 1.5px solid #d1d5db; transition: all 0.2s; }
+        .prompt-set-btn.active-set-1 { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+        .prompt-set-btn.active-set-2 { background: #f59e0b; color: #fff; border-color: #f59e0b; }
+        .prompt-set-btn:not(.active-set-1):not(.active-set-2) { background: #f3f4f6; color: #6b7280; }
+        .prompt-set-btn:not(.active-set-1):not(.active-set-2):hover { background: #e5e7eb; }
+        body.dark-mode .prompt-set-btn:not(.active-set-1):not(.active-set-2) { background: #334155; color: #94a3b8; border-color: #475569; }
+        body.dark-mode .prompt-set-btn:not(.active-set-1):not(.active-set-2):hover { background: #475569; }
+
+        /* Set indicator badge */
+        .set-badge { display: inline-block; font-size: 9px; font-weight: 800; padding: 1px 5px; border-radius: 4px; margin-left: 4px; vertical-align: middle; }
+        .set-badge-1 { background: #dbeafe; color: #2563eb; }
+        .set-badge-2 { background: #fef3c7; color: #d97706; }
+        body.dark-mode .set-badge-1 { background: rgba(59,130,246,0.2); color: #60a5fa; }
+        body.dark-mode .set-badge-2 { background: rgba(245,158,11,0.2); color: #fbbf24; }
+
+        /* Settings set tabs */
+        .settings-set-tab { padding: 8px 20px; font-weight: 600; font-size: 14px; border-radius: 8px 8px 0 0; cursor: pointer; border: 1.5px solid transparent; border-bottom: none; transition: all 0.2s; }
+        .settings-set-tab.active { border-color: #d1d5db; }
+        .settings-set-tab:not(.active) { opacity: 0.5; }
+        .settings-set-tab:not(.active):hover { opacity: 0.8; }
+        body.dark-mode .settings-set-tab.active { border-color: #475569; }
+
+        /* Amber tints for set 2 */
+        body.dark-mode .bg-amber-50 { background-color: rgba(245,158,11,0.08) !important; }
+        body.dark-mode .border-amber-200 { border-color: rgba(245,158,11,0.3) !important; }
+        body.dark-mode .border-amber-300 { border-color: rgba(245,158,11,0.35) !important; }
     </style>
 </head>
 <body class="h-screen md:h-screen flex flex-col overflow-hidden relative" style="height: 100dvh;">
@@ -228,45 +156,31 @@
             <h1 class="text-base md:text-xl font-bold text-gray-800"><i class="fas fa-layer-group text-blue-500 mr-1 md:mr-2"></i><span class="hidden sm:inline">Vocab Canvas</span><span class="sm:hidden">VC</span></h1>
 
             <div class="flex items-center space-x-1 md:space-x-2 bg-gray-50 rounded px-1 md:px-2 py-1 border border-gray-100">
-                <button onclick="pullFromCloud()" class="text-blue-600 hover:text-blue-800 transition px-1 md:px-2 py-1 rounded hover:bg-blue-50" title="Tải từ Cloud">
-                    <i class="fas fa-cloud-download-alt"></i>
-                </button>
-                <button onclick="pushToCloud()" class="text-green-600 hover:text-green-800 transition px-1 md:px-2 py-1 rounded hover:bg-green-50" title="Đẩy lên Cloud">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                </button>
-                <button onclick="openCompareModal()" class="text-purple-600 hover:text-purple-800 transition px-1 md:px-2 py-1 rounded hover:bg-purple-50" title="So sánh Cloud vs Local">
-                    <i class="fas fa-balance-scale"></i>
-                </button>
+                <button onclick="pullFromCloud()" class="text-blue-600 hover:text-blue-800 transition px-1 md:px-2 py-1 rounded hover:bg-blue-50" title="Tải từ Cloud"><i class="fas fa-cloud-download-alt"></i></button>
+                <button onclick="pushToCloud()" class="text-green-600 hover:text-green-800 transition px-1 md:px-2 py-1 rounded hover:bg-green-50" title="Đẩy lên Cloud"><i class="fas fa-cloud-upload-alt"></i></button>
+                <button onclick="openCompareModal()" class="text-purple-600 hover:text-purple-800 transition px-1 md:px-2 py-1 rounded hover:bg-purple-50" title="So sánh Cloud vs Local"><i class="fas fa-balance-scale"></i></button>
                 <div class="h-4 w-px bg-gray-300"></div>
-                <!-- Dark Mode Toggle -->
-                <button id="darkModeBtn" onclick="toggleDarkMode()" class="dm-toggle bg-transparent hover:bg-gray-200 transition" title="Dark / Light Mode">
-                    <i id="darkModeIcon" class="fas fa-moon"></i>
-                </button>
-                <button onclick="openModal('settingsModal')" class="text-gray-500 hover:text-blue-600 transition px-1 md:px-2 py-1" title="Cấu hình">
-                    <i class="fas fa-cog"></i>
-                </button>
+                <button id="darkModeBtn" onclick="toggleDarkMode()" class="dm-toggle bg-transparent hover:bg-gray-200 transition" title="Dark / Light Mode"><i id="darkModeIcon" class="fas fa-moon"></i></button>
+                <button onclick="openModal('settingsModal')" class="text-gray-500 hover:text-blue-600 transition px-1 md:px-2 py-1" title="Cấu hình"><i class="fas fa-cog"></i></button>
                 <span id="syncStatusIndicator" class="text-xs text-gray-400 font-medium pl-1 border-l border-gray-300 ml-1 w-16 md:w-24 truncate">Local</span>
             </div>
 
             <button id="undoBtn" onclick="undoLastAction()" class="hidden text-orange-600 hover:text-orange-800 transition px-2 py-1 rounded hover:bg-orange-50 border border-orange-200 bg-orange-50" title="Hoàn tác">
-                <i class="fas fa-undo"></i>
-                <span id="undoCount" class="text-xs font-bold ml-1">0</span>
+                <i class="fas fa-undo"></i><span id="undoCount" class="text-xs font-bold ml-1">0</span>
             </button>
         </div>
 
-        <div class="space-x-1 md:space-x-2 flex">
-            <button onclick="openModal('dictionaryModal')" class="px-1.5 md:px-2 py-1 md:py-1.5 text-xs bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded text-blue-700 font-medium transition" title="Words">
-                W:<span id="wordCount">0</span>
-            </button>
-            <button onclick="openModal('dictionaryModal')" class="px-1.5 md:px-2 py-1 md:py-1.5 text-xs bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded text-indigo-700 font-medium transition" title="Phrases">
-                P:<span id="phraseCount">0</span>
-            </button>
-            <button onclick="openModal('dictionaryModal')" class="px-1.5 md:px-2 py-1 md:py-1.5 text-xs bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded text-teal-700 font-medium transition" title="Word Families">
-                <i class="fas fa-sitemap"></i><span id="familyCount">0</span>
-            </button>
-            <button onclick="openModal('dictionaryModal')" class="hidden sm:block px-1.5 md:px-2 py-1 md:py-1.5 text-xs bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded text-gray-600 font-medium transition" title="Personal / Ignored">
-                <i class="fas fa-user-shield"></i><span id="personalCount">0</span>
-            </button>
+        <div class="space-x-1 md:space-x-2 flex items-center">
+            <!-- Prompt Set Toggle -->
+            <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden mr-1" title="Chuyển bộ Prompt">
+                <button id="promptSetBtn1" onclick="switchPromptSet(1)" class="prompt-set-btn rounded-l-md active-set-1">①</button>
+                <button id="promptSetBtn2" onclick="switchPromptSet(2)" class="prompt-set-btn rounded-r-md">②</button>
+            </div>
+
+            <button onclick="openModal('dictionaryModal')" class="px-1.5 md:px-2 py-1 md:py-1.5 text-xs bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded text-blue-700 font-medium transition" title="Words">W:<span id="wordCount">0</span></button>
+            <button onclick="openModal('dictionaryModal')" class="px-1.5 md:px-2 py-1 md:py-1.5 text-xs bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded text-indigo-700 font-medium transition" title="Phrases">P:<span id="phraseCount">0</span></button>
+            <button onclick="openModal('dictionaryModal')" class="px-1.5 md:px-2 py-1 md:py-1.5 text-xs bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded text-teal-700 font-medium transition" title="Word Families"><i class="fas fa-sitemap"></i><span id="familyCount">0</span></button>
+            <button onclick="openModal('dictionaryModal')" class="hidden sm:block px-1.5 md:px-2 py-1 md:py-1.5 text-xs bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded text-gray-600 font-medium transition" title="Personal / Ignored"><i class="fas fa-user-shield"></i><span id="personalCount">0</span></button>
         </div>
     </header>
 
@@ -277,13 +191,10 @@
                     <button id="tabWordBtn" class="tab-active pb-1 md:pb-2 px-1 md:px-2 transition text-sm md:text-base" onclick="switchTab('word')">Word</button>
                     <button id="tabManualBtn" class="text-gray-500 pb-1 md:pb-2 px-1 md:px-2 hover:text-gray-700 transition text-sm md:text-base" onclick="switchTab('manual')">Manual</button>
                 </div>
-
                 <div id="subtitleNav" class="hidden flex items-center gap-1 ml-auto bg-purple-50 px-1.5 md:px-2 py-0.5 md:py-1 rounded border border-purple-200">
                     <button onclick="goToSubtitle('first')" class="p-0.5 md:p-1 text-purple-600 hover:bg-purple-100 rounded text-xs md:text-sm" title="Câu đầu"><i class="fas fa-angle-double-left"></i></button>
                     <button onclick="goToSubtitle('prev')" class="p-0.5 md:p-1 text-purple-600 hover:bg-purple-100 rounded text-xs md:text-sm" title="Câu trước"><i class="fas fa-angle-left"></i></button>
-                    <input type="text" inputmode="numeric" id="subtitleJumpInput"
-                           class="w-8 md:w-10 text-center text-xs font-medium bg-white border border-purple-200 rounded px-0.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-purple-400"
-                           placeholder="#" onkeydown="if(event.key==='Enter'){event.preventDefault();jumpToSubtitle();}">
+                    <input type="text" inputmode="numeric" id="subtitleJumpInput" class="w-8 md:w-10 text-center text-xs font-medium bg-white border border-purple-200 rounded px-0.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-purple-400" placeholder="#" onkeydown="if(event.key==='Enter'){event.preventDefault();jumpToSubtitle();}">
                     <span class="text-xs text-purple-600">/</span>
                     <span id="subtitleTotal" class="text-xs font-medium text-purple-700">0</span>
                     <button onclick="goToSubtitle('next')" class="p-0.5 md:p-1 text-purple-600 hover:bg-purple-100 rounded text-xs md:text-sm" title="Câu tiếp"><i class="fas fa-angle-right"></i></button>
@@ -292,7 +203,6 @@
                     <button onclick="hideSubtitleNav()" class="p-0.5 md:p-1 text-gray-400 hover:text-red-500 rounded text-xs" title="Ẩn"><i class="fas fa-times"></i></button>
                 </div>
             </div>
-
             <div id="wordTabContent" class="relative flex-1 min-h-0 flex flex-col">
                 <textarea id="inputText" class="w-full h-full p-2 md:p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none text-sm md:text-lg pr-10 md:pr-12"></textarea>
                 <div class="absolute top-1 md:top-2 right-1 md:right-2 flex flex-col gap-1 md:gap-2">
@@ -302,7 +212,6 @@
                     <button onclick="clearInput()" class="bg-white p-1.5 md:p-2 rounded shadow hover:text-red-500 text-gray-400 border border-gray-200 transition text-xs md:text-base" title="Xóa hết"><i class="fas fa-trash-alt"></i></button>
                 </div>
             </div>
-
             <div id="manualTabContent" class="hidden relative flex-1 min-h-0 flex flex-col">
                 <div class="relative flex-1">
                     <textarea id="manualPhraseInput" class="w-full h-full p-2 md:p-4 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none text-sm md:text-base pr-10 md:pr-12"></textarea>
@@ -315,11 +224,13 @@
         </div>
 
         <div class="output-panel w-1/2 p-2 md:p-4 flex flex-col bg-white overflow-hidden">
-            <div class="flex mb-2 md:mb-3 border-b border-gray-200 overflow-x-auto">
+            <div class="flex mb-2 md:mb-3 border-b border-gray-200 overflow-x-auto items-end">
                 <button id="outputTabResult" onclick="switchOutputTab('result')" class="output-tab-active px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium rounded-t-lg transition whitespace-nowrap"><i class="fas fa-list mr-1"></i>Kết quả</button>
                 <button id="outputTabExtract" onclick="switchOutputTab('extract')" class="px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium text-gray-500 hover:text-gray-700 rounded-t-lg transition whitespace-nowrap"><i class="fas fa-magic mr-1"></i>Extract</button>
                 <button id="outputTabPrompt" onclick="switchOutputTab('prompt')" class="px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium text-gray-500 hover:text-gray-700 rounded-t-lg transition whitespace-nowrap"><i class="fas fa-terminal mr-1"></i>Word</button>
                 <button id="outputTabPhrasePrompt" onclick="switchOutputTab('phrasePrompt')" class="px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium text-gray-500 hover:text-gray-700 rounded-t-lg transition whitespace-nowrap"><i class="fas fa-comment-dots mr-1"></i>Phrase</button>
+                <!-- Set indicator in tabs -->
+                <span id="promptSetBadge" class="set-badge set-badge-1 ml-auto self-center">SET 1</span>
             </div>
 
             <div id="outputResultTab" class="flex-1 flex flex-col overflow-hidden">
@@ -344,7 +255,7 @@
 
             <div id="outputExtractTab" class="flex-1 flex flex-col overflow-hidden hidden">
                 <div class="flex justify-between items-center mb-2 flex-shrink-0">
-                    <h3 class="text-sm font-bold text-purple-600 flex items-center"><i class="fas fa-magic mr-2"></i> Extract Prompt</h3>
+                    <h3 class="text-sm font-bold text-purple-600 flex items-center"><i class="fas fa-magic mr-2"></i> Extract Prompt <span id="extractSetLabel" class="set-badge set-badge-1 ml-1">SET 1</span></h3>
                     <button onclick="copyExtractPrompt()" class="text-xs bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-1.5 rounded transition font-medium"><i class="fas fa-copy mr-1"></i> Copy</button>
                 </div>
                 <div class="bg-purple-900 text-purple-100 p-3 rounded text-sm font-mono overflow-y-auto whitespace-pre-wrap flex-1" id="extractPromptPreview"></div>
@@ -352,7 +263,7 @@
 
             <div id="outputPromptTab" class="flex-1 flex flex-col overflow-hidden hidden">
                 <div class="flex justify-between items-center mb-2 flex-shrink-0">
-                    <h3 class="text-sm font-bold text-gray-600 flex items-center"><i class="fas fa-terminal mr-2"></i> Word Prompt</h3>
+                    <h3 class="text-sm font-bold text-gray-600 flex items-center"><i class="fas fa-terminal mr-2"></i> Word Prompt <span id="wordSetLabel" class="set-badge set-badge-1 ml-1">SET 1</span></h3>
                     <button onclick="copyPrompt()" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded transition font-medium"><i class="fas fa-copy mr-1"></i> Copy</button>
                 </div>
                 <div class="bg-gray-800 text-gray-200 p-3 rounded text-sm font-mono flex-1 overflow-y-auto whitespace-pre-wrap" id="promptPreview"></div>
@@ -360,7 +271,7 @@
 
             <div id="outputPhrasePromptTab" class="flex-1 flex flex-col overflow-hidden hidden">
                 <div class="flex justify-between items-center mb-2 flex-shrink-0">
-                    <h3 class="text-sm font-bold text-indigo-600 flex items-center"><i class="fas fa-comment-dots mr-2"></i> Phrase Prompt</h3>
+                    <h3 class="text-sm font-bold text-indigo-600 flex items-center"><i class="fas fa-comment-dots mr-2"></i> Phrase Prompt <span id="phraseSetLabel" class="set-badge set-badge-1 ml-1">SET 1</span></h3>
                     <button onclick="copyPhrasePrompt()" class="text-xs bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1.5 rounded transition font-medium"><i class="fas fa-copy mr-1"></i> Copy</button>
                 </div>
                 <div class="bg-indigo-900 text-indigo-100 p-3 rounded text-sm font-mono flex-1 overflow-y-auto whitespace-pre-wrap" id="phrasePromptPreview"></div>
@@ -375,34 +286,13 @@
                 <h2 class="text-xl font-bold text-gray-800"><i class="fas fa-balance-scale text-purple-500 mr-2"></i>So sánh Cloud vs Local</h2>
                 <button onclick="closeModal('compareModal')" class="text-gray-400 hover:text-red-500 text-2xl transition">&times;</button>
             </div>
-            <div id="compareLoading" class="text-center py-10">
-                <i class="fas fa-circle-notch fa-spin text-4xl text-blue-500 mb-4"></i>
-                <p class="text-gray-500">Đang tải dữ liệu từ Cloud...</p>
-            </div>
-            <div id="compareError" class="hidden text-center py-10">
-                <i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-4"></i>
-                <p class="text-red-600 font-medium" id="compareErrorMsg">Lỗi kết nối</p>
-                <button onclick="openCompareModal()" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"><i class="fas fa-redo mr-2"></i>Thử lại</button>
-            </div>
+            <div id="compareLoading" class="text-center py-10"><i class="fas fa-circle-notch fa-spin text-4xl text-blue-500 mb-4"></i><p class="text-gray-500">Đang tải dữ liệu từ Cloud...</p></div>
+            <div id="compareError" class="hidden text-center py-10"><i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-4"></i><p class="text-red-600 font-medium" id="compareErrorMsg">Lỗi kết nối</p><button onclick="openCompareModal()" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"><i class="fas fa-redo mr-2"></i>Thử lại</button></div>
             <div id="compareContent" class="hidden">
                 <table class="w-full border-collapse">
-                    <thead>
-                        <tr class="bg-gray-100">
-                            <th class="p-3 text-left font-semibold text-gray-700 border-b">Danh mục</th>
-                            <th class="p-3 text-center font-semibold text-blue-600 border-b"><i class="fas fa-cloud mr-1"></i>Cloud</th>
-                            <th class="p-3 text-center font-semibold text-green-600 border-b"><i class="fas fa-laptop mr-1"></i>Local</th>
-                            <th class="p-3 text-center font-semibold text-gray-600 border-b">Chênh lệch</th>
-                        </tr>
-                    </thead>
+                    <thead><tr class="bg-gray-100"><th class="p-3 text-left font-semibold text-gray-700 border-b">Danh mục</th><th class="p-3 text-center font-semibold text-blue-600 border-b"><i class="fas fa-cloud mr-1"></i>Cloud</th><th class="p-3 text-center font-semibold text-green-600 border-b"><i class="fas fa-laptop mr-1"></i>Local</th><th class="p-3 text-center font-semibold text-gray-600 border-b">Chênh lệch</th></tr></thead>
                     <tbody id="compareTableBody"></tbody>
-                    <tfoot>
-                        <tr class="bg-gray-50 font-bold">
-                            <td class="p-3 border-t">Tổng cộng</td>
-                            <td class="p-3 text-center border-t text-blue-600" id="totalCloud">0</td>
-                            <td class="p-3 text-center border-t text-green-600" id="totalLocal">0</td>
-                            <td class="p-3 text-center border-t" id="totalDiff">0</td>
-                        </tr>
-                    </tfoot>
+                    <tfoot><tr class="bg-gray-50 font-bold"><td class="p-3 border-t">Tổng cộng</td><td class="p-3 text-center border-t text-blue-600" id="totalCloud">0</td><td class="p-3 text-center border-t text-green-600" id="totalLocal">0</td><td class="p-3 text-center border-t" id="totalDiff">0</td></tr></tfoot>
                 </table>
                 <div class="mt-4 text-center text-sm text-gray-500" id="compareTimestamp"></div>
                 <div class="mt-6 flex gap-3">
@@ -410,11 +300,7 @@
                     <button onclick="pushToCloud(); closeModal('compareModal');" class="flex-1 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition"><i class="fas fa-cloud-upload-alt mr-2"></i>Đẩy Local lên</button>
                 </div>
             </div>
-            <div id="compareNoConfig" class="hidden text-center py-10">
-                <i class="fas fa-cog text-4xl text-gray-400 mb-4"></i>
-                <p class="text-gray-600 mb-4">Chưa cấu hình Github Gist</p>
-                <button onclick="closeModal('compareModal'); openModal('settingsModal');" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"><i class="fas fa-cog mr-2"></i>Mở Cài đặt</button>
-            </div>
+            <div id="compareNoConfig" class="hidden text-center py-10"><i class="fas fa-cog text-4xl text-gray-400 mb-4"></i><p class="text-gray-600 mb-4">Chưa cấu hình Github Gist</p><button onclick="closeModal('compareModal'); openModal('settingsModal');" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"><i class="fas fa-cog mr-2"></i>Mở Cài đặt</button></div>
         </div>
     </div>
 
@@ -427,22 +313,10 @@
             </div>
             <input type="text" id="searchVocab" class="w-full p-2 border rounded mb-3" oninput="renderDictionary()">
             <div class="flex-1 overflow-y-auto flex flex-col md:flex-row gap-2 text-sm">
-                <div class="min-h-[300px] flex-1 flex flex-col bg-blue-50 rounded p-2 min-h-0">
-                    <h3 class="font-bold text-blue-600 mb-2 border-b border-blue-200 pb-1 text-center text-xs md:text-sm">Words (<span id="dictWordCount">0</span>)</h3>
-                    <div id="dictWordList" class="flex-1 overflow-y-auto pr-1 space-y-1"></div>
-                </div>
-                <div class="min-h-[300px] flex-1 flex flex-col bg-indigo-50 rounded p-2 min-h-0">
-                    <h3 class="font-bold text-indigo-600 mb-2 border-b border-indigo-200 pb-1 text-center text-xs md:text-sm">Phrases (<span id="dictPhraseCount">0</span>)</h3>
-                    <div id="dictPhraseList" class="flex-1 overflow-y-auto pr-1 space-y-1"></div>
-                </div>
-                <div class="min-h-[300px] flex-1 flex flex-col bg-teal-50 rounded p-2 min-h-0">
-                    <h3 class="font-bold text-teal-600 mb-2 border-b border-teal-200 pb-1 text-center text-xs md:text-sm">Families (<span id="dictFamilyCount">0</span>)</h3>
-                    <div id="dictFamilyList" class="flex-1 overflow-y-auto pr-1 space-y-1"></div>
-                </div>
-                <div class="min-h-[300px] flex-1 flex flex-col bg-gray-100 rounded p-2 min-h-0">
-                    <h3 class="font-bold text-gray-600 mb-2 border-b border-gray-300 pb-1 text-center text-xs md:text-sm">Ignored (<span id="dictPersonalCount">0</span>)</h3>
-                    <div id="dictPersonalList" class="flex-1 overflow-y-auto pr-1 space-y-1"></div>
-                </div>
+                <div class="min-h-[300px] flex-1 flex flex-col bg-blue-50 rounded p-2 min-h-0"><h3 class="font-bold text-blue-600 mb-2 border-b border-blue-200 pb-1 text-center text-xs md:text-sm">Words (<span id="dictWordCount">0</span>)</h3><div id="dictWordList" class="flex-1 overflow-y-auto pr-1 space-y-1"></div></div>
+                <div class="min-h-[300px] flex-1 flex flex-col bg-indigo-50 rounded p-2 min-h-0"><h3 class="font-bold text-indigo-600 mb-2 border-b border-indigo-200 pb-1 text-center text-xs md:text-sm">Phrases (<span id="dictPhraseCount">0</span>)</h3><div id="dictPhraseList" class="flex-1 overflow-y-auto pr-1 space-y-1"></div></div>
+                <div class="min-h-[300px] flex-1 flex flex-col bg-teal-50 rounded p-2 min-h-0"><h3 class="font-bold text-teal-600 mb-2 border-b border-teal-200 pb-1 text-center text-xs md:text-sm">Families (<span id="dictFamilyCount">0</span>)</h3><div id="dictFamilyList" class="flex-1 overflow-y-auto pr-1 space-y-1"></div></div>
+                <div class="min-h-[300px] flex-1 flex flex-col bg-gray-100 rounded p-2 min-h-0"><h3 class="font-bold text-gray-600 mb-2 border-b border-gray-300 pb-1 text-center text-xs md:text-sm">Ignored (<span id="dictPersonalCount">0</span>)</h3><div id="dictPersonalList" class="flex-1 overflow-y-auto pr-1 space-y-1"></div></div>
             </div>
         </div>
     </div>
@@ -458,35 +332,54 @@
             <div class="mb-8 bg-gradient-to-r from-gray-50 to-gray-100 p-5 rounded-xl border border-gray-200">
                 <h3 class="font-bold text-gray-800 mb-4 text-lg flex items-center"><i class="fab fa-github mr-2 text-xl"></i> Github Gist Sync</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm text-gray-600 font-medium mb-1">Github Token</label>
-                        <input type="password" id="githubToken" class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-600 font-medium mb-1">Gist ID</label>
-                        <input type="text" id="gistId" class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none">
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-sm text-gray-600 font-medium mb-1">Filename (chứa cả vocab + settings)</label>
-                        <input type="text" id="gistFilename" class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none" value="vocab_canvas_data.json">
-                    </div>
+                    <div><label class="block text-sm text-gray-600 font-medium mb-1">Github Token</label><input type="password" id="githubToken" class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"></div>
+                    <div><label class="block text-sm text-gray-600 font-medium mb-1">Gist ID</label><input type="text" id="gistId" class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"></div>
+                    <div class="md:col-span-2"><label class="block text-sm text-gray-600 font-medium mb-1">Filename</label><input type="text" id="gistFilename" class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none" value="vocab_canvas_data.json"></div>
                 </div>
             </div>
 
             <div class="mb-6">
                 <h3 class="font-bold text-gray-800 mb-4 text-lg flex items-center"><i class="fas fa-edit text-purple-500 mr-2"></i> Prompt Templates</h3>
-                <div class="space-y-5">
+
+                <!-- Set Tabs -->
+                <div class="flex gap-1 mb-0">
+                    <button id="settingsSetTab1" onclick="switchSettingsSetTab(1)" class="settings-set-tab active bg-white text-blue-700 border-blue-200" style="border-bottom-color: white; margin-bottom: -1.5px; z-index: 1;">
+                        <i class="fas fa-layer-group mr-1"></i> Bộ ① <span class="text-xs font-normal opacity-70">Primary</span>
+                    </button>
+                    <button id="settingsSetTab2" onclick="switchSettingsSetTab(2)" class="settings-set-tab bg-gray-50 text-amber-700">
+                        <i class="fas fa-layer-group mr-1"></i> Bộ ② <span class="text-xs font-normal opacity-70">Secondary</span>
+                    </button>
+                </div>
+
+                <!-- Set 1 Templates -->
+                <div id="settingsSet1Content" class="space-y-5 border border-gray-200 rounded-b-xl rounded-tr-xl p-5">
                     <div class="bg-purple-50 p-4 rounded-xl border border-purple-200">
-                        <label class="block text-sm font-bold text-purple-700 mb-2"><i class="fas fa-magic mr-1"></i> Extract Prompt <span class="font-normal text-purple-500 ml-2">(dùng {text})</span></label>
+                        <label class="block text-sm font-bold text-purple-700 mb-2"><i class="fas fa-magic mr-1"></i> Extract Prompt ① <span class="font-normal text-purple-500 ml-2">(dùng {text})</span></label>
                         <textarea id="extractPromptTemplate" class="w-full p-3 border border-purple-300 rounded-lg text-sm font-mono h-32 focus:ring-2 focus:ring-purple-400 focus:outline-none bg-white"></textarea>
                     </div>
                     <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                        <label class="block text-sm font-bold text-gray-700 mb-2"><i class="fas fa-terminal mr-1"></i> Word Prompt <span class="font-normal text-gray-500 ml-2">(dùng {words}, {text})</span></label>
+                        <label class="block text-sm font-bold text-gray-700 mb-2"><i class="fas fa-terminal mr-1"></i> Word Prompt ① <span class="font-normal text-gray-500 ml-2">(dùng {words}, {text})</span></label>
                         <textarea id="promptTemplate" class="w-full p-3 border border-gray-300 rounded-lg text-sm font-mono h-32 focus:ring-2 focus:ring-gray-400 focus:outline-none bg-white"></textarea>
                     </div>
                     <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-200">
-                        <label class="block text-sm font-bold text-indigo-700 mb-2"><i class="fas fa-comment-dots mr-1"></i> Phrase Prompt <span class="font-normal text-indigo-500 ml-2">(dùng {phrases}, {text})</span></label>
+                        <label class="block text-sm font-bold text-indigo-700 mb-2"><i class="fas fa-comment-dots mr-1"></i> Phrase Prompt ① <span class="font-normal text-indigo-500 ml-2">(dùng {phrases}, {text})</span></label>
                         <textarea id="phrasePromptTemplate" class="w-full p-3 border border-indigo-300 rounded-lg text-sm font-mono h-32 focus:ring-2 focus:ring-indigo-400 focus:outline-none bg-white"></textarea>
+                    </div>
+                </div>
+
+                <!-- Set 2 Templates -->
+                <div id="settingsSet2Content" class="space-y-5 border border-amber-200 rounded-b-xl rounded-tr-xl p-5 hidden">
+                    <div class="bg-amber-50 p-4 rounded-xl border border-amber-200">
+                        <label class="block text-sm font-bold text-amber-700 mb-2"><i class="fas fa-magic mr-1"></i> Extract Prompt ② <span class="font-normal text-amber-500 ml-2">(dùng {text})</span></label>
+                        <textarea id="extractPromptTemplate2" class="w-full p-3 border border-amber-300 rounded-lg text-sm font-mono h-32 focus:ring-2 focus:ring-amber-400 focus:outline-none bg-white"></textarea>
+                    </div>
+                    <div class="bg-amber-50 p-4 rounded-xl border border-amber-200">
+                        <label class="block text-sm font-bold text-amber-700 mb-2"><i class="fas fa-terminal mr-1"></i> Word Prompt ② <span class="font-normal text-amber-500 ml-2">(dùng {words}, {text})</span></label>
+                        <textarea id="promptTemplate2" class="w-full p-3 border border-amber-300 rounded-lg text-sm font-mono h-32 focus:ring-2 focus:ring-amber-400 focus:outline-none bg-white"></textarea>
+                    </div>
+                    <div class="bg-amber-50 p-4 rounded-xl border border-amber-200">
+                        <label class="block text-sm font-bold text-amber-700 mb-2"><i class="fas fa-comment-dots mr-1"></i> Phrase Prompt ② <span class="font-normal text-amber-500 ml-2">(dùng {phrases}, {text})</span></label>
+                        <textarea id="phrasePromptTemplate2" class="w-full p-3 border border-amber-300 rounded-lg text-sm font-mono h-32 focus:ring-2 focus:ring-amber-400 focus:outline-none bg-white"></textarea>
                     </div>
                 </div>
             </div>
@@ -511,6 +404,7 @@
 
         let currentTab = 'word';
         let currentOutputTab = 'result';
+        let currentPromptSet = 1;
 
         let cloudDataInMemory = null;
 
@@ -534,14 +428,79 @@
         const defaultPhrasePrompt = `Phân tích các cụm từ này : {phrases}`;
         const defaultExtractPrompt = `ONLY Extract Expressions from the text. Ignore common single words. Return a JSON array of strings in lowercase. Text: "{text}"`;
 
+        const defaultPrompt2 = `Phân tích các từ này (Bộ 2): {words}`;
+        const defaultPhrasePrompt2 = `Phân tích các cụm từ này (Bộ 2): {phrases}`;
+        const defaultExtractPrompt2 = `Extract ALL notable expressions and collocations from the text. Return a JSON array of lowercase strings. Text: "{text}"`;
+
         const config = {
             githubToken: '',
             gistId: '',
             gistFilename: 'vocab_canvas_data.json',
             extractPromptTemplate: defaultExtractPrompt,
             promptTemplate: defaultPrompt,
-            phrasePromptTemplate: defaultPhrasePrompt
+            phrasePromptTemplate: defaultPhrasePrompt,
+            extractPromptTemplate2: defaultExtractPrompt2,
+            promptTemplate2: defaultPrompt2,
+            phrasePromptTemplate2: defaultPhrasePrompt2
         };
+
+        // --- PROMPT SET SWITCHING ---
+        function getActiveTemplates() {
+            if (currentPromptSet === 2) {
+                return {
+                    extract: config.extractPromptTemplate2,
+                    word: config.promptTemplate2,
+                    phrase: config.phrasePromptTemplate2
+                };
+            }
+            return {
+                extract: config.extractPromptTemplate,
+                word: config.promptTemplate,
+                phrase: config.phrasePromptTemplate
+            };
+        }
+
+        function switchPromptSet(setNum) {
+            currentPromptSet = setNum;
+            localStorage.setItem('currentPromptSet', setNum);
+
+            // Update toggle buttons
+            const btn1 = document.getElementById('promptSetBtn1');
+            const btn2 = document.getElementById('promptSetBtn2');
+            btn1.classList.toggle('active-set-1', setNum === 1);
+            btn2.classList.toggle('active-set-2', setNum === 2);
+
+            // Update badges
+            const badgeClass = setNum === 1 ? 'set-badge-1' : 'set-badge-2';
+            const badgeText = setNum === 1 ? 'SET 1' : 'SET 2';
+            ['promptSetBadge', 'extractSetLabel', 'wordSetLabel', 'phraseSetLabel'].forEach(id => {
+                const el = document.getElementById(id);
+                el.className = `set-badge ${badgeClass}`;
+                el.textContent = badgeText;
+            });
+
+            updatePrompts();
+            showToast(setNum === 1 ? '🔵 Bộ Prompt ① (Primary)' : '🟡 Bộ Prompt ② (Secondary)');
+        }
+
+        function switchSettingsSetTab(setNum) {
+            const tab1 = document.getElementById('settingsSetTab1');
+            const tab2 = document.getElementById('settingsSetTab2');
+            const content1 = document.getElementById('settingsSet1Content');
+            const content2 = document.getElementById('settingsSet2Content');
+
+            if (setNum === 1) {
+                tab1.classList.add('active'); tab1.style.borderBottomColor = 'white'; tab1.style.marginBottom = '-1.5px'; tab1.style.zIndex = '1';
+                tab2.classList.remove('active'); tab2.style.borderBottomColor = ''; tab2.style.marginBottom = ''; tab2.style.zIndex = '';
+                content1.classList.remove('hidden');
+                content2.classList.add('hidden');
+            } else {
+                tab2.classList.add('active'); tab2.style.borderBottomColor = 'white'; tab2.style.marginBottom = '-1.5px'; tab2.style.zIndex = '1';
+                tab1.classList.remove('active'); tab1.style.borderBottomColor = ''; tab1.style.marginBottom = ''; tab1.style.zIndex = '';
+                content2.classList.remove('hidden');
+                content1.classList.add('hidden');
+            }
+        }
 
         // --- DARK MODE ---
         function initDarkMode() {
@@ -549,12 +508,8 @@
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             isDarkMode = saved ? saved === 'dark' : prefersDark;
             applyDarkMode();
-
             window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-                if (!localStorage.getItem('vocabCanvasTheme')) {
-                    isDarkMode = e.matches;
-                    applyDarkMode();
-                }
+                if (!localStorage.getItem('vocabCanvasTheme')) { isDarkMode = e.matches; applyDarkMode(); }
             });
         }
 
@@ -573,11 +528,7 @@
 
         // --- HELPER FUNCTIONS ---
         function hasItem(arr, item) { return arr.includes(item); }
-
-        function isInAnyVocab(item) {
-            return hasItem(vocabWords, item) || hasItem(vocabPhrases, item) || hasItem(vocabFamily, item) || hasItem(personalDict, item) || sessionIgnored.has(item);
-        }
-
+        function isInAnyVocab(item) { return hasItem(vocabWords, item) || hasItem(vocabPhrases, item) || hasItem(vocabFamily, item) || hasItem(personalDict, item) || sessionIgnored.has(item); }
         function addItem(arr, item) { if (!arr.includes(item)) arr.unshift(item); }
         function removeItem(arr, item) { const i = arr.indexOf(item); if (i > -1) arr.splice(i, 1); }
         function updateCombinedPhrases() { detectedPhrases = manualPhrases.filter(p => !isInAnyVocab(p)); }
@@ -598,43 +549,30 @@
             if (cloudSettings.extractPromptTemplate && cloudSettings.extractPromptTemplate !== config.extractPromptTemplate) return true;
             if (cloudSettings.promptTemplate && cloudSettings.promptTemplate !== config.promptTemplate) return true;
             if (cloudSettings.phrasePromptTemplate && cloudSettings.phrasePromptTemplate !== config.phrasePromptTemplate) return true;
+            if (cloudSettings.extractPromptTemplate2 && cloudSettings.extractPromptTemplate2 !== config.extractPromptTemplate2) return true;
+            if (cloudSettings.promptTemplate2 && cloudSettings.promptTemplate2 !== config.promptTemplate2) return true;
+            if (cloudSettings.phrasePromptTemplate2 && cloudSettings.phrasePromptTemplate2 !== config.phrasePromptTemplate2) return true;
             return false;
         }
 
-        // --- FOCUS WITHOUT KEYBOARD (Mobile) ---
         function focusWithoutKeyboard(textarea, start, end) {
             const isMobile = window.innerWidth <= 768;
-            if (isMobile) {
-                textarea.setAttribute('readonly', 'readonly');
-                textarea.focus();
-                textarea.setSelectionRange(start, end);
-                scrollToSelection(textarea, start);
-                setTimeout(() => textarea.removeAttribute('readonly'), 100);
-            } else {
-                textarea.focus();
-                textarea.setSelectionRange(start, end);
-                scrollToSelection(textarea, start);
-            }
+            if (isMobile) { textarea.setAttribute('readonly', 'readonly'); textarea.focus(); textarea.setSelectionRange(start, end); scrollToSelection(textarea, start); setTimeout(() => textarea.removeAttribute('readonly'), 100); }
+            else { textarea.focus(); textarea.setSelectionRange(start, end); scrollToSelection(textarea, start); }
         }
 
-        // --- SENTENCE BOUNDARY DETECTION ---
         function isRealSentenceEnd(text, dotPosition) {
             const before = text.substring(Math.max(0, dotPosition - 15), dotPosition);
             const after = text.substring(dotPosition + 1, Math.min(text.length, dotPosition + 10));
             if (/^\d/.test(after)) return false;
             if (/[$€£¥]\d+$/.test(before)) return false;
             if (/\d$/.test(before) && /^\d/.test(after)) return false;
-            const abbrevPatterns = [
-                /\b(Mr|Mrs|Ms|Dr|Prof|Sr|Jr|vs|etc|e\.g|i\.e|no|vol|rev|est|approx|dept|inc|ltd|corp|co|st|ave|blvd|apt|govt|ft|mt|gen|col|lt|sgt|capt|cmdr|min|sec|hr|hrs|lb|lbs|oz|pt|qt|gal|sq|cu|mph|kph|fig|figs|pp?|ed|eds|trans|tel|fax|ext|ref|attn|jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec|u\.s|u\.k|u\.n|e\.u|a\.m|p\.m)$/i
-            ];
-            for (const pattern of abbrevPatterns) {
-                if (pattern.test(before)) return false;
-            }
+            const abbrevPatterns = [/\b(Mr|Mrs|Ms|Dr|Prof|Sr|Jr|vs|etc|e\.g|i\.e|no|vol|rev|est|approx|dept|inc|ltd|corp|co|st|ave|blvd|apt|govt|ft|mt|gen|col|lt|sgt|capt|cmdr|min|sec|hr|hrs|lb|lbs|oz|pt|qt|gal|sq|cu|mph|kph|fig|figs|pp?|ed|eds|trans|tel|fax|ext|ref|attn|jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec|u\.s|u\.k|u\.n|e\.u|a\.m|p\.m)$/i];
+            for (const pattern of abbrevPatterns) { if (pattern.test(before)) return false; }
             if (/\s[A-Za-z]$/.test(before)) return false;
             return true;
         }
 
-        // --- FIND IN PAGE FUNCTION ---
         function findInPage(item) {
             const textarea = document.getElementById('inputText');
             const text = textarea.value;
@@ -643,9 +581,7 @@
             const positions = [];
             const regex = new RegExp(`\\b${escapeRegex(searchTerm)}\\b`, 'gi');
             let match;
-            while ((match = regex.exec(text)) !== null) {
-                positions.push({ start: match.index, end: match.index + match[0].length });
-            }
+            while ((match = regex.exec(text)) !== null) { positions.push({ start: match.index, end: match.index + match[0].length }); }
             if (positions.length === 0) { showToast(`Không tìm thấy "${item}"`); return; }
             currentFindIndex = (currentFindIndex + 1) % positions.length;
             const target = positions[currentFindIndex];
@@ -657,20 +593,10 @@
 
         function findSentenceContaining(text, wordStart, wordEnd) {
             let start = wordStart;
-            while (start > 0) {
-                const char = text[start - 1];
-                if (/[.!?]/.test(char)) { if (isRealSentenceEnd(text, start - 1)) break; }
-                if (char === '\n') break;
-                start--;
-            }
+            while (start > 0) { const char = text[start - 1]; if (/[.!?]/.test(char)) { if (isRealSentenceEnd(text, start - 1)) break; } if (char === '\n') break; start--; }
             while (start < wordStart && /\s/.test(text[start])) start++;
             let end = wordEnd;
-            while (end < text.length) {
-                const char = text[end];
-                if (/[.!?]/.test(char)) { if (isRealSentenceEnd(text, end)) { end++; break; } }
-                if (char === '\n') break;
-                end++;
-            }
+            while (end < text.length) { const char = text[end]; if (/[.!?]/.test(char)) { if (isRealSentenceEnd(text, end)) { end++; break; } } if (char === '\n') break; end++; }
             return { start, end };
         }
 
@@ -690,10 +616,7 @@
             ctx.font = `${style.fontSize} ${style.fontFamily}`;
             let totalLines = 0;
             const paragraphs = textBefore.split('\n');
-            for (const para of paragraphs) {
-                if (para === '') { totalLines += 1; }
-                else { totalLines += Math.max(1, Math.ceil(ctx.measureText(para).width / textareaWidth)); }
-            }
+            for (const para of paragraphs) { if (para === '') totalLines += 1; else totalLines += Math.max(1, Math.ceil(ctx.measureText(para).width / textareaWidth)); }
             const positionY = paddingTop + (totalLines - 1) * lineHeight;
             const isMobile = window.innerWidth <= 768;
             const topOffset = isMobile ? 0.02 : 0.4;
@@ -704,11 +627,7 @@
         function isSoundDescription(text) {
             const trimmed = text.trim();
             if (/^\[.+\]$/.test(trimmed)) return true;
-            if (/^\(.+\)$/.test(trimmed)) {
-                const inner = trimmed.slice(1, -1).toLowerCase();
-                const soundKeywords = ['music','singing','song','playing','applause','laughter','cheering','sobbing','crying','screaming','shouting','whispering','sighing','gasping','coughing','snoring','knocking','ringing','beeping','buzzing','clicking','thunder','rain','wind','explosion','gunshot','siren','door','phone','alarm','bell','horn','engine','footsteps','breathing','heartbeat','silence','inaudible','indistinct','unintelligible','continues','in ','speaks ','speaking '];
-                if (soundKeywords.some(kw => inner.includes(kw))) return true;
-            }
+            if (/^\(.+\)$/.test(trimmed)) { const inner = trimmed.slice(1, -1).toLowerCase(); const soundKeywords = ['music','singing','song','playing','applause','laughter','cheering','sobbing','crying','screaming','shouting','whispering','sighing','gasping','coughing','snoring','knocking','ringing','beeping','buzzing','clicking','thunder','rain','wind','explosion','gunshot','siren','door','phone','alarm','bell','horn','engine','footsteps','breathing','heartbeat','silence','inaudible','indistinct','unintelligible','continues','in ','speaks ','speaking ']; if (soundKeywords.some(kw => inner.includes(kw))) return true; }
             if (/^[♪♫].*[♪♫]$/.test(trimmed)) return true;
             if (trimmed.includes('♪') || trimmed.includes('♫')) return true;
             if (/^\*.+\*$/.test(trimmed)) return true;
@@ -736,11 +655,7 @@
             const sentences = [];
             let currentSentence = null;
             for (const block of rawBlocks) {
-                if (block.isSoundDesc) {
-                    if (currentSentence) { currentSentence.text = currentSentence.text.replace(/\s+/g, ' ').trim(); sentences.push(currentSentence); currentSentence = null; }
-                    sentences.push({ index: sentences.length + 1, startTime: block.startTime, endTime: block.endTime, text: block.text, isSoundDesc: true });
-                    continue;
-                }
+                if (block.isSoundDesc) { if (currentSentence) { currentSentence.text = currentSentence.text.replace(/\s+/g, ' ').trim(); sentences.push(currentSentence); currentSentence = null; } sentences.push({ index: sentences.length + 1, startTime: block.startTime, endTime: block.endTime, text: block.text, isSoundDesc: true }); continue; }
                 if (currentSentence === null) { currentSentence = { index: sentences.length + 1, startTime: block.startTime, endTime: block.endTime, text: block.text }; }
                 else { const lastChar = currentSentence.text.slice(-1); const separator = (lastChar === '-') ? '' : ' '; currentSentence.text += separator + block.text; currentSentence.endTime = block.endTime; }
                 if (isSentenceComplete(currentSentence.text)) { currentSentence.text = currentSentence.text.replace(/\s+/g, ' ').trim(); sentences.push(currentSentence); currentSentence = null; }
@@ -766,9 +681,8 @@
             document.getElementById('subtitleTotal').innerText = subtitleSentences.length;
             const input = document.getElementById('subtitleJumpInput');
             input.value = currentSubtitleIndex >= 0 ? currentSubtitleIndex + 1 : '';
-            if (currentSubtitleIndex >= 0 && subtitleSentences[currentSubtitleIndex]) {
-                document.getElementById('subtitleTimestamp').innerText = `${subtitleSentences[currentSubtitleIndex].startTime.substring(0, 8)}`;
-            } else { document.getElementById('subtitleTimestamp').innerText = ''; }
+            if (currentSubtitleIndex >= 0 && subtitleSentences[currentSubtitleIndex]) { document.getElementById('subtitleTimestamp').innerText = `${subtitleSentences[currentSubtitleIndex].startTime.substring(0, 8)}`; }
+            else { document.getElementById('subtitleTimestamp').innerText = ''; }
         }
 
         function jumpToSubtitle() {
@@ -784,12 +698,7 @@
 
         function goToSubtitle(direction) {
             if (subtitleSentences.length === 0) { showToast('Chưa có subtitle!'); return; }
-            switch(direction) {
-                case 'first': currentSubtitleIndex = 0; break;
-                case 'prev': currentSubtitleIndex = Math.max(0, currentSubtitleIndex - 1); break;
-                case 'next': currentSubtitleIndex = Math.min(subtitleSentences.length - 1, currentSubtitleIndex + 1); break;
-                case 'last': currentSubtitleIndex = subtitleSentences.length - 1; break;
-            }
+            switch(direction) { case 'first': currentSubtitleIndex = 0; break; case 'prev': currentSubtitleIndex = Math.max(0, currentSubtitleIndex - 1); break; case 'next': currentSubtitleIndex = Math.min(subtitleSentences.length - 1, currentSubtitleIndex + 1); break; case 'last': currentSubtitleIndex = subtitleSentences.length - 1; break; }
             focusSubtitleSentence(currentSubtitleIndex);
             updateSubtitleNav();
         }
@@ -800,10 +709,7 @@
             const textarea = document.getElementById('inputText');
             const text = textarea.value;
             let position = -1, currentPos = 0;
-            for (let i = 0; i <= index; i++) {
-                const foundPos = text.indexOf(subtitleSentences[i].text, currentPos);
-                if (foundPos !== -1) { if (i === index) { position = foundPos; break; } currentPos = foundPos + subtitleSentences[i].text.length; }
-            }
+            for (let i = 0; i <= index; i++) { const foundPos = text.indexOf(subtitleSentences[i].text, currentPos); if (foundPos !== -1) { if (i === index) { position = foundPos; break; } currentPos = foundPos + subtitleSentences[i].text.length; } }
             if (position === -1) position = text.indexOf(sentence.text);
             if (position === -1) { showToast(`Không tìm thấy câu ${index + 1}`); return; }
             if (currentTab !== 'word') switchTab('word');
@@ -815,14 +721,18 @@
             initDarkMode();
             loadSettings();
             loadVocab();
+
+            // Restore prompt set
+            const savedSet = parseInt(localStorage.getItem('currentPromptSet'));
+            if (savedSet === 2) switchPromptSet(2);
+            else switchPromptSet(1);
+
             document.getElementById('inputText').addEventListener('input', handleInput);
             document.getElementById('manualPhraseInput').addEventListener('input', handleManualPhraseInput);
             document.getElementById('fileInput').addEventListener('change', handleFileUpload);
             renderCounts();
             updateUndoButton();
-            if (config.githubToken && config.gistId) {
-                setTimeout(() => checkCloudOnStartup(), 1000);
-            }
+            if (config.githubToken && config.gistId) { setTimeout(() => checkCloudOnStartup(), 1000); }
         };
 
         async function checkCloudOnStartup() {
@@ -929,19 +839,19 @@
         function copyPrompt() {
             const text = document.getElementById('promptPreview').innerText;
             if (!text || text.includes('Chưa có')) { showToast('Không có Word Prompt!'); return; }
-            navigator.clipboard.writeText(text).then(() => showToast('Đã copy Word Prompt!'));
+            navigator.clipboard.writeText(text).then(() => showToast(`Đã copy Word Prompt (Bộ ${currentPromptSet})!`));
         }
 
         function copyPhrasePrompt() {
             const text = document.getElementById('phrasePromptPreview').innerText;
             if (!text || text.includes('Chưa có')) { showToast('Không có Phrase Prompt!'); return; }
-            navigator.clipboard.writeText(text).then(() => showToast('Đã copy Phrase Prompt!'));
+            navigator.clipboard.writeText(text).then(() => showToast(`Đã copy Phrase Prompt (Bộ ${currentPromptSet})!`));
         }
 
         function copyExtractPrompt() {
             const text = document.getElementById('extractPromptPreview').innerText;
             if (!text || text.includes('Nhập văn bản')) { showToast('Không có Extract Prompt!'); return; }
-            navigator.clipboard.writeText(text).then(() => showToast('Đã copy Extract Prompt!'));
+            navigator.clipboard.writeText(text).then(() => showToast(`Đã copy Extract Prompt (Bộ ${currentPromptSet})!`));
         }
 
         function copyItem(item) { navigator.clipboard.writeText(item).then(() => showToast(`Đã copy: ${item}`)).catch(() => showToast('Lỗi copy!')); }
@@ -999,13 +909,9 @@
                 const el = document.getElementById(`output${t}Tab`);
                 const btn = document.getElementById(`outputTab${t}`);
                 if (t.toLowerCase() === tab || (t === 'Result' && tab === 'result') || (t === 'Extract' && tab === 'extract') || (t === 'Prompt' && tab === 'prompt') || (t === 'PhrasePrompt' && tab === 'phrasePrompt')) {
-                    el.classList.remove('hidden');
-                    btn.classList.add('output-tab-active');
-                    btn.classList.remove('text-gray-500');
+                    el.classList.remove('hidden'); btn.classList.add('output-tab-active'); btn.classList.remove('text-gray-500');
                 } else {
-                    el.classList.add('hidden');
-                    btn.classList.remove('output-tab-active');
-                    btn.classList.add('text-gray-500');
+                    el.classList.add('hidden'); btn.classList.remove('output-tab-active'); btn.classList.add('text-gray-500');
                 }
             });
         }
@@ -1042,12 +948,9 @@
             updatePrompts();
         }
 
-        // ===== CẢI TIẾN: {text} dùng được trong cả Word & Phrase Prompt =====
         function buildPromptText(template, replacements) {
             let result = template;
-            for (const [key, value] of Object.entries(replacements)) {
-                result = result.replaceAll(key, value);
-            }
+            for (const [key, value] of Object.entries(replacements)) { result = result.replaceAll(key, value); }
             return result;
         }
 
@@ -1057,38 +960,39 @@
             const wordsStr = detectedWords.join(', ');
             const phrasesStr = detectedPhrases.join(', ');
 
-            // Extract Prompt: chỉ cần {text}
+            const templates = getActiveTemplates();
+
+            // Extract Prompt
             if (hasText) {
-                document.getElementById('extractPromptPreview').innerText = buildPromptText(config.extractPromptTemplate, { '{text}': inputText });
+                document.getElementById('extractPromptPreview').innerText = buildPromptText(templates.extract, { '{text}': inputText });
             } else {
                 document.getElementById('extractPromptPreview').innerText = '(Nhập văn bản để xem Extract Prompt)';
             }
 
-            // Word Prompt: hỗ trợ {words} và {text}
-            const wordTemplateHasWords = config.promptTemplate.includes('{words}');
-            const wordTemplateHasText = config.promptTemplate.includes('{text}');
+            // Word Prompt
+            const wordTemplateHasWords = templates.word.includes('{words}');
+            const wordTemplateHasText = templates.word.includes('{text}');
             if ((wordTemplateHasWords && detectedWords.length === 0) && (!wordTemplateHasText || !hasText)) {
                 document.getElementById('promptPreview').innerText = '(Chưa có từ hoặc văn bản để phân tích)';
             } else if (wordTemplateHasWords && detectedWords.length === 0 && wordTemplateHasText && hasText) {
-                // Có {text} nhưng không có {words} → vẫn render, {words} sẽ rỗng
-                document.getElementById('promptPreview').innerText = buildPromptText(config.promptTemplate, { '{words}': '(none)', '{text}': inputText });
+                document.getElementById('promptPreview').innerText = buildPromptText(templates.word, { '{words}': '(none)', '{text}': inputText });
             } else if (!wordTemplateHasWords && wordTemplateHasText && !hasText) {
                 document.getElementById('promptPreview').innerText = '(Chưa có văn bản để phân tích)';
             } else {
-                document.getElementById('promptPreview').innerText = buildPromptText(config.promptTemplate, { '{words}': wordsStr, '{text}': inputText });
+                document.getElementById('promptPreview').innerText = buildPromptText(templates.word, { '{words}': wordsStr, '{text}': inputText });
             }
 
-            // Phrase Prompt: hỗ trợ {phrases} và {text}
-            const phraseTemplateHasPhrases = config.phrasePromptTemplate.includes('{phrases}');
-            const phraseTemplateHasText = config.phrasePromptTemplate.includes('{text}');
+            // Phrase Prompt
+            const phraseTemplateHasPhrases = templates.phrase.includes('{phrases}');
+            const phraseTemplateHasText = templates.phrase.includes('{text}');
             if ((phraseTemplateHasPhrases && detectedPhrases.length === 0) && (!phraseTemplateHasText || !hasText)) {
                 document.getElementById('phrasePromptPreview').innerText = '(Chưa có phrases hoặc văn bản để phân tích)';
             } else if (phraseTemplateHasPhrases && detectedPhrases.length === 0 && phraseTemplateHasText && hasText) {
-                document.getElementById('phrasePromptPreview').innerText = buildPromptText(config.phrasePromptTemplate, { '{phrases}': '(none)', '{text}': inputText });
+                document.getElementById('phrasePromptPreview').innerText = buildPromptText(templates.phrase, { '{phrases}': '(none)', '{text}': inputText });
             } else if (!phraseTemplateHasPhrases && phraseTemplateHasText && !hasText) {
                 document.getElementById('phrasePromptPreview').innerText = '(Chưa có văn bản để phân tích)';
             } else {
-                document.getElementById('phrasePromptPreview').innerText = buildPromptText(config.phrasePromptTemplate, { '{phrases}': phrasesStr, '{text}': inputText });
+                document.getElementById('phrasePromptPreview').innerText = buildPromptText(templates.phrase, { '{phrases}': phrasesStr, '{text}': inputText });
             }
         }
 
@@ -1109,26 +1013,14 @@
 
         function addItemToCurrentVocab(item) {
             let type = currentTab === 'word' ? 'word' : 'phrase';
-            if (type === 'word') addItem(vocabWords, item);
-            else addItem(vocabPhrases, item);
+            if (type === 'word') addItem(vocabWords, item); else addItem(vocabPhrases, item);
             pushToUndoStack(type, item, currentTab);
             updateVocabAndSync(); removeCurrentItem(item);
             showToast(`Đã thêm: ${item}`);
         }
 
-        function addToPersonalDict(item) {
-            addItem(personalDict, item);
-            pushToUndoStack('personal', item, currentTab);
-            updateVocabAndSync(); removeCurrentItem(item);
-            showToast(`Đã thêm vào Ignored: ${item}`);
-        }
-
-        function addToWordFamily(item) {
-            addItem(vocabFamily, item);
-            pushToUndoStack('family', item, currentTab);
-            updateVocabAndSync(); removeCurrentItem(item);
-            showToast(`Đã thêm vào Family: ${item}`);
-        }
+        function addToPersonalDict(item) { addItem(personalDict, item); pushToUndoStack('personal', item, currentTab); updateVocabAndSync(); removeCurrentItem(item); showToast(`Đã thêm vào Ignored: ${item}`); }
+        function addToWordFamily(item) { addItem(vocabFamily, item); pushToUndoStack('family', item, currentTab); updateVocabAndSync(); removeCurrentItem(item); showToast(`Đã thêm vào Family: ${item}`); }
 
         function addAllCurrentToVocab() {
             let list = currentTab === 'word' ? [...detectedWords] : [...detectedPhrases];
@@ -1209,6 +1101,21 @@
             updateVocabAndSync(); renderDictionary(); handleInput(); updateCombinedPhrases();
         }
 
+        // --- CLOUD SYNC ---
+        function buildSyncData() {
+            return {
+                vocab: { words: vocabWords, phrases: vocabPhrases, family: vocabFamily, personal: personalDict },
+                settings: {
+                    extractPromptTemplate: config.extractPromptTemplate,
+                    promptTemplate: config.promptTemplate,
+                    phrasePromptTemplate: config.phrasePromptTemplate,
+                    extractPromptTemplate2: config.extractPromptTemplate2,
+                    promptTemplate2: config.promptTemplate2,
+                    phrasePromptTemplate2: config.phrasePromptTemplate2
+                }
+            };
+        }
+
         async function fetchGist() {
             const url = `https://api.github.com/gists/${config.gistId}?t=${Date.now()}`;
             const res = await fetch(url, { headers: { 'Authorization': `token ${config.githubToken}` } });
@@ -1245,11 +1152,7 @@
             const statusEl = document.getElementById('syncStatusIndicator');
             statusEl.innerHTML = '<i class="fas fa-cloud-upload-alt fa-spin text-blue-500"></i> Pushing...';
             try {
-                const data = {
-                    vocab: { words: vocabWords, phrases: vocabPhrases, family: vocabFamily, personal: personalDict },
-                    settings: { extractPromptTemplate: config.extractPromptTemplate, promptTemplate: config.promptTemplate, phrasePromptTemplate: config.phrasePromptTemplate }
-                };
-                await pushGist(data);
+                await pushGist(buildSyncData());
                 statusEl.innerHTML = '<i class="fas fa-check-circle text-green-500"></i> Synced';
                 statusEl.title = `Pushed @ ${new Date().toLocaleTimeString()}`;
             } catch (err) {
@@ -1292,11 +1195,7 @@
             pushLocked = true;
             statusEl.innerHTML = '<i class="fas fa-cloud-upload-alt fa-spin text-blue-500"></i> Pushing...';
             try {
-                const data = {
-                    vocab: { words: vocabWords, phrases: vocabPhrases, family: vocabFamily, personal: personalDict },
-                    settings: { extractPromptTemplate: config.extractPromptTemplate, promptTemplate: config.promptTemplate, phrasePromptTemplate: config.phrasePromptTemplate }
-                };
-                await pushGist(data);
+                await pushGist(buildSyncData());
                 statusEl.innerHTML = '<i class="fas fa-check-circle text-green-500"></i> Synced';
                 showToast('Đã đẩy lên Cloud!');
             } catch (err) { console.error('Push error:', err); statusEl.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500"></i> Error'; showToast('Lỗi push: ' + err.message); }
@@ -1348,10 +1247,7 @@
                 let diffClass = diff > 0 ? 'text-green-600' : diff < 0 ? 'text-red-600' : 'text-gray-500';
                 const row = document.createElement('tr');
                 row.className = 'border-b hover:bg-gray-50';
-                row.innerHTML = `<td class="p-3"><i class="${cat.icon} text-${cat.color}-500 mr-2"></i>${cat.name}</td>
-                    <td class="p-3 text-center font-semibold text-blue-600">${cat.cloud}</td>
-                    <td class="p-3 text-center font-semibold text-green-600">${cat.local}</td>
-                    <td class="p-3 text-center font-semibold ${diffClass}">${diffText}</td>`;
+                row.innerHTML = `<td class="p-3"><i class="${cat.icon} text-${cat.color}-500 mr-2"></i>${cat.name}</td><td class="p-3 text-center font-semibold text-blue-600">${cat.cloud}</td><td class="p-3 text-center font-semibold text-green-600">${cat.local}</td><td class="p-3 text-center font-semibold ${diffClass}">${diffText}</td>`;
                 tableBody.appendChild(row);
             });
             document.getElementById('totalCloud').innerText = totalCloud;
@@ -1376,13 +1272,25 @@
             vocabPhrases = Array.isArray(vocab.phrases) ? vocab.phrases : [];
             vocabFamily = Array.isArray(vocab.family) ? vocab.family : [];
             personalDict = Array.isArray(vocab.personal) ? vocab.personal : [];
+
+            // Set 1
             if (settings.extractPromptTemplate) config.extractPromptTemplate = settings.extractPromptTemplate;
             if (settings.promptTemplate) config.promptTemplate = settings.promptTemplate;
             if (settings.phrasePromptTemplate) config.phrasePromptTemplate = settings.phrasePromptTemplate;
+            // Set 2
+            if (settings.extractPromptTemplate2) config.extractPromptTemplate2 = settings.extractPromptTemplate2;
+            if (settings.promptTemplate2) config.promptTemplate2 = settings.promptTemplate2;
+            if (settings.phrasePromptTemplate2) config.phrasePromptTemplate2 = settings.phrasePromptTemplate2;
+
             localStorage.setItem('appConfig', JSON.stringify(config));
+            // Update settings form
             document.getElementById('extractPromptTemplate').value = config.extractPromptTemplate;
             document.getElementById('promptTemplate').value = config.promptTemplate;
             document.getElementById('phrasePromptTemplate').value = config.phrasePromptTemplate;
+            document.getElementById('extractPromptTemplate2').value = config.extractPromptTemplate2;
+            document.getElementById('promptTemplate2').value = config.promptTemplate2;
+            document.getElementById('phrasePromptTemplate2').value = config.phrasePromptTemplate2;
+
             saveVocabLocal(); renderCounts();
             if (!document.getElementById('dictionaryModal').classList.contains('hidden')) renderDictionary();
             handleInput(); updateCombinedPhrases();
@@ -1406,9 +1314,15 @@
             config.githubToken = document.getElementById('githubToken').value;
             config.gistId = document.getElementById('gistId').value;
             config.gistFilename = document.getElementById('gistFilename').value;
+            // Set 1
             config.extractPromptTemplate = document.getElementById('extractPromptTemplate').value;
             config.promptTemplate = document.getElementById('promptTemplate').value;
             config.phrasePromptTemplate = document.getElementById('phrasePromptTemplate').value;
+            // Set 2
+            config.extractPromptTemplate2 = document.getElementById('extractPromptTemplate2').value;
+            config.promptTemplate2 = document.getElementById('promptTemplate2').value;
+            config.phrasePromptTemplate2 = document.getElementById('phrasePromptTemplate2').value;
+
             localStorage.setItem('appConfig', JSON.stringify(config));
             closeModal('settingsModal');
             showToast('Đã lưu cài đặt!');
@@ -1424,14 +1338,23 @@
                 if (!parsed.extractPromptTemplate) parsed.extractPromptTemplate = defaultExtractPrompt;
                 if (!parsed.phrasePromptTemplate) parsed.phrasePromptTemplate = defaultPhrasePrompt;
                 if (!parsed.gistFilename) parsed.gistFilename = 'vocab_canvas_data.json';
+                // Set 2 defaults
+                if (!parsed.extractPromptTemplate2) parsed.extractPromptTemplate2 = defaultExtractPrompt2;
+                if (!parsed.promptTemplate2) parsed.promptTemplate2 = defaultPrompt2;
+                if (!parsed.phrasePromptTemplate2) parsed.phrasePromptTemplate2 = defaultPhrasePrompt2;
                 Object.assign(config, parsed);
             }
             document.getElementById('githubToken').value = config.githubToken;
             document.getElementById('gistId').value = config.gistId;
             document.getElementById('gistFilename').value = config.gistFilename;
+            // Set 1
             document.getElementById('extractPromptTemplate').value = config.extractPromptTemplate;
             document.getElementById('promptTemplate').value = config.promptTemplate;
             document.getElementById('phrasePromptTemplate').value = config.phrasePromptTemplate;
+            // Set 2
+            document.getElementById('extractPromptTemplate2').value = config.extractPromptTemplate2;
+            document.getElementById('promptTemplate2').value = config.promptTemplate2;
+            document.getElementById('phrasePromptTemplate2').value = config.phrasePromptTemplate2;
         }
     </script>
 </body>
