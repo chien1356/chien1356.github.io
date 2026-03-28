@@ -1,41 +1,26 @@
 Extract phrasal verbs, collocations and idioms from the text. Ignore common single words.
 
-Create an interactive artifact with:
+Create an interactive HTML with:
 1. A "Copy All Phrases" button at the top that copies all phrases (one per line) to clipboard
 2. A table with columns: Phrase | Vietnamese Meaning
 
 Text: "{text}"
 
+_______________________________________________________________________________________________
+Extract the English words/phrases in the Word field from this anki file and Analyze and create a downloadable CSV file (UTF-8 encoded) with these columns:
 
-Analyze the following English words and create a artifact downloadable CSV file (UTF-8 encoded) with these columns:
-1. **Word**: The original word
+1. **word/phrase**: The original word/phrase/idiom/other
 2. **Phonetic (US)**: dictionary-style
 3. **POS**: Part of speech
-4. **Vietnamese meanings of the word**
-5. **Sentence**: The sentence containing that word is in the document (Original quote, unedited, If a word appears multiple times, choose the sentence that best illustrates its meaning) 
-6. **Sentence Translation**: Vietnamese translation of the sentence
+4. **Vietnamese Meaning of the word/phrase**
+5. **Definition**: Search word/phrase Cambridge and Merriam-Webster in real-time. If the phrase is found in multiple dictionaries, use Cambridge. If found in only one, use that dictionary's definition. And Vietnamese translation of the definition
+6. **Sentence Translation**: Vietnamese translation of Sub_En field from this anki file (The context is included in the paste file to assist with translating the Sub_En field if necessary.)
+
 **Important formatting requirements:**
 - Do NOT include column headers in the file
 - Add the following three lines at the beginning of the file:
-  #notetype:Words
-  #deck:vocab
+  #notetype:asbplayer
+  #deck:asbplayer
   #separator:Comma
-Words to analyze: {words}
-Document: "{text}"
 
-
-Analyze the following English phrases and create a artifact downloadable CSV file (UTF-8 encoded) with these columns:
-1. **Phrase**: The original phrase/idiom/other
-2. **Phonetic (US)**: dictionary-style
-3. **Type**: dictionary-style
-4. **Vietnamese Meaning**
-5. **Sentence**: The sentence containing that phrase is in the document (Original quote, unedited, If a word appears multiple times, choose the sentence that best illustrates its meaning) 
-6. **Sentence Translation**: Vietnamese translation of the sentence
-**Important formatting requirements:**
-- Do NOT include column headers in the file
-- Add the following three lines at the beginning of the file:
-  #notetype:MyExpressions
-  #deck:expressions
-  #separator:Comma
-Phrases to analyze: {phrases}
-Document: "{text}"
+Context: "{text}"
