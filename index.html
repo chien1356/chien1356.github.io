@@ -8,7 +8,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; }
-        .tab-active { border-bottom: 3px solid #3b82f6; color: #3b82f6; font-weight: bold; }
         .output-tab-active { background-color: #3b82f6; color: white; }
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
@@ -70,7 +69,6 @@
         body.dark-mode .border-green-200 { border-color: rgba(34,197,94,0.3) !important; }
         body.dark-mode .border-green-100 { border-color: rgba(34,197,94,0.2) !important; }
         body.dark-mode .border-orange-200 { border-color: rgba(249,115,22,0.3) !important; }
-        body.dark-mode .tab-active { border-color: #60a5fa !important; color: #60a5fa !important; }
         body.dark-mode .output-tab-active { background-color: #3b82f6 !important; color: #fff !important; }
         body.dark-mode #outputList > div { background-color: #1e293b !important; border-color: transparent !important; }
         body.dark-mode #outputList > div:hover { background-color: #334155 !important; border-color: #475569 !important; box-shadow: none !important; }
@@ -87,64 +85,29 @@
         body.dark-mode tfoot tr { background-color: #0f172a !important; }
         body.dark-mode th { color: #94a3b8 !important; border-color: #334155 !important; }
         body.dark-mode td { border-color: #334155 !important; }
-        body.dark-mode #dictWordList > div, body.dark-mode #dictPhraseList > div, body.dark-mode #dictFamilyList > div, body.dark-mode #dictPersonalList > div { background-color: #0f172a !important; border-color: #334155 !important; color: #cbd5e1; }
-        body.dark-mode .border-blue-200.pb-1, body.dark-mode .border-indigo-200.pb-1, body.dark-mode .border-teal-200.pb-1, body.dark-mode .border-gray-300.pb-1 { border-color: #475569 !important; }
+        body.dark-mode #dictWordList > div, body.dark-mode #dictFamilyList > div, body.dark-mode #dictPersonalList > div { background-color: #0f172a !important; border-color: #334155 !important; color: #cbd5e1; }
+        body.dark-mode .border-blue-200.pb-1, body.dark-mode .border-teal-200.pb-1, body.dark-mode .border-gray-300.pb-1 { border-color: #475569 !important; }
         body.dark-mode .bg-gradient-to-r.from-gray-50 { background: #0f172a !important; }
         body.dark-mode [class*="from-gray-50"][class*="to-gray-100"] { background: #0f172a !important; }
         body.dark-mode .bg-purple-50.p-4 { background-color: rgba(168,85,247,0.08) !important; }
-        body.dark-mode .bg-gray-50.p-4 { background-color: #0f172a !important; }
         body.dark-mode .bg-indigo-50.p-4 { background-color: rgba(99,102,241,0.08) !important; }
+        body.dark-mode .bg-gray-50.p-4 { background-color: #0f172a !important; }
         body.dark-mode #toastContainer > div { background-color: #334155 !important; border: 1px solid #475569; }
-        body.dark-mode #subtitleNav { background-color: rgba(168,85,247,0.1) !important; border-color: rgba(168,85,247,0.3) !important; }
-        body.dark-mode #subtitleJumpInput { background-color: #0f172a !important; border-color: rgba(168,85,247,0.3) !important; color: #cbd5e1 !important; }
         body.dark-mode .hover\:bg-blue-50:hover { background-color: rgba(59,130,246,0.15) !important; }
         body.dark-mode .hover\:bg-green-50:hover { background-color: rgba(34,197,94,0.15) !important; }
         body.dark-mode .hover\:bg-purple-50:hover { background-color: rgba(168,85,247,0.15) !important; }
         body.dark-mode .hover\:bg-orange-50:hover { background-color: rgba(249,115,22,0.15) !important; }
         body.dark-mode .hover\:bg-gray-100:hover { background-color: #334155 !important; }
         body.dark-mode .hover\:bg-gray-200:hover { background-color: #475569 !important; }
-        body.dark-mode .hover\:bg-gray-300:hover { background-color: #475569 !important; }
         body.dark-mode .hover\:bg-purple-100:hover { background-color: rgba(168,85,247,0.2) !important; }
         body.dark-mode .hover\:bg-purple-200:hover { background-color: rgba(168,85,247,0.25) !important; }
         body.dark-mode .hover\:bg-indigo-100:hover { background-color: rgba(99,102,241,0.2) !important; }
         body.dark-mode .hover\:bg-indigo-200:hover { background-color: rgba(99,102,241,0.25) !important; }
-        body.dark-mode .hover\:bg-blue-100:hover { background-color: rgba(59,130,246,0.2) !important; }
-        body.dark-mode .hover\:bg-green-100:hover { background-color: rgba(34,197,94,0.2) !important; }
-        body.dark-mode .hover\:bg-green-200:hover { background-color: rgba(34,197,94,0.25) !important; }
         body.dark-mode .hover\:bg-teal-50:hover { background-color: rgba(20,184,166,0.15) !important; }
-        body.dark-mode .hover\:bg-yellow-50:hover { background-color: rgba(234,179,8,0.15) !important; }
         .dm-toggle { position: relative; width: 2rem; height: 2rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
         .dm-toggle .fa-sun { color: #fbbf24; }
         .dm-toggle .fa-moon { color: #94a3b8; }
         @media (max-width: 768px) { body.dark-mode .input-panel { border-bottom-color: #334155 !important; } }
-
-        /* Prompt Set Toggle */
-        .prompt-set-btn { min-width: 28px; text-align: center; font-weight: 700; font-size: 11px; padding: 3px 7px; cursor: pointer; border: 1.5px solid #d1d5db; transition: all 0.2s; }
-        .prompt-set-btn.active-set-1 { background: #3b82f6; color: #fff; border-color: #3b82f6; }
-        .prompt-set-btn.active-set-2 { background: #f59e0b; color: #fff; border-color: #f59e0b; }
-        .prompt-set-btn:not(.active-set-1):not(.active-set-2) { background: #f3f4f6; color: #6b7280; }
-        .prompt-set-btn:not(.active-set-1):not(.active-set-2):hover { background: #e5e7eb; }
-        body.dark-mode .prompt-set-btn:not(.active-set-1):not(.active-set-2) { background: #334155; color: #94a3b8; border-color: #475569; }
-        body.dark-mode .prompt-set-btn:not(.active-set-1):not(.active-set-2):hover { background: #475569; }
-
-        /* Set indicator badge */
-        .set-badge { display: inline-block; font-size: 9px; font-weight: 800; padding: 1px 5px; border-radius: 4px; margin-left: 4px; vertical-align: middle; }
-        .set-badge-1 { background: #dbeafe; color: #2563eb; }
-        .set-badge-2 { background: #fef3c7; color: #d97706; }
-        body.dark-mode .set-badge-1 { background: rgba(59,130,246,0.2); color: #60a5fa; }
-        body.dark-mode .set-badge-2 { background: rgba(245,158,11,0.2); color: #fbbf24; }
-
-        /* Settings set tabs */
-        .settings-set-tab { padding: 8px 20px; font-weight: 600; font-size: 14px; border-radius: 8px 8px 0 0; cursor: pointer; border: 1.5px solid transparent; border-bottom: none; transition: all 0.2s; }
-        .settings-set-tab.active { border-color: #d1d5db; }
-        .settings-set-tab:not(.active) { opacity: 0.5; }
-        .settings-set-tab:not(.active):hover { opacity: 0.8; }
-        body.dark-mode .settings-set-tab.active { border-color: #475569; }
-
-        /* Amber tints for set 2 */
-        body.dark-mode .bg-amber-50 { background-color: rgba(245,158,11,0.08) !important; }
-        body.dark-mode .border-amber-200 { border-color: rgba(245,158,11,0.3) !important; }
-        body.dark-mode .border-amber-300 { border-color: rgba(245,158,11,0.35) !important; }
     </style>
 </head>
 <body class="h-screen md:h-screen flex flex-col overflow-hidden relative" style="height: 100dvh;">
@@ -171,76 +134,40 @@
         </div>
 
         <div class="space-x-1 md:space-x-2 flex items-center">
-            <!-- Prompt Set Toggle -->
-            <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden mr-1" title="Chuyển bộ Prompt">
-                <button id="promptSetBtn1" onclick="switchPromptSet(1)" class="prompt-set-btn rounded-l-md active-set-1">①</button>
-                <button id="promptSetBtn2" onclick="switchPromptSet(2)" class="prompt-set-btn rounded-r-md">②</button>
-            </div>
-
             <button onclick="openModal('dictionaryModal')" class="px-1.5 md:px-2 py-1 md:py-1.5 text-xs bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded text-blue-700 font-medium transition" title="Words">W:<span id="wordCount">0</span></button>
-            <button onclick="openModal('dictionaryModal')" class="px-1.5 md:px-2 py-1 md:py-1.5 text-xs bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded text-indigo-700 font-medium transition" title="Phrases">P:<span id="phraseCount">0</span></button>
             <button onclick="openModal('dictionaryModal')" class="px-1.5 md:px-2 py-1 md:py-1.5 text-xs bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded text-teal-700 font-medium transition" title="Word Families"><i class="fas fa-sitemap"></i><span id="familyCount">0</span></button>
-            <button onclick="openModal('dictionaryModal')" class="hidden sm:block px-1.5 md:px-2 py-1 md:py-1.5 text-xs bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded text-gray-600 font-medium transition" title="Personal / Ignored"><i class="fas fa-user-shield"></i><span id="personalCount">0</span></button>
+            <button onclick="openModal('dictionaryModal')" class="px-1.5 md:px-2 py-1 md:py-1.5 text-xs bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded text-gray-600 font-medium transition" title="Personal / Ignored"><i class="fas fa-user-shield"></i><span id="personalCount">0</span></button>
         </div>
     </header>
 
     <div class="flex flex-1 overflow-hidden main-container">
+        <!-- Khu vực nhập liệu chính -->
         <div class="input-panel w-1/2 p-2 md:p-4 flex flex-col border-r border-gray-300 bg-gray-50 relative group">
-            <div class="flex items-center gap-2 mb-2 md:mb-3 border-b border-gray-300 pb-1 md:pb-2">
-                <div class="flex space-x-2 md:space-x-4">
-                    <button id="tabWordBtn" class="tab-active pb-1 md:pb-2 px-1 md:px-2 transition text-sm md:text-base" onclick="switchTab('word')">Word</button>
-                    <button id="tabManualBtn" class="text-gray-500 pb-1 md:pb-2 px-1 md:px-2 hover:text-gray-700 transition text-sm md:text-base" onclick="switchTab('manual')">Manual</button>
-                </div>
-                <div id="subtitleNav" class="hidden flex items-center gap-1 ml-auto bg-purple-50 px-1.5 md:px-2 py-0.5 md:py-1 rounded border border-purple-200">
-                    <button onclick="goToSubtitle('first')" class="p-0.5 md:p-1 text-purple-600 hover:bg-purple-100 rounded text-xs md:text-sm" title="Câu đầu"><i class="fas fa-angle-double-left"></i></button>
-                    <button onclick="goToSubtitle('prev')" class="p-0.5 md:p-1 text-purple-600 hover:bg-purple-100 rounded text-xs md:text-sm" title="Câu trước"><i class="fas fa-angle-left"></i></button>
-                    <input type="text" inputmode="numeric" id="subtitleJumpInput" class="w-8 md:w-10 text-center text-xs font-medium bg-white border border-purple-200 rounded px-0.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-purple-400" placeholder="#" onkeydown="if(event.key==='Enter'){event.preventDefault();jumpToSubtitle();}">
-                    <span class="text-xs text-purple-600">/</span>
-                    <span id="subtitleTotal" class="text-xs font-medium text-purple-700">0</span>
-                    <button onclick="goToSubtitle('next')" class="p-0.5 md:p-1 text-purple-600 hover:bg-purple-100 rounded text-xs md:text-sm" title="Câu tiếp"><i class="fas fa-angle-right"></i></button>
-                    <button onclick="goToSubtitle('last')" class="p-0.5 md:p-1 text-purple-600 hover:bg-purple-100 rounded text-xs md:text-sm" title="Câu cuối"><i class="fas fa-angle-double-right"></i></button>
-                    <span id="subtitleTimestamp" class="text-xs text-gray-500 hidden lg:inline ml-1"></span>
-                    <button onclick="hideSubtitleNav()" class="p-0.5 md:p-1 text-gray-400 hover:text-red-500 rounded text-xs" title="Ẩn"><i class="fas fa-times"></i></button>
-                </div>
-            </div>
             <div id="wordTabContent" class="relative flex-1 min-h-0 flex flex-col">
-                <textarea id="inputText" class="w-full h-full p-2 md:p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none text-sm md:text-lg pr-10 md:pr-12"></textarea>
+                <textarea id="inputText" class="w-full h-full p-2 md:p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none text-sm md:text-lg pr-10 md:pr-12" placeholder="Nhập văn bản vào đây..."></textarea>
                 <div class="absolute top-1 md:top-2 right-1 md:right-2 flex flex-col gap-1 md:gap-2">
-                    <input type="file" id="fileInput" accept=".txt,.srt" class="hidden">
-                    <button onclick="document.getElementById('fileInput').click()" class="bg-white p-1.5 md:p-2 rounded shadow hover:bg-blue-50 text-blue-500 border border-gray-200 transition text-xs md:text-base" title="Nhập file .txt hoặc .srt"><i class="fas fa-file-upload"></i></button>
-                    <button onclick="pasteFromClipboard()" class="bg-white p-1.5 md:p-2 rounded shadow hover:bg-gray-100 text-gray-600 border border-gray-200 transition text-xs md:text-base" title="Dán nối tiếp từ Clipboard"><i class="fas fa-paste"></i></button>
+                    <button onclick="pasteFromClipboard()" class="bg-white p-1.5 md:p-2 rounded shadow hover:bg-gray-100 text-gray-600 border border-gray-200 transition text-xs md:text-base" title="Dán nhanh từ Clipboard"><i class="fas fa-paste"></i></button>
                     <button onclick="clearInput()" class="bg-white p-1.5 md:p-2 rounded shadow hover:text-red-500 text-gray-400 border border-gray-200 transition text-xs md:text-base" title="Xóa hết"><i class="fas fa-trash-alt"></i></button>
-                </div>
-            </div>
-            <div id="manualTabContent" class="hidden relative flex-1 min-h-0 flex flex-col">
-                <div class="relative flex-1">
-                    <textarea id="manualPhraseInput" class="w-full h-full p-2 md:p-4 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none text-sm md:text-base pr-10 md:pr-12"></textarea>
-                    <div class="absolute top-1 md:top-2 right-1 md:right-2 flex flex-col gap-1 md:gap-2">
-                        <button onclick="quickPasteManualPhrase()" class="bg-purple-500 hover:bg-purple-600 p-1.5 md:p-2 rounded shadow text-white border border-purple-400 transition text-xs md:text-base" title="Dán nhanh từ Clipboard"><i class="fas fa-paste"></i></button>
-                        <button onclick="clearManualInput()" class="bg-white p-1.5 md:p-2 rounded shadow hover:text-red-500 text-gray-400 border border-gray-200 transition text-xs md:text-base" title="Xóa hết"><i class="fas fa-trash-alt"></i></button>
-                    </div>
                 </div>
             </div>
         </div>
 
+        <!-- Bảng điều khiển kết quả / prompts -->
         <div class="output-panel w-1/2 p-2 md:p-4 flex flex-col bg-white overflow-hidden">
             <div class="flex mb-2 md:mb-3 border-b border-gray-200 overflow-x-auto items-end">
-                <button id="outputTabResult" onclick="switchOutputTab('result')" class="output-tab-active px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium rounded-t-lg transition whitespace-nowrap"><i class="fas fa-list mr-1"></i>Kết quả</button>
+                <button id="outputTabResult" onclick="switchOutputTab('result')" class="output-tab-active px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium rounded-t-lg transition whitespace-nowrap"><i class="fas fa-list mr-1"></i>Từ vựng</button>
                 <button id="outputTabExtract" onclick="switchOutputTab('extract')" class="px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium text-gray-500 hover:text-gray-700 rounded-t-lg transition whitespace-nowrap"><i class="fas fa-magic mr-1"></i>Extract</button>
-                <button id="outputTabPrompt" onclick="switchOutputTab('prompt')" class="px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium text-gray-500 hover:text-gray-700 rounded-t-lg transition whitespace-nowrap"><i class="fas fa-terminal mr-1"></i>Word</button>
-                <button id="outputTabPhrasePrompt" onclick="switchOutputTab('phrasePrompt')" class="px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium text-gray-500 hover:text-gray-700 rounded-t-lg transition whitespace-nowrap"><i class="fas fa-comment-dots mr-1"></i>Phrase</button>
-                <!-- Set indicator in tabs -->
-                <span id="promptSetBadge" class="set-badge set-badge-1 ml-auto self-center">SET 1</span>
+                <button id="outputTabSupplemental" onclick="switchOutputTab('supplemental')" class="px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium text-gray-500 hover:text-gray-700 rounded-t-lg transition whitespace-nowrap"><i class="fas fa-plus-circle mr-1"></i>Prompt Bổ Sung</button>
             </div>
 
             <div id="outputResultTab" class="flex-1 flex flex-col overflow-hidden">
                 <div class="flex justify-between items-center mb-2 md:mb-3 flex-shrink-0">
                     <h2 class="text-sm md:text-lg font-semibold text-gray-700">
-                        <span id="listTitle">Kết quả Word</span>
+                        <span id="listTitle">Từ phát hiện</span>
                         <span id="resultCount" class="bg-red-100 text-red-600 px-1.5 md:px-2 py-0.5 rounded text-xs md:text-sm ml-1 md:ml-2">0</span>
                     </h2>
                     <button onclick="addAllCurrentToVocab()" class="text-xs text-green-600 hover:text-green-800 font-medium bg-green-50 px-1.5 md:px-2 py-1 rounded border border-green-100 transition">
-                        <i class="fas fa-plus-circle"></i> <span class="hidden sm:inline">Thêm trang này</span><span class="sm:hidden">+All</span>
+                        <i class="fas fa-plus-circle"></i> <span class="hidden sm:inline">Thêm tất cả</span><span class="sm:hidden">+All</span>
                     </button>
                 </div>
                 <div id="outputList" class="flex-1 overflow-y-auto space-y-1 md:space-y-2 pr-1 md:pr-2">
@@ -248,33 +175,24 @@
                 </div>
                 <div class="flex gap-2 mt-2 pt-2 border-t border-gray-200 flex-shrink-0">
                     <button onclick="copyExtractPrompt()" class="flex-1 py-1.5 text-xs font-medium bg-purple-100 hover:bg-purple-200 text-purple-700 rounded transition" title="Copy Extract Prompt"><i class="fas fa-magic mr-1"></i>Extract</button>
-                    <button onclick="copyPrompt()" class="flex-1 py-1.5 text-xs font-medium bg-gray-200 hover:bg-gray-300 text-gray-700 rounded transition" title="Copy Word Prompt"><i class="fas fa-terminal mr-1"></i>Word</button>
-                    <button onclick="copyPhrasePrompt()" class="flex-1 py-1.5 text-xs font-medium bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded transition" title="Copy Phrase Prompt"><i class="fas fa-comment-dots mr-1"></i>Phrase</button>
+                    <button onclick="copySupplementalPrompt()" class="flex-1 py-1.5 text-xs font-medium bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded transition" title="Copy Prompt Bổ Sung"><i class="fas fa-plus-circle mr-1"></i>Bổ sung</button>
                 </div>
             </div>
 
             <div id="outputExtractTab" class="flex-1 flex flex-col overflow-hidden hidden">
                 <div class="flex justify-between items-center mb-2 flex-shrink-0">
-                    <h3 class="text-sm font-bold text-purple-600 flex items-center"><i class="fas fa-magic mr-2"></i> Extract Prompt <span id="extractSetLabel" class="set-badge set-badge-1 ml-1">SET 1</span></h3>
+                    <h3 class="text-sm font-bold text-purple-600 flex items-center"><i class="fas fa-magic mr-2"></i> Extract Prompt</h3>
                     <button onclick="copyExtractPrompt()" class="text-xs bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-1.5 rounded transition font-medium"><i class="fas fa-copy mr-1"></i> Copy</button>
                 </div>
                 <div class="bg-purple-900 text-purple-100 p-3 rounded text-sm font-mono overflow-y-auto whitespace-pre-wrap flex-1" id="extractPromptPreview"></div>
             </div>
 
-            <div id="outputPromptTab" class="flex-1 flex flex-col overflow-hidden hidden">
+            <div id="outputSupplementalTab" class="flex-1 flex flex-col overflow-hidden hidden">
                 <div class="flex justify-between items-center mb-2 flex-shrink-0">
-                    <h3 class="text-sm font-bold text-gray-600 flex items-center"><i class="fas fa-terminal mr-2"></i> Word Prompt <span id="wordSetLabel" class="set-badge set-badge-1 ml-1">SET 1</span></h3>
-                    <button onclick="copyPrompt()" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded transition font-medium"><i class="fas fa-copy mr-1"></i> Copy</button>
+                    <h3 class="text-sm font-bold text-indigo-600 flex items-center"><i class="fas fa-plus-circle mr-2"></i> Prompt Bổ Sung</h3>
+                    <button onclick="copySupplementalPrompt()" class="text-xs bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1.5 rounded transition font-medium"><i class="fas fa-copy mr-1"></i> Copy</button>
                 </div>
-                <div class="bg-gray-800 text-gray-200 p-3 rounded text-sm font-mono flex-1 overflow-y-auto whitespace-pre-wrap" id="promptPreview"></div>
-            </div>
-
-            <div id="outputPhrasePromptTab" class="flex-1 flex flex-col overflow-hidden hidden">
-                <div class="flex justify-between items-center mb-2 flex-shrink-0">
-                    <h3 class="text-sm font-bold text-indigo-600 flex items-center"><i class="fas fa-comment-dots mr-2"></i> Phrase Prompt <span id="phraseSetLabel" class="set-badge set-badge-1 ml-1">SET 1</span></h3>
-                    <button onclick="copyPhrasePrompt()" class="text-xs bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1.5 rounded transition font-medium"><i class="fas fa-copy mr-1"></i> Copy</button>
-                </div>
-                <div class="bg-indigo-900 text-indigo-100 p-3 rounded text-sm font-mono flex-1 overflow-y-auto whitespace-pre-wrap" id="phrasePromptPreview"></div>
+                <div class="bg-indigo-900 text-indigo-100 p-3 rounded text-sm font-mono flex-1 overflow-y-auto whitespace-pre-wrap" id="supplementalPromptPreview"></div>
             </div>
         </div>
     </div>
@@ -311,10 +229,9 @@
                 <h2 class="text-lg md:text-xl font-bold">Quản lý Kho từ vựng <span class="text-sm font-normal text-gray-500">(Mới nhất trước)</span></h2>
                 <button onclick="closeModal('dictionaryModal')" class="text-gray-500 hover:text-red-500 text-xl">&times;</button>
             </div>
-            <input type="text" id="searchVocab" class="w-full p-2 border rounded mb-3" oninput="renderDictionary()">
+            <input type="text" id="searchVocab" class="w-full p-2 border rounded mb-3" placeholder="Tìm kiếm từ..." oninput="renderDictionary()">
             <div class="flex-1 overflow-y-auto flex flex-col md:flex-row gap-2 text-sm">
                 <div class="min-h-[300px] flex-1 flex flex-col bg-blue-50 rounded p-2 min-h-0"><h3 class="font-bold text-blue-600 mb-2 border-b border-blue-200 pb-1 text-center text-xs md:text-sm">Words (<span id="dictWordCount">0</span>)</h3><div id="dictWordList" class="flex-1 overflow-y-auto pr-1 space-y-1"></div></div>
-                <div class="min-h-[300px] flex-1 flex flex-col bg-indigo-50 rounded p-2 min-h-0"><h3 class="font-bold text-indigo-600 mb-2 border-b border-indigo-200 pb-1 text-center text-xs md:text-sm">Phrases (<span id="dictPhraseCount">0</span>)</h3><div id="dictPhraseList" class="flex-1 overflow-y-auto pr-1 space-y-1"></div></div>
                 <div class="min-h-[300px] flex-1 flex flex-col bg-teal-50 rounded p-2 min-h-0"><h3 class="font-bold text-teal-600 mb-2 border-b border-teal-200 pb-1 text-center text-xs md:text-sm">Families (<span id="dictFamilyCount">0</span>)</h3><div id="dictFamilyList" class="flex-1 overflow-y-auto pr-1 space-y-1"></div></div>
                 <div class="min-h-[300px] flex-1 flex flex-col bg-gray-100 rounded p-2 min-h-0"><h3 class="font-bold text-gray-600 mb-2 border-b border-gray-300 pb-1 text-center text-xs md:text-sm">Ignored (<span id="dictPersonalCount">0</span>)</h3><div id="dictPersonalList" class="flex-1 overflow-y-auto pr-1 space-y-1"></div></div>
             </div>
@@ -340,46 +257,14 @@
 
             <div class="mb-6">
                 <h3 class="font-bold text-gray-800 mb-4 text-lg flex items-center"><i class="fas fa-edit text-purple-500 mr-2"></i> Prompt Templates</h3>
-
-                <!-- Set Tabs -->
-                <div class="flex gap-1 mb-0">
-                    <button id="settingsSetTab1" onclick="switchSettingsSetTab(1)" class="settings-set-tab active bg-white text-blue-700 border-blue-200" style="border-bottom-color: white; margin-bottom: -1.5px; z-index: 1;">
-                        <i class="fas fa-layer-group mr-1"></i> Bộ ① <span class="text-xs font-normal opacity-70">Primary</span>
-                    </button>
-                    <button id="settingsSetTab2" onclick="switchSettingsSetTab(2)" class="settings-set-tab bg-gray-50 text-amber-700">
-                        <i class="fas fa-layer-group mr-1"></i> Bộ ② <span class="text-xs font-normal opacity-70">Secondary</span>
-                    </button>
-                </div>
-
-                <!-- Set 1 Templates -->
-                <div id="settingsSet1Content" class="space-y-5 border border-gray-200 rounded-b-xl rounded-tr-xl p-5">
+                <div class="space-y-5 border border-gray-200 rounded-xl p-5">
                     <div class="bg-purple-50 p-4 rounded-xl border border-purple-200">
-                        <label class="block text-sm font-bold text-purple-700 mb-2"><i class="fas fa-magic mr-1"></i> Extract Prompt ① <span class="font-normal text-purple-500 ml-2">(dùng {text})</span></label>
+                        <label class="block text-sm font-bold text-purple-700 mb-2"><i class="fas fa-magic mr-1"></i> Extract Prompt <span class="font-normal text-purple-500 ml-2">(dùng {text})</span></label>
                         <textarea id="extractPromptTemplate" class="w-full p-3 border border-purple-300 rounded-lg text-sm font-mono h-32 focus:ring-2 focus:ring-purple-400 focus:outline-none bg-white"></textarea>
                     </div>
-                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                        <label class="block text-sm font-bold text-gray-700 mb-2"><i class="fas fa-terminal mr-1"></i> Word Prompt ① <span class="font-normal text-gray-500 ml-2">(dùng {words}, {text})</span></label>
-                        <textarea id="promptTemplate" class="w-full p-3 border border-gray-300 rounded-lg text-sm font-mono h-32 focus:ring-2 focus:ring-gray-400 focus:outline-none bg-white"></textarea>
-                    </div>
                     <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-200">
-                        <label class="block text-sm font-bold text-indigo-700 mb-2"><i class="fas fa-comment-dots mr-1"></i> Phrase Prompt ① <span class="font-normal text-indigo-500 ml-2">(dùng {phrases}, {text})</span></label>
-                        <textarea id="phrasePromptTemplate" class="w-full p-3 border border-indigo-300 rounded-lg text-sm font-mono h-32 focus:ring-2 focus:ring-indigo-400 focus:outline-none bg-white"></textarea>
-                    </div>
-                </div>
-
-                <!-- Set 2 Templates -->
-                <div id="settingsSet2Content" class="space-y-5 border border-amber-200 rounded-b-xl rounded-tr-xl p-5 hidden">
-                    <div class="bg-amber-50 p-4 rounded-xl border border-amber-200">
-                        <label class="block text-sm font-bold text-amber-700 mb-2"><i class="fas fa-magic mr-1"></i> Extract Prompt ② <span class="font-normal text-amber-500 ml-2">(dùng {text})</span></label>
-                        <textarea id="extractPromptTemplate2" class="w-full p-3 border border-amber-300 rounded-lg text-sm font-mono h-32 focus:ring-2 focus:ring-amber-400 focus:outline-none bg-white"></textarea>
-                    </div>
-                    <div class="bg-amber-50 p-4 rounded-xl border border-amber-200">
-                        <label class="block text-sm font-bold text-amber-700 mb-2"><i class="fas fa-terminal mr-1"></i> Word Prompt ② <span class="font-normal text-amber-500 ml-2">(dùng {words}, {text})</span></label>
-                        <textarea id="promptTemplate2" class="w-full p-3 border border-amber-300 rounded-lg text-sm font-mono h-32 focus:ring-2 focus:ring-amber-400 focus:outline-none bg-white"></textarea>
-                    </div>
-                    <div class="bg-amber-50 p-4 rounded-xl border border-amber-200">
-                        <label class="block text-sm font-bold text-amber-700 mb-2"><i class="fas fa-comment-dots mr-1"></i> Phrase Prompt ② <span class="font-normal text-amber-500 ml-2">(dùng {phrases}, {text})</span></label>
-                        <textarea id="phrasePromptTemplate2" class="w-full p-3 border border-amber-300 rounded-lg text-sm font-mono h-32 focus:ring-2 focus:ring-amber-400 focus:outline-none bg-white"></textarea>
+                        <label class="block text-sm font-bold text-indigo-700 mb-2"><i class="fas fa-plus-circle mr-1"></i> Prompt Bổ Sung <span class="font-normal text-indigo-500 ml-2">(dùng {text})</span></label>
+                        <textarea id="supplementalPromptTemplate" class="w-full p-3 border border-indigo-300 rounded-lg text-sm font-mono h-32 focus:ring-2 focus:ring-indigo-400 focus:outline-none bg-white"></textarea>
                     </div>
                 </div>
             </div>
@@ -393,19 +278,12 @@
     <script>
         // --- DATA & STATE ---
         let vocabWords = [];
-        let vocabPhrases = [];
         let vocabFamily = [];
         let personalDict = [];
         let sessionIgnored = new Set();
-
         let detectedWords = [];
-        let detectedPhrases = [];
-        let manualPhrases = [];
 
-        let currentTab = 'word';
         let currentOutputTab = 'result';
-        let currentPromptSet = 1;
-
         let cloudDataInMemory = null;
 
         let undoStack = [];
@@ -418,89 +296,18 @@
 
         let currentFindIndex = -1;
         let lastFindItem = '';
-
-        let subtitleSentences = [];
-        let currentSubtitleIndex = -1;
-
         let isDarkMode = false;
 
-        const defaultPrompt = `Phân tích các từ này : {words}`;
-        const defaultPhrasePrompt = `Phân tích các cụm từ này : {phrases}`;
         const defaultExtractPrompt = `ONLY Extract Expressions from the text. Ignore common single words. Return a JSON array of strings in lowercase. Text: "{text}"`;
-
-        const defaultPrompt2 = `Phân tích các từ này (Bộ 2): {words}`;
-        const defaultPhrasePrompt2 = `Phân tích các cụm từ này (Bộ 2): {phrases}`;
-        const defaultExtractPrompt2 = `Extract ALL notable expressions and collocations from the text. Return a JSON array of lowercase strings. Text: "{text}"`;
+        const defaultSupplementalPrompt = `Extract ALL notable expressions and collocations from the text. Return a JSON array of lowercase strings. Text: "{text}"`;
 
         const config = {
             githubToken: '',
             gistId: '',
             gistFilename: 'vocab_canvas_data.json',
             extractPromptTemplate: defaultExtractPrompt,
-            promptTemplate: defaultPrompt,
-            phrasePromptTemplate: defaultPhrasePrompt,
-            extractPromptTemplate2: defaultExtractPrompt2,
-            promptTemplate2: defaultPrompt2,
-            phrasePromptTemplate2: defaultPhrasePrompt2
+            supplementalPromptTemplate: defaultSupplementalPrompt
         };
-
-        // --- PROMPT SET SWITCHING ---
-        function getActiveTemplates() {
-            if (currentPromptSet === 2) {
-                return {
-                    extract: config.extractPromptTemplate2,
-                    word: config.promptTemplate2,
-                    phrase: config.phrasePromptTemplate2
-                };
-            }
-            return {
-                extract: config.extractPromptTemplate,
-                word: config.promptTemplate,
-                phrase: config.phrasePromptTemplate
-            };
-        }
-
-        function switchPromptSet(setNum) {
-            currentPromptSet = setNum;
-            localStorage.setItem('currentPromptSet', setNum);
-
-            // Update toggle buttons
-            const btn1 = document.getElementById('promptSetBtn1');
-            const btn2 = document.getElementById('promptSetBtn2');
-            btn1.classList.toggle('active-set-1', setNum === 1);
-            btn2.classList.toggle('active-set-2', setNum === 2);
-
-            // Update badges
-            const badgeClass = setNum === 1 ? 'set-badge-1' : 'set-badge-2';
-            const badgeText = setNum === 1 ? 'SET 1' : 'SET 2';
-            ['promptSetBadge', 'extractSetLabel', 'wordSetLabel', 'phraseSetLabel'].forEach(id => {
-                const el = document.getElementById(id);
-                el.className = `set-badge ${badgeClass}`;
-                el.textContent = badgeText;
-            });
-
-            updatePrompts();
-            showToast(setNum === 1 ? '🔵 Bộ Prompt ① (Primary)' : '🟡 Bộ Prompt ② (Secondary)');
-        }
-
-        function switchSettingsSetTab(setNum) {
-            const tab1 = document.getElementById('settingsSetTab1');
-            const tab2 = document.getElementById('settingsSetTab2');
-            const content1 = document.getElementById('settingsSet1Content');
-            const content2 = document.getElementById('settingsSet2Content');
-
-            if (setNum === 1) {
-                tab1.classList.add('active'); tab1.style.borderBottomColor = 'white'; tab1.style.marginBottom = '-1.5px'; tab1.style.zIndex = '1';
-                tab2.classList.remove('active'); tab2.style.borderBottomColor = ''; tab2.style.marginBottom = ''; tab2.style.zIndex = '';
-                content1.classList.remove('hidden');
-                content2.classList.add('hidden');
-            } else {
-                tab2.classList.add('active'); tab2.style.borderBottomColor = 'white'; tab2.style.marginBottom = '-1.5px'; tab2.style.zIndex = '1';
-                tab1.classList.remove('active'); tab1.style.borderBottomColor = ''; tab1.style.marginBottom = ''; tab1.style.zIndex = '';
-                content2.classList.remove('hidden');
-                content1.classList.add('hidden');
-            }
-        }
 
         // --- DARK MODE ---
         function initDarkMode() {
@@ -528,10 +335,9 @@
 
         // --- HELPER FUNCTIONS ---
         function hasItem(arr, item) { return arr.includes(item); }
-        function isInAnyVocab(item) { return hasItem(vocabWords, item) || hasItem(vocabPhrases, item) || hasItem(vocabFamily, item) || hasItem(personalDict, item) || sessionIgnored.has(item); }
+        function isInAnyVocab(item) { return hasItem(vocabWords, item) || hasItem(vocabFamily, item) || hasItem(personalDict, item) || sessionIgnored.has(item); }
         function addItem(arr, item) { if (!arr.includes(item)) arr.unshift(item); }
         function removeItem(arr, item) { const i = arr.indexOf(item); if (i > -1) arr.splice(i, 1); }
-        function updateCombinedPhrases() { detectedPhrases = manualPhrases.filter(p => !isInAnyVocab(p)); }
 
         function arraysEqual(a, b) {
             if (a.length !== b.length) return false;
@@ -543,15 +349,10 @@
             const cloud = cloudData.vocab || {};
             const cloudSettings = cloudData.settings || {};
             if (!arraysEqual(cloud.words || [], vocabWords)) return true;
-            if (!arraysEqual(cloud.phrases || [], vocabPhrases)) return true;
             if (!arraysEqual(cloud.family || [], vocabFamily)) return true;
             if (!arraysEqual(cloud.personal || [], personalDict)) return true;
             if (cloudSettings.extractPromptTemplate && cloudSettings.extractPromptTemplate !== config.extractPromptTemplate) return true;
-            if (cloudSettings.promptTemplate && cloudSettings.promptTemplate !== config.promptTemplate) return true;
-            if (cloudSettings.phrasePromptTemplate && cloudSettings.phrasePromptTemplate !== config.phrasePromptTemplate) return true;
-            if (cloudSettings.extractPromptTemplate2 && cloudSettings.extractPromptTemplate2 !== config.extractPromptTemplate2) return true;
-            if (cloudSettings.promptTemplate2 && cloudSettings.promptTemplate2 !== config.promptTemplate2) return true;
-            if (cloudSettings.phrasePromptTemplate2 && cloudSettings.phrasePromptTemplate2 !== config.phrasePromptTemplate2) return true;
+            if (cloudSettings.supplementalPromptTemplate && cloudSettings.supplementalPromptTemplate !== config.supplementalPromptTemplate) return true;
             return false;
         }
 
@@ -586,7 +387,6 @@
             currentFindIndex = (currentFindIndex + 1) % positions.length;
             const target = positions[currentFindIndex];
             const sentence = findSentenceContaining(text, target.start, target.end);
-            if (currentTab !== 'word') switchTab('word');
             focusWithoutKeyboard(textarea, sentence.start, sentence.end);
             showToast(`"${item}" - ${currentFindIndex + 1}/${positions.length}`);
         }
@@ -623,113 +423,12 @@
             textarea.scrollTop = Math.max(0, positionY - textarea.clientHeight * topOffset);
         }
 
-        // --- SUBTITLE FUNCTIONS ---
-        function isSoundDescription(text) {
-            const trimmed = text.trim();
-            if (/^\[.+\]$/.test(trimmed)) return true;
-            if (/^\(.+\)$/.test(trimmed)) { const inner = trimmed.slice(1, -1).toLowerCase(); const soundKeywords = ['music','singing','song','playing','applause','laughter','cheering','sobbing','crying','screaming','shouting','whispering','sighing','gasping','coughing','snoring','knocking','ringing','beeping','buzzing','clicking','thunder','rain','wind','explosion','gunshot','siren','door','phone','alarm','bell','horn','engine','footsteps','breathing','heartbeat','silence','inaudible','indistinct','unintelligible','continues','in ','speaks ','speaking ']; if (soundKeywords.some(kw => inner.includes(kw))) return true; }
-            if (/^[♪♫].*[♪♫]$/.test(trimmed)) return true;
-            if (trimmed.includes('♪') || trimmed.includes('♫')) return true;
-            if (/^\*.+\*$/.test(trimmed)) return true;
-            if (/^\([A-Z\s]+\)$/.test(trimmed)) return true;
-            if (/^\[[A-Z\s]+\]$/.test(trimmed)) return true;
-            return false;
-        }
-
-        function parseSRT(content) {
-            const rawBlocks = [];
-            const blocks = content.trim().split(/\n\s*\n/);
-            for (const block of blocks) {
-                const lines = block.trim().split('\n');
-                if (lines.length < 2) continue;
-                let timeLineIndex = -1;
-                for (let i = 0; i < lines.length; i++) { if (lines[i].includes('-->')) { timeLineIndex = i; break; } }
-                if (timeLineIndex === -1) continue;
-                const timeMatch = lines[timeLineIndex].match(/(\d{2}:\d{2}:\d{2}[,\.]\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}[,\.]\d{3})/);
-                if (!timeMatch) continue;
-                const textLines = lines.slice(timeLineIndex + 1);
-                let text = textLines.join(' ').replace(/<[^>]*>/g, '').replace(/\{[^}]*\}/g, '').replace(/\s+/g, ' ').trim();
-                if (!text) continue;
-                rawBlocks.push({ startTime: timeMatch[1], endTime: timeMatch[2], text: text, isSoundDesc: isSoundDescription(text) });
-            }
-            const sentences = [];
-            let currentSentence = null;
-            for (const block of rawBlocks) {
-                if (block.isSoundDesc) { if (currentSentence) { currentSentence.text = currentSentence.text.replace(/\s+/g, ' ').trim(); sentences.push(currentSentence); currentSentence = null; } sentences.push({ index: sentences.length + 1, startTime: block.startTime, endTime: block.endTime, text: block.text, isSoundDesc: true }); continue; }
-                if (currentSentence === null) { currentSentence = { index: sentences.length + 1, startTime: block.startTime, endTime: block.endTime, text: block.text }; }
-                else { const lastChar = currentSentence.text.slice(-1); const separator = (lastChar === '-') ? '' : ' '; currentSentence.text += separator + block.text; currentSentence.endTime = block.endTime; }
-                if (isSentenceComplete(currentSentence.text)) { currentSentence.text = currentSentence.text.replace(/\s+/g, ' ').trim(); sentences.push(currentSentence); currentSentence = null; }
-            }
-            if (currentSentence) { currentSentence.text = currentSentence.text.replace(/\s+/g, ' ').trim(); sentences.push(currentSentence); }
-            sentences.forEach((s, i) => s.index = i + 1);
-            return { sentences };
-        }
-
-        function isSentenceComplete(text) {
-            const trimmed = text.trim();
-            if (!/[.!?]$/.test(trimmed) && !/[.!?]["'"'」』]$/.test(trimmed)) return false;
-            if (/\.{3}$/.test(trimmed) || /\.{3}["'"']$/.test(trimmed)) return true;
-            const lastDotMatch = trimmed.match(/[.!?](?=["'"'」』]?$)/);
-            if (lastDotMatch) { const dotPos = trimmed.lastIndexOf(lastDotMatch[0]); if (!isRealSentenceEnd(trimmed, dotPos)) return false; }
-            return true;
-        }
-
-        function showSubtitleNav() { document.getElementById('subtitleNav').classList.remove('hidden'); }
-        function hideSubtitleNav() { document.getElementById('subtitleNav').classList.add('hidden'); }
-
-        function updateSubtitleNav() {
-            document.getElementById('subtitleTotal').innerText = subtitleSentences.length;
-            const input = document.getElementById('subtitleJumpInput');
-            input.value = currentSubtitleIndex >= 0 ? currentSubtitleIndex + 1 : '';
-            if (currentSubtitleIndex >= 0 && subtitleSentences[currentSubtitleIndex]) { document.getElementById('subtitleTimestamp').innerText = `${subtitleSentences[currentSubtitleIndex].startTime.substring(0, 8)}`; }
-            else { document.getElementById('subtitleTimestamp').innerText = ''; }
-        }
-
-        function jumpToSubtitle() {
-            if (subtitleSentences.length === 0) { showToast('Chưa có subtitle!'); return; }
-            const input = document.getElementById('subtitleJumpInput');
-            const num = parseInt(input.value);
-            if (isNaN(num) || num < 1 || num > subtitleSentences.length) { showToast(`Nhập số từ 1 đến ${subtitleSentences.length}`); input.value = currentSubtitleIndex >= 0 ? currentSubtitleIndex + 1 : ''; return; }
-            currentSubtitleIndex = num - 1;
-            focusSubtitleSentence(currentSubtitleIndex);
-            updateSubtitleNav();
-            input.blur();
-        }
-
-        function goToSubtitle(direction) {
-            if (subtitleSentences.length === 0) { showToast('Chưa có subtitle!'); return; }
-            switch(direction) { case 'first': currentSubtitleIndex = 0; break; case 'prev': currentSubtitleIndex = Math.max(0, currentSubtitleIndex - 1); break; case 'next': currentSubtitleIndex = Math.min(subtitleSentences.length - 1, currentSubtitleIndex + 1); break; case 'last': currentSubtitleIndex = subtitleSentences.length - 1; break; }
-            focusSubtitleSentence(currentSubtitleIndex);
-            updateSubtitleNav();
-        }
-
-        function focusSubtitleSentence(index) {
-            if (index < 0 || index >= subtitleSentences.length) return;
-            const sentence = subtitleSentences[index];
-            const textarea = document.getElementById('inputText');
-            const text = textarea.value;
-            let position = -1, currentPos = 0;
-            for (let i = 0; i <= index; i++) { const foundPos = text.indexOf(subtitleSentences[i].text, currentPos); if (foundPos !== -1) { if (i === index) { position = foundPos; break; } currentPos = foundPos + subtitleSentences[i].text.length; } }
-            if (position === -1) position = text.indexOf(sentence.text);
-            if (position === -1) { showToast(`Không tìm thấy câu ${index + 1}`); return; }
-            if (currentTab !== 'word') switchTab('word');
-            focusWithoutKeyboard(textarea, position, position + sentence.text.length);
-        }
-
         // --- INIT ---
         window.onload = () => {
             initDarkMode();
             loadSettings();
             loadVocab();
-
-            // Restore prompt set
-            const savedSet = parseInt(localStorage.getItem('currentPromptSet'));
-            if (savedSet === 2) switchPromptSet(2);
-            else switchPromptSet(1);
-
             document.getElementById('inputText').addEventListener('input', handleInput);
-            document.getElementById('manualPhraseInput').addEventListener('input', handleManualPhraseInput);
-            document.getElementById('fileInput').addEventListener('change', handleFileUpload);
             renderCounts();
             updateUndoButton();
             if (config.githubToken && config.gistId) { setTimeout(() => checkCloudOnStartup(), 1000); }
@@ -747,46 +446,6 @@
             } catch (err) { console.error('Startup check error:', err); statusEl.innerHTML = '<i class="fas fa-wifi text-gray-400"></i> Offline'; }
         }
 
-        function handleManualPhraseInput() {
-            const text = document.getElementById('manualPhraseInput').value;
-            const lines = text.split('\n').map(line => line.toLowerCase().trim()).filter(line => line.length > 0);
-            manualPhrases = [...new Set(lines)];
-            updateCombinedPhrases();
-            if (currentTab === 'manual') renderView();
-            updatePrompts();
-        }
-
-        function clearManualInput() {
-            const input = document.getElementById('manualPhraseInput');
-            if (!input.value.trim()) { showToast('Không có gì để xóa!'); return; }
-            if (!confirm('Xóa tất cả phrases đã nhập?')) return;
-            input.value = '';
-            manualPhrases = [];
-            updateCombinedPhrases();
-            renderView();
-            updatePrompts();
-            showToast('Đã xóa tất cả!');
-        }
-
-        async function quickPasteManualPhrase() {
-            try {
-                const clipboardText = await navigator.clipboard.readText();
-                if (!clipboardText.trim()) { showToast('Clipboard trống!'); return; }
-                const input = document.getElementById('manualPhraseInput');
-                const currentText = input.value;
-                const existingLines = currentText.split('\n').map(l => l.toLowerCase().trim()).filter(l => l);
-                const clipboardLines = clipboardText.split('\n').map(line => line.trim().toLowerCase().replace(/\s+/g, ' ')).filter(line => line.length > 0);
-                if (clipboardLines.length === 0) { showToast('Không có nội dung hợp lệ!'); return; }
-                const newPhrases = [], duplicates = [];
-                clipboardLines.forEach(phrase => { if (existingLines.includes(phrase)) duplicates.push(phrase); else if (!newPhrases.includes(phrase)) newPhrases.push(phrase); });
-                if (newPhrases.length === 0) { showToast(duplicates.length === 1 ? `"${duplicates[0]}" đã có!` : `${duplicates.length} phrases đã có!`); return; }
-                input.value = currentText.trim() ? currentText.trimEnd() + '\n' + newPhrases.join('\n') : newPhrases.join('\n');
-                input.scrollTop = input.scrollHeight;
-                handleManualPhraseInput();
-                showToast(newPhrases.length === 1 ? `Đã thêm: "${newPhrases[0]}"` : `Đã thêm ${newPhrases.length} phrases`);
-            } catch (err) { showToast('Lỗi clipboard: Hãy cấp quyền.'); }
-        }
-
         async function pasteFromClipboard() {
             try {
                 const clipboardText = await navigator.clipboard.readText();
@@ -795,63 +454,26 @@
                 input.focus();
                 input.scrollTop = input.scrollHeight;
                 handleInput();
-                showToast('Đã dán nối tiếp!');
+                showToast('Đã dán văn bản!');
             } catch (err) { showToast('Lỗi clipboard: Hãy cấp quyền.'); }
         }
 
         function clearInput() {
             document.getElementById('inputText').value = '';
             detectedWords = [];
-            subtitleSentences = [];
-            currentSubtitleIndex = -1;
-            hideSubtitleNav();
             handleInput();
-        }
-
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const content = e.target.result;
-                const input = document.getElementById('inputText');
-                const isSrt = file.name.toLowerCase().endsWith('.srt');
-                if (isSrt) {
-                    const parsed = parseSRT(content);
-                    const textOnly = parsed.sentences.map(s => s.text).join('\n\n');
-                    input.value = input.value.trim() ? input.value.trimEnd() + '\n\n---\n\n' + textOnly : textOnly;
-                    subtitleSentences = parsed.sentences;
-                    currentSubtitleIndex = -1;
-                    updateSubtitleNav();
-                    showSubtitleNav();
-                    const soundDescCount = parsed.sentences.filter(s => s.isSoundDesc).length;
-                    showToast(`SRT: ${parsed.sentences.length - soundDescCount} câu + ${soundDescCount} mô tả`);
-                } else {
-                    input.value = input.value.trim() ? input.value.trimEnd() + '\n\n---\n\n' + content : content;
-                    showToast(`Đã nhập file: ${file.name}`);
-                }
-                handleInput();
-                event.target.value = '';
-            };
-            reader.readAsText(file);
-        }
-
-        function copyPrompt() {
-            const text = document.getElementById('promptPreview').innerText;
-            if (!text || text.includes('Chưa có')) { showToast('Không có Word Prompt!'); return; }
-            navigator.clipboard.writeText(text).then(() => showToast(`Đã copy Word Prompt (Bộ ${currentPromptSet})!`));
-        }
-
-        function copyPhrasePrompt() {
-            const text = document.getElementById('phrasePromptPreview').innerText;
-            if (!text || text.includes('Chưa có')) { showToast('Không có Phrase Prompt!'); return; }
-            navigator.clipboard.writeText(text).then(() => showToast(`Đã copy Phrase Prompt (Bộ ${currentPromptSet})!`));
         }
 
         function copyExtractPrompt() {
             const text = document.getElementById('extractPromptPreview').innerText;
             if (!text || text.includes('Nhập văn bản')) { showToast('Không có Extract Prompt!'); return; }
-            navigator.clipboard.writeText(text).then(() => showToast(`Đã copy Extract Prompt (Bộ ${currentPromptSet})!`));
+            navigator.clipboard.writeText(text).then(() => showToast(`Đã copy Extract Prompt!`));
+        }
+
+        function copySupplementalPrompt() {
+            const text = document.getElementById('supplementalPromptPreview').innerText;
+            if (!text || text.includes('Nhập văn bản')) { showToast('Không có Prompt Bổ Sung!'); return; }
+            navigator.clipboard.writeText(text).then(() => showToast(`Đã copy Prompt Bổ Sung!`));
         }
 
         function copyItem(item) { navigator.clipboard.writeText(item).then(() => showToast(`Đã copy: ${item}`)).catch(() => showToast('Lỗi copy!')); }
@@ -866,8 +488,8 @@
             setTimeout(() => { div.style.opacity = '0'; div.style.transform = 'translateY(100%)'; div.style.transition = 'all 0.3s'; setTimeout(() => div.remove(), 300); }, 2500);
         }
 
-        function pushToUndoStack(type, item, sourceTab) {
-            undoStack.push({ type, item, sourceTab });
+        function pushToUndoStack(type, item) {
+            undoStack.push({ type, item });
             if (undoStack.length > MAX_UNDO_STACK) undoStack.shift();
             updateUndoButton();
         }
@@ -882,13 +504,11 @@
         function undoLastAction() {
             if (undoStack.length === 0) return;
             const action = undoStack.pop();
-            const { type, item, sourceTab } = action;
+            const { type, item } = action;
             if (type === 'word') removeItem(vocabWords, item);
-            else if (type === 'phrase') removeItem(vocabPhrases, item);
             else if (type === 'family') removeItem(vocabFamily, item);
             else if (type === 'personal') removeItem(personalDict, item);
-            if (sourceTab === 'manual') updateCombinedPhrases();
-            saveVocabLocal(); schedulePush(); analyzeWords(); updateCombinedPhrases(); renderView(); updateUndoButton();
+            saveVocabLocal(); schedulePush(); analyzeWords(); renderView(); updateUndoButton();
             showToast(`Đã hoàn tác: ${item}`);
         }
 
@@ -904,11 +524,11 @@
 
         function switchOutputTab(tab) {
             currentOutputTab = tab;
-            const tabs = ['Result', 'Extract', 'Prompt', 'PhrasePrompt'];
+            const tabs = ['Result', 'Extract', 'Supplemental'];
             tabs.forEach(t => {
                 const el = document.getElementById(`output${t}Tab`);
                 const btn = document.getElementById(`outputTab${t}`);
-                if (t.toLowerCase() === tab || (t === 'Result' && tab === 'result') || (t === 'Extract' && tab === 'extract') || (t === 'Prompt' && tab === 'prompt') || (t === 'PhrasePrompt' && tab === 'phrasePrompt')) {
+                if (t.toLowerCase() === tab || (t === 'Result' && tab === 'result') || (t === 'Extract' && tab === 'extract') || (t === 'Supplemental' && tab === 'supplemental')) {
                     el.classList.remove('hidden'); btn.classList.add('output-tab-active'); btn.classList.remove('text-gray-500');
                 } else {
                     el.classList.add('hidden'); btn.classList.remove('output-tab-active'); btn.classList.add('text-gray-500');
@@ -919,15 +539,14 @@
         function renderView() {
             const listEl = document.getElementById('outputList');
             const countEl = document.getElementById('resultCount');
-            const titleEl = document.getElementById('listTitle');
-            let itemsToRender = currentTab === 'word' ? detectedWords : detectedPhrases;
-            titleEl.innerText = currentTab === 'word' ? 'Kết quả Word' : 'Kết quả Phrase';
-            countEl.innerText = itemsToRender.length;
+            
+            countEl.innerText = detectedWords.length;
             listEl.innerHTML = '';
-            if (itemsToRender.length === 0) {
+            
+            if (detectedWords.length === 0) {
                 listEl.innerHTML = `<div class="text-center text-gray-400 mt-10 text-sm">Trống</div>`;
             } else {
-                itemsToRender.forEach(item => {
+                detectedWords.forEach(item => {
                     const escapedItem = item.replace(/'/g, "\\'").replace(/"/g, '\\"');
                     const div = document.createElement('div');
                     div.className = 'flex justify-between items-center bg-gray-50 p-1.5 md:p-2 rounded hover:bg-white hover:shadow-sm border border-transparent hover:border-blue-200 group transition';
@@ -940,12 +559,11 @@
                             <button onclick="ignoreItem('${escapedItem}')" class="p-1 md:p-1.5 text-gray-400 hover:text-red-500 text-xs md:text-base" title="Bỏ qua tạm"><i class="fas fa-times"></i></button>
                             <button onclick="addToPersonalDict('${escapedItem}')" class="p-1 md:p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded text-xs md:text-base" title="Bỏ qua vĩnh viễn"><i class="fas fa-user-shield"></i></button>
                             <button onclick="addToWordFamily('${escapedItem}')" class="p-1 md:p-1.5 text-teal-500 hover:text-teal-700 hover:bg-teal-50 rounded text-xs md:text-base" title="Word Family"><i class="fas fa-sitemap"></i></button>
-                            <button onclick="addItemToCurrentVocab('${escapedItem}')" class="p-1 md:p-1.5 text-blue-400 hover:text-blue-600 text-xs md:text-base" title="Thêm vào kho"><i class="fas fa-check"></i></button>
+                            <button onclick="addItemToCurrentVocab('${escapedItem}')" class="p-1 md:p-1.5 text-blue-400 hover:text-blue-600 text-xs md:text-base" title="Thêm vào kho Words"><i class="fas fa-check"></i></button>
                         </div>`;
                     listEl.appendChild(div);
                 });
             }
-            updatePrompts();
         }
 
         function buildPromptText(template, replacements) {
@@ -957,97 +575,49 @@
         function updatePrompts() {
             const inputText = document.getElementById('inputText').value;
             const hasText = inputText.trim().length > 0;
-            const wordsStr = detectedWords.join(', ');
-            const phrasesStr = detectedPhrases.join(', ');
 
-            const templates = getActiveTemplates();
-
-            // Extract Prompt
             if (hasText) {
-                document.getElementById('extractPromptPreview').innerText = buildPromptText(templates.extract, { '{text}': inputText });
+                document.getElementById('extractPromptPreview').innerText = buildPromptText(config.extractPromptTemplate, { '{text}': inputText });
+                document.getElementById('supplementalPromptPreview').innerText = buildPromptText(config.supplementalPromptTemplate, { '{text}': inputText });
             } else {
                 document.getElementById('extractPromptPreview').innerText = '(Nhập văn bản để xem Extract Prompt)';
+                document.getElementById('supplementalPromptPreview').innerText = '(Nhập văn bản để xem Prompt Bổ Sung)';
             }
-
-            // Word Prompt
-            const wordTemplateHasWords = templates.word.includes('{words}');
-            const wordTemplateHasText = templates.word.includes('{text}');
-            if ((wordTemplateHasWords && detectedWords.length === 0) && (!wordTemplateHasText || !hasText)) {
-                document.getElementById('promptPreview').innerText = '(Chưa có từ hoặc văn bản để phân tích)';
-            } else if (wordTemplateHasWords && detectedWords.length === 0 && wordTemplateHasText && hasText) {
-                document.getElementById('promptPreview').innerText = buildPromptText(templates.word, { '{words}': '(none)', '{text}': inputText });
-            } else if (!wordTemplateHasWords && wordTemplateHasText && !hasText) {
-                document.getElementById('promptPreview').innerText = '(Chưa có văn bản để phân tích)';
-            } else {
-                document.getElementById('promptPreview').innerText = buildPromptText(templates.word, { '{words}': wordsStr, '{text}': inputText });
-            }
-
-            // Phrase Prompt
-            const phraseTemplateHasPhrases = templates.phrase.includes('{phrases}');
-            const phraseTemplateHasText = templates.phrase.includes('{text}');
-            if ((phraseTemplateHasPhrases && detectedPhrases.length === 0) && (!phraseTemplateHasText || !hasText)) {
-                document.getElementById('phrasePromptPreview').innerText = '(Chưa có phrases hoặc văn bản để phân tích)';
-            } else if (phraseTemplateHasPhrases && detectedPhrases.length === 0 && phraseTemplateHasText && hasText) {
-                document.getElementById('phrasePromptPreview').innerText = buildPromptText(templates.phrase, { '{phrases}': '(none)', '{text}': inputText });
-            } else if (!phraseTemplateHasPhrases && phraseTemplateHasText && !hasText) {
-                document.getElementById('phrasePromptPreview').innerText = '(Chưa có văn bản để phân tích)';
-            } else {
-                document.getElementById('phrasePromptPreview').innerText = buildPromptText(templates.phrase, { '{phrases}': phrasesStr, '{text}': inputText });
-            }
-        }
-
-        function switchTab(tab) {
-            currentTab = tab;
-            const wordBtn = document.getElementById('tabWordBtn');
-            const manualBtn = document.getElementById('tabManualBtn');
-            const wordContent = document.getElementById('wordTabContent');
-            const manualContent = document.getElementById('manualTabContent');
-            [wordBtn, manualBtn].forEach(b => { b.classList.remove('tab-active'); b.classList.add('text-gray-500'); });
-            [wordContent, manualContent].forEach(c => c.classList.add('hidden'));
-            if (tab === 'word') { wordBtn.classList.add('tab-active'); wordBtn.classList.remove('text-gray-500'); wordContent.classList.remove('hidden'); }
-            else { manualBtn.classList.add('tab-active'); manualBtn.classList.remove('text-gray-500'); manualContent.classList.remove('hidden'); }
-            renderView();
         }
 
         function updateVocabAndSync() { saveVocabLocal(); schedulePush(); }
 
         function addItemToCurrentVocab(item) {
-            let type = currentTab === 'word' ? 'word' : 'phrase';
-            if (type === 'word') addItem(vocabWords, item); else addItem(vocabPhrases, item);
-            pushToUndoStack(type, item, currentTab);
+            addItem(vocabWords, item);
+            pushToUndoStack('word', item);
             updateVocabAndSync(); removeCurrentItem(item);
             showToast(`Đã thêm: ${item}`);
         }
 
-        function addToPersonalDict(item) { addItem(personalDict, item); pushToUndoStack('personal', item, currentTab); updateVocabAndSync(); removeCurrentItem(item); showToast(`Đã thêm vào Ignored: ${item}`); }
-        function addToWordFamily(item) { addItem(vocabFamily, item); pushToUndoStack('family', item, currentTab); updateVocabAndSync(); removeCurrentItem(item); showToast(`Đã thêm vào Family: ${item}`); }
+        function addToPersonalDict(item) { addItem(personalDict, item); pushToUndoStack('personal', item); updateVocabAndSync(); removeCurrentItem(item); showToast(`Đã thêm vào Ignored: ${item}`); }
+        function addToWordFamily(item) { addItem(vocabFamily, item); pushToUndoStack('family', item); updateVocabAndSync(); removeCurrentItem(item); showToast(`Đã thêm vào Family: ${item}`); }
 
         function addAllCurrentToVocab() {
-            let list = currentTab === 'word' ? [...detectedWords] : [...detectedPhrases];
-            let type = currentTab === 'word' ? 'word' : 'phrase';
+            let list = [...detectedWords];
             if (list.length === 0) return;
             list.forEach(item => {
-                if (type === 'word') { addItem(vocabWords, item); pushToUndoStack('word', item, 'word'); }
-                else { addItem(vocabPhrases, item); pushToUndoStack('phrase', item, currentTab); }
+                addItem(vocabWords, item); pushToUndoStack('word', item);
             });
             updateVocabAndSync();
-            if (currentTab === 'word') detectedWords = [];
-            else { manualPhrases = manualPhrases.filter(p => !list.includes(p)); updateCombinedPhrases(); }
+            detectedWords = [];
             renderView(); renderCounts();
-            showToast(`Đã thêm ${list.length} items`);
+            showToast(`Đã thêm ${list.length} từ`);
         }
 
         function ignoreItem(item) { sessionIgnored.add(item); removeCurrentItem(item); }
 
         function removeCurrentItem(item) {
-            if (currentTab === 'word') detectedWords = detectedWords.filter(i => i !== item);
-            else { manualPhrases = manualPhrases.filter(i => i !== item); updateCombinedPhrases(); }
+            detectedWords = detectedWords.filter(i => i !== item);
             renderView(); renderCounts();
         }
 
         function saveVocabLocal() {
             localStorage.setItem('myVocabWords', JSON.stringify(vocabWords));
-            localStorage.setItem('myVocabPhrases', JSON.stringify(vocabPhrases));
             localStorage.setItem('myVocabFamily', JSON.stringify(vocabFamily));
             localStorage.setItem('myPersonalDict', JSON.stringify(personalDict));
             renderCounts();
@@ -1056,14 +626,12 @@
         function loadVocab() {
             const parse = (key) => { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : []; } catch { return []; } };
             vocabWords = parse('myVocabWords');
-            vocabPhrases = parse('myVocabPhrases');
             vocabFamily = parse('myVocabFamily');
             personalDict = parse('myPersonalDict');
         }
 
         function renderCounts() {
             document.getElementById('wordCount').innerText = vocabWords.length;
-            document.getElementById('phraseCount').innerText = vocabPhrases.length;
             document.getElementById('familyCount').innerText = vocabFamily.length;
             document.getElementById('personalCount').innerText = personalDict.length;
         }
@@ -1083,11 +651,9 @@
                 });
             };
             renderCol(vocabWords, document.getElementById('dictWordList'), 'word');
-            renderCol(vocabPhrases, document.getElementById('dictPhraseList'), 'phrase');
             renderCol(vocabFamily, document.getElementById('dictFamilyList'), 'family');
             renderCol(personalDict, document.getElementById('dictPersonalList'), 'personal');
             document.getElementById('dictWordCount').innerText = vocabWords.length;
-            document.getElementById('dictPhraseCount').innerText = vocabPhrases.length;
             document.getElementById('dictFamilyCount').innerText = vocabFamily.length;
             document.getElementById('dictPersonalCount').innerText = personalDict.length;
         }
@@ -1095,23 +661,18 @@
         function deleteDictItem(item, type) {
             if (!confirm(`Xóa "${item}"?`)) return;
             if (type === 'word') removeItem(vocabWords, item);
-            else if (type === 'phrase') removeItem(vocabPhrases, item);
             else if (type === 'family') removeItem(vocabFamily, item);
             else if (type === 'personal') removeItem(personalDict, item);
-            updateVocabAndSync(); renderDictionary(); handleInput(); updateCombinedPhrases();
+            updateVocabAndSync(); renderDictionary(); handleInput();
         }
 
         // --- CLOUD SYNC ---
         function buildSyncData() {
             return {
-                vocab: { words: vocabWords, phrases: vocabPhrases, family: vocabFamily, personal: personalDict },
+                vocab: { words: vocabWords, family: vocabFamily, personal: personalDict },
                 settings: {
                     extractPromptTemplate: config.extractPromptTemplate,
-                    promptTemplate: config.promptTemplate,
-                    phrasePromptTemplate: config.phrasePromptTemplate,
-                    extractPromptTemplate2: config.extractPromptTemplate2,
-                    promptTemplate2: config.promptTemplate2,
-                    phrasePromptTemplate2: config.phrasePromptTemplate2
+                    supplementalPromptTemplate: config.supplementalPromptTemplate
                 }
             };
         }
@@ -1235,7 +796,6 @@
             tableBody.innerHTML = '';
             const categories = [
                 { name: 'Words', icon: 'fas fa-font', color: 'blue', cloud: (cloud.words || []).length, local: vocabWords.length },
-                { name: 'Phrases', icon: 'fas fa-comment', color: 'indigo', cloud: (cloud.phrases || []).length, local: vocabPhrases.length },
                 { name: 'Families', icon: 'fas fa-sitemap', color: 'teal', cloud: (cloud.family || []).length, local: vocabFamily.length },
                 { name: 'Ignored', icon: 'fas fa-user-shield', color: 'gray', cloud: (cloud.personal || []).length, local: personalDict.length }
             ];
@@ -1269,31 +829,20 @@
             const vocab = data.vocab || {};
             const settings = data.settings || {};
             vocabWords = Array.isArray(vocab.words) ? vocab.words : [];
-            vocabPhrases = Array.isArray(vocab.phrases) ? vocab.phrases : [];
             vocabFamily = Array.isArray(vocab.family) ? vocab.family : [];
             personalDict = Array.isArray(vocab.personal) ? vocab.personal : [];
 
-            // Set 1
             if (settings.extractPromptTemplate) config.extractPromptTemplate = settings.extractPromptTemplate;
-            if (settings.promptTemplate) config.promptTemplate = settings.promptTemplate;
-            if (settings.phrasePromptTemplate) config.phrasePromptTemplate = settings.phrasePromptTemplate;
-            // Set 2
-            if (settings.extractPromptTemplate2) config.extractPromptTemplate2 = settings.extractPromptTemplate2;
-            if (settings.promptTemplate2) config.promptTemplate2 = settings.promptTemplate2;
-            if (settings.phrasePromptTemplate2) config.phrasePromptTemplate2 = settings.phrasePromptTemplate2;
+            if (settings.supplementalPromptTemplate) config.supplementalPromptTemplate = settings.supplementalPromptTemplate;
 
             localStorage.setItem('appConfig', JSON.stringify(config));
-            // Update settings form
+            
             document.getElementById('extractPromptTemplate').value = config.extractPromptTemplate;
-            document.getElementById('promptTemplate').value = config.promptTemplate;
-            document.getElementById('phrasePromptTemplate').value = config.phrasePromptTemplate;
-            document.getElementById('extractPromptTemplate2').value = config.extractPromptTemplate2;
-            document.getElementById('promptTemplate2').value = config.promptTemplate2;
-            document.getElementById('phrasePromptTemplate2').value = config.phrasePromptTemplate2;
+            document.getElementById('supplementalPromptTemplate').value = config.supplementalPromptTemplate;
 
             saveVocabLocal(); renderCounts();
             if (!document.getElementById('dictionaryModal').classList.contains('hidden')) renderDictionary();
-            handleInput(); updateCombinedPhrases();
+            handleInput();
             document.getElementById('syncStatusIndicator').innerHTML = '<i class="fas fa-check-circle text-green-500"></i> Synced';
         }
 
@@ -1314,14 +863,8 @@
             config.githubToken = document.getElementById('githubToken').value;
             config.gistId = document.getElementById('gistId').value;
             config.gistFilename = document.getElementById('gistFilename').value;
-            // Set 1
             config.extractPromptTemplate = document.getElementById('extractPromptTemplate').value;
-            config.promptTemplate = document.getElementById('promptTemplate').value;
-            config.phrasePromptTemplate = document.getElementById('phrasePromptTemplate').value;
-            // Set 2
-            config.extractPromptTemplate2 = document.getElementById('extractPromptTemplate2').value;
-            config.promptTemplate2 = document.getElementById('promptTemplate2').value;
-            config.phrasePromptTemplate2 = document.getElementById('phrasePromptTemplate2').value;
+            config.supplementalPromptTemplate = document.getElementById('supplementalPromptTemplate').value;
 
             localStorage.setItem('appConfig', JSON.stringify(config));
             closeModal('settingsModal');
@@ -1334,27 +877,17 @@
             const saved = localStorage.getItem('appConfig');
             if (saved) {
                 const parsed = JSON.parse(saved);
-                if (!parsed.promptTemplate || parsed.promptTemplate.includes("Explain these")) parsed.promptTemplate = defaultPrompt;
                 if (!parsed.extractPromptTemplate) parsed.extractPromptTemplate = defaultExtractPrompt;
-                if (!parsed.phrasePromptTemplate) parsed.phrasePromptTemplate = defaultPhrasePrompt;
+                if (!parsed.supplementalPromptTemplate) parsed.supplementalPromptTemplate = defaultSupplementalPrompt;
                 if (!parsed.gistFilename) parsed.gistFilename = 'vocab_canvas_data.json';
-                // Set 2 defaults
-                if (!parsed.extractPromptTemplate2) parsed.extractPromptTemplate2 = defaultExtractPrompt2;
-                if (!parsed.promptTemplate2) parsed.promptTemplate2 = defaultPrompt2;
-                if (!parsed.phrasePromptTemplate2) parsed.phrasePromptTemplate2 = defaultPhrasePrompt2;
                 Object.assign(config, parsed);
             }
             document.getElementById('githubToken').value = config.githubToken;
             document.getElementById('gistId').value = config.gistId;
             document.getElementById('gistFilename').value = config.gistFilename;
-            // Set 1
+            
             document.getElementById('extractPromptTemplate').value = config.extractPromptTemplate;
-            document.getElementById('promptTemplate').value = config.promptTemplate;
-            document.getElementById('phrasePromptTemplate').value = config.phrasePromptTemplate;
-            // Set 2
-            document.getElementById('extractPromptTemplate2').value = config.extractPromptTemplate2;
-            document.getElementById('promptTemplate2').value = config.promptTemplate2;
-            document.getElementById('phrasePromptTemplate2').value = config.phrasePromptTemplate2;
+            document.getElementById('supplementalPromptTemplate').value = config.supplementalPromptTemplate;
         }
     </script>
 </body>
