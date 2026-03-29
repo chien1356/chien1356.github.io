@@ -476,9 +476,6 @@
             navigator.clipboard.writeText(text).then(() => showToast(`Đã copy Prompt Bổ Sung!`));
         }
 
-        function copyItem(item) { navigator.clipboard.writeText(item).then(() => showToast(`Đã copy: ${item}`)).catch(() => showToast('Lỗi copy!')); }
-        function searchOnGoogle(item) { window.open(`https://www.google.com/search?q=${encodeURIComponent(item + ' meaning')}`, '_blank'); }
-
         function showToast(msg) {
             const container = document.getElementById('toastContainer');
             const div = document.createElement('div');
@@ -554,8 +551,6 @@
                         <span class="font-medium text-gray-800 ml-1 text-sm md:text-base truncate flex-1">${item}</span>
                         <div class="mobile-always-visible md:opacity-0 group-hover:opacity-100 transition-opacity flex space-x-0.5 md:space-x-1 flex-shrink-0">
                             <button onclick="findInPage('${escapedItem}')" class="p-1 md:p-1.5 text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded text-xs md:text-base" title="Tìm trong trang"><i class="fas fa-crosshairs"></i></button>
-                            <button onclick="copyItem('${escapedItem}')" class="p-1 md:p-1.5 text-yellow-500 hover:text-yellow-600 hover:bg-yellow-50 rounded text-xs md:text-base" title="Copy"><i class="fas fa-copy"></i></button>
-                            <button onclick="searchOnGoogle('${escapedItem}')" class="p-1 md:p-1.5 text-green-500 hover:text-green-600 hover:bg-green-50 rounded text-xs md:text-base" title="Tìm Google"><i class="fas fa-search"></i></button>
                             <button onclick="ignoreItem('${escapedItem}')" class="p-1 md:p-1.5 text-gray-400 hover:text-red-500 text-xs md:text-base" title="Bỏ qua tạm"><i class="fas fa-times"></i></button>
                             <button onclick="addToPersonalDict('${escapedItem}')" class="p-1 md:p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded text-xs md:text-base" title="Bỏ qua vĩnh viễn"><i class="fas fa-user-shield"></i></button>
                             <button onclick="addToWordFamily('${escapedItem}')" class="p-1 md:p-1.5 text-teal-500 hover:text-teal-700 hover:bg-teal-50 rounded text-xs md:text-base" title="Word Family"><i class="fas fa-sitemap"></i></button>
